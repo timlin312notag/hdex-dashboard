@@ -1053,14 +1053,48 @@ var CHART_COLORS = [
 ];
 
 function initKolSelect() {
-    var namesSet = {};
-    RAW_DATA.forEach(function(r) { namesSet[r.name] = true; });
-    var names = Object.keys(namesSet).sort();
+    // 取得所有 KOL 及其分類（以最新月份為準）
+    var kolMap = {};
+    RAW_DATA.forEach(function(r) {
+        if (!kolMap[r.name]) {
+            kolMap[r.name] = r.classification || 'OTHER';
+        }
+    });
 
-    // KOL checkbox tags
+    var groups = { AMBASSADOR: [], PARTNER: [], OTHER: [] };
+    Object.keys(kolMap).sort().forEach(function(name) {
+        var cls = kolMap[name];
+        if (groups[cls]) groups[cls].push(name);
+        else groups['OTHER'].push(name);
+    });
+
+    var groupLabels = {
+        AMBASSADOR: '✨ Ambassador',
+        PARTNER: '👥 Partner',
+        OTHER: '📌 Other'
+    };
+    var groupColors = {
+        AMBASSADOR: 'rgba(255,197,66,0.12)',
+        PARTNER: 'rgba(77,156,255,0.12)',
+        OTHER: 'rgba(122,122,142,0.12)'
+    };
+    var groupBorders = {
+        AMBASSADOR: '#ffc542',
+        PARTNER: '#4d9cff',
+        OTHER: '#7a7a8e'
+    };
+
     var kolGroup = document.getElementById('kolCheckboxGroup');
-    kolGroup.innerHTML = names.map(function(n) {
-        return '<button class="kol-tag" data-kol="' + n + '" onclick="toggleKol(this)">' + n + '</button>';
+    kolGroup.innerHTML = ['AMBASSADOR','PARTNER','OTHER'].map(function(cls) {
+        var names = groups[cls];
+        if (names.length === 0) return '';
+        var tags = names.map(function(n) {
+            return '<button class="kol-tag" data-kol="' + n + '" data-cls="' + cls + '" onclick="toggleKol(this)">' + n + '</button>';
+        }).join('');
+        return '<div style="width:100%;margin-bottom:10px;">' +
+            '<div style="font-size:11px;font-weight:600;color:' + groupBorders[cls] + ';letter-spacing:0.05em;margin-bottom:6px;padding:3px 8px;background:' + groupColors[cls] + ';border-radius:6px;display:inline-block;">' + groupLabels[cls] + '</div>' +
+            '<div style="display:flex;flex-wrap:wrap;gap:8px;">' + tags + '</div>' +
+            '</div>';
     }).join('');
 
     // Month checkbox tags
