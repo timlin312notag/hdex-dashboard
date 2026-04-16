@@ -589,17 +589,33 @@ function apiPost(action, csvText) {
 // =====================================================================
 function checkPassword() {
     var pw = document.getElementById('loginPassword').value.toLowerCase().trim();
-    if (pw === 'notag') {
-        sessionStorage.setItem('hdex_auth', '1');
-        document.getElementById('loginGate').style.display = 'none';
-        document.getElementById('app').style.display = '';
-        loadDashboard();
-    } else {
-        var errEl = document.getElementById('loginError');
-        errEl.style.display = 'block';
-        document.getElementById('loginPassword').value = '';
-        document.getElementById('loginPassword').focus();
-    }
+    var btn = document.getElementById('loginBtn');
+    btn.disabled = true;
+    btn.textContent = '驗證中...';
+
+    apiGet('verifyPassword&pw=' + encodeURIComponent(pw))
+        .then(function(result) {
+            btn.disabled = false;
+            btn.textContent = '進入';
+            if (result.ok) {
+                sessionStorage.setItem('hdex_auth', '1');
+                document.getElementById('loginGate').style.display = 'none';
+                document.getElementById('app').style.display = '';
+                loadDashboard();
+            } else {
+                var errEl = document.getElementById('loginError');
+                errEl.style.display = 'block';
+                document.getElementById('loginPassword').value = '';
+                document.getElementById('loginPassword').focus();
+            }
+        })
+        .catch(function() {
+            btn.disabled = false;
+            btn.textContent = '進入';
+            var errEl = document.getElementById('loginError');
+            errEl.style.display = 'block';
+            errEl.textContent = '驗證失敗，請重試';
+        });
 }
 
 document.addEventListener('DOMContentLoaded', function() {
