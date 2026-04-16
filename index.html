@@ -255,13 +255,31 @@ table tr:hover td { background: rgba(26,26,38,0.5); }
 .individual-section { display: none; }
 .individual-section.visible { display: block; }
 .overview-section.hidden { display: none; }
-.kol-select-wrap { margin-bottom: 20px; }
-.kol-select {
-    padding: 10px 16px; font-family: 'Outfit', sans-serif; font-size: 14px;
-    border: 1px solid var(--border); border-radius: 10px;
-    background: var(--bg-card); color: var(--text-primary); cursor: pointer; min-width: 200px;
+.kol-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 500;
+    border: 1px solid var(--border); background: var(--bg-primary);
+    color: var(--text-secondary); cursor: pointer; transition: all 0.18s;
+    font-family: 'Outfit', sans-serif;
 }
-.kol-select option { background: var(--bg-card); color: var(--text-primary); }
+.kol-tag:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+.kol-tag.selected { background: var(--accent-green-dim); border-color: var(--accent-green); color: var(--accent-green); }
+.month-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 500;
+    border: 1px solid var(--border); background: var(--bg-primary);
+    color: var(--text-secondary); cursor: pointer; transition: all 0.18s;
+    font-family: 'JetBrains Mono', monospace;
+}
+.month-tag:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+.month-tag.selected { background: var(--accent-blue-dim); border-color: var(--accent-blue); color: var(--accent-blue); }
+.compare-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 600px; }
+.compare-table th { text-align: left; padding: 10px 12px; font-weight: 600; color: var(--text-secondary); border-bottom: 1px solid var(--border); font-size: 12px; white-space: nowrap; }
+.compare-table td { padding: 10px 12px; border-bottom: 1px solid rgba(30,30,46,0.5); font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-primary); white-space: nowrap; }
+.compare-table tr:hover td { background: rgba(26,26,38,0.5); }
+.compare-section { margin-bottom: 24px; }
+.compare-section-title { font-size: 14px; font-weight: 600; color: var(--accent-green); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+.no-data-msg { color: var(--text-muted); font-size: 13px; padding: 20px 0; text-align: center; }
 .personal-kpi-row {
     display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 20px;
 }
@@ -479,21 +497,46 @@ table td { font-size: 13px; color: #d0d0e0; padding: 10px 12px; }
 </div><!-- end overviewSection -->
 
 <div id="individualSection" class="individual-section">
-    <div class="kol-select-wrap fade-up delay-1"><select class="kol-select" id="kolSelect"></select></div>
-    <div class="personal-kpi-row fade-up delay-2" id="personalKpi"></div>
-    <div class="grid-1-1 fade-up delay-3">
-        <div class="card"><div class="card-title">三個月趨勢</div><div class="chart-container"><canvas id="chartPersonalTrend"></canvas></div></div>
-        <div class="card"><div class="card-title">能力雷達圖</div><div class="chart-container"><canvas id="chartRadar"></canvas></div></div>
-    </div>
-    <div class="card full-width fade-up delay-4">
-        <div class="card-title">月度比較</div>
-        <div class="table-wrap">
-            <table id="personalTable">
-                <thead><tr><th>月份</th><th>訂單</th><th>銷售額</th><th>客單價</th><th>底薪</th><th>Credit</th><th>分潤</th><th>總成本</th><th>ROAS</th></tr></thead>
-                <tbody id="personalBody"></tbody>
-            </table>
+
+    <!-- KOL 多選 -->
+    <div class="card fade-up delay-1" style="margin-bottom:16px;">
+        <div class="card-title">👥 選擇 KOL（可多選）</div>
+        <div id="kolCheckboxGroup" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;"></div>
+        <div style="display:flex;gap:8px;">
+            <button class="sort-btn" onclick="selectAllKols()">全選</button>
+            <button class="sort-btn" onclick="clearAllKols()">清除</button>
         </div>
     </div>
+
+    <!-- 月份多選 -->
+    <div class="card fade-up delay-2" style="margin-bottom:16px;">
+        <div class="card-title">📅 選擇月份（可多選）</div>
+        <div id="monthCheckboxGroup" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;"></div>
+        <div style="display:flex;gap:8px;">
+            <button class="sort-btn" onclick="selectAllMonths()">全選</button>
+            <button class="sort-btn" onclick="clearAllMonths()">清除</button>
+        </div>
+    </div>
+
+    <!-- 趨勢折線圖 -->
+    <div class="card full-width fade-up delay-3" style="margin-bottom:16px;">
+        <div class="card-title">📈 銷售趨勢比較</div>
+        <div class="card-subtitle">各 KOL 跨月銷售額趨勢</div>
+        <div class="chart-container"><canvas id="chartPersonalTrend"></canvas></div>
+    </div>
+
+    <!-- 表格 A：以人為主 -->
+    <div class="card full-width fade-up delay-4" style="margin-bottom:16px;">
+        <div class="card-title">📋 以人為主 — 各人各月數據</div>
+        <div id="tableByPerson"></div>
+    </div>
+
+    <!-- 表格 B：以月份為主 -->
+    <div class="card full-width fade-up delay-5" style="margin-bottom:16px;">
+        <div class="card-title">📋 以月份為主 — 各月各人並排</div>
+        <div id="tableByMonth"></div>
+    </div>
+
 </div>
 
 </div><!-- end dashboard -->
@@ -997,73 +1040,185 @@ function renderBubbleChart() {
     });
 }
 
+// =====================================================================
+// 個人分析：多選 KOL + 多選月份
+// =====================================================================
+var selectedKols = [];
+var selectedMonths = [];
+
+var CHART_COLORS = [
+    '#00e88f','#4d9cff','#ffc542','#ff4d6a','#a855f7',
+    '#ff9f43','#00cec9','#fd79a8','#6c5ce7','#55efc4',
+    '#fdcb6e','#e17055','#74b9ff','#fab1a0','#81ecec'
+];
+
 function initKolSelect() {
-    var namesSet={};
-    RAW_DATA.forEach(function(r){namesSet[r.name]=true;});
-    var names=Object.keys(namesSet).sort();
-    var sel=document.getElementById('kolSelect');
-    sel.innerHTML=names.map(function(n){return '<option value="'+n+'">'+n+'</option>';}).join('');
-    sel.addEventListener('change',renderIndividual);
+    var namesSet = {};
+    RAW_DATA.forEach(function(r) { namesSet[r.name] = true; });
+    var names = Object.keys(namesSet).sort();
+
+    // KOL checkbox tags
+    var kolGroup = document.getElementById('kolCheckboxGroup');
+    kolGroup.innerHTML = names.map(function(n) {
+        return '<button class="kol-tag" data-kol="' + n + '" onclick="toggleKol(this)">' + n + '</button>';
+    }).join('');
+
+    // Month checkbox tags
+    var monthGroup = document.getElementById('monthCheckboxGroup');
+    monthGroup.innerHTML = PERIODS.map(function(p) {
+        return '<button class="month-tag selected" data-month="' + p + '" onclick="toggleMonth(this)">' + p + '</button>';
+    }).join('');
+
+    // 預設全選月份
+    selectedMonths = PERIODS.slice();
+    selectedKols = [];
+}
+
+function toggleKol(btn) {
+    var kol = btn.dataset.kol;
+    btn.classList.toggle('selected');
+    if (btn.classList.contains('selected')) {
+        if (selectedKols.indexOf(kol) === -1) selectedKols.push(kol);
+    } else {
+        selectedKols = selectedKols.filter(function(k) { return k !== kol; });
+    }
+    renderIndividual();
+}
+
+function toggleMonth(btn) {
+    var month = btn.dataset.month;
+    btn.classList.toggle('selected');
+    if (btn.classList.contains('selected')) {
+        if (selectedMonths.indexOf(month) === -1) selectedMonths.push(month);
+    } else {
+        selectedMonths = selectedMonths.filter(function(m) { return m !== month; });
+    }
+    // 保持原本 PERIODS 順序
+    selectedMonths.sort(function(a, b) { return PERIODS.indexOf(a) - PERIODS.indexOf(b); });
+    renderIndividual();
+}
+
+function selectAllKols() {
+    document.querySelectorAll('#kolCheckboxGroup .kol-tag').forEach(function(btn) {
+        btn.classList.add('selected');
+        var kol = btn.dataset.kol;
+        if (selectedKols.indexOf(kol) === -1) selectedKols.push(kol);
+    });
+    renderIndividual();
+}
+
+function clearAllKols() {
+    document.querySelectorAll('#kolCheckboxGroup .kol-tag').forEach(function(btn) {
+        btn.classList.remove('selected');
+    });
+    selectedKols = [];
+    renderIndividual();
+}
+
+function selectAllMonths() {
+    document.querySelectorAll('#monthCheckboxGroup .month-tag').forEach(function(btn) {
+        btn.classList.add('selected');
+        var m = btn.dataset.month;
+        if (selectedMonths.indexOf(m) === -1) selectedMonths.push(m);
+    });
+    selectedMonths.sort(function(a, b) { return PERIODS.indexOf(a) - PERIODS.indexOf(b); });
+    renderIndividual();
+}
+
+function clearAllMonths() {
+    document.querySelectorAll('#monthCheckboxGroup .month-tag').forEach(function(btn) {
+        btn.classList.remove('selected');
+    });
+    selectedMonths = [];
+    renderIndividual();
 }
 
 function renderIndividual() {
-    var name=document.getElementById('kolSelect').value;
-    if(!name) return;
-    var allData=PERIODS.map(function(m){return getMonthData(m).find(function(r){return r.name===name;});}).filter(Boolean);
-    var totalSales3=allData.reduce(function(s,r){return s+r.amount;},0);
-    var roasFiltered=allData.filter(function(r){return r.roas>0;});
-    var avgRoas=roasFiltered.length>0?allData.reduce(function(s,r){return s+r.roas;},0)/roasFiltered.length:0;
-    var aovFiltered=allData.filter(function(r){return r.aov>0;});
-    var avgAov=aovFiltered.length>0?aovFiltered.reduce(function(s,r){return s+r.aov;},0)/aovFiltered.length:0;
-    var bestMonth=allData.reduce(function(best,r){return r.amount>best.amount?r:best;},allData[0]);
-    var personalKpis=[
-        {label:'三個月總銷售額',value:fmt(totalSales3)},
-        {label:'平均 ROAS',value:fmtDec(avgRoas)+'x'},
-        {label:'平均客單價',value:avgAov>0?fmt(avgAov):'—'},
-        {label:'最佳月份',value:bestMonth.period+' '+fmt(bestMonth.amount)},
-    ];
-    document.getElementById('personalKpi').innerHTML=personalKpis.map(function(k){return '<div class="card personal-kpi" style="padding:16px"><div class="kpi-label">'+k.label+'</div><div class="kpi-value mono" style="font-size:20px">'+k.value+'</div></div>';}).join('');
+    if (selectedKols.length === 0 || selectedMonths.length === 0) {
+        destroyChart('chartPersonalTrend');
+        document.getElementById('tableByPerson').innerHTML = '<div class="no-data-msg">請選擇至少一位 KOL 和一個月份</div>';
+        document.getElementById('tableByMonth').innerHTML = '<div class="no-data-msg">請選擇至少一位 KOL 和一個月份</div>';
+        return;
+    }
 
+    // ── 趨勢折線圖 ──────────────────────────────────────────────
     destroyChart('chartPersonalTrend');
-    var ctx1=document.getElementById('chartPersonalTrend').getContext('2d');
-    chartInstances['chartPersonalTrend']=new Chart(ctx1,{
-        type:'line',
-        data:{labels:PERIODS,datasets:[
-            {label:'銷售額',data:PERIODS.map(function(m){var d=getMonthData(m).find(function(r){return r.name===name;});return d?Math.round(d.amount):0;}),borderColor:'#00e88f',backgroundColor:'rgba(0,232,143,0.1)',fill:true,tension:0.4,pointRadius:6,pointBackgroundColor:'#00e88f',yAxisID:'y'},
-            {label:'訂單數',data:PERIODS.map(function(m){var d=getMonthData(m).find(function(r){return r.name===name;});return d?d.orders:0;}),borderColor:'#4d9cff',tension:0.4,pointRadius:6,pointBackgroundColor:'#4d9cff',yAxisID:'y1'},
-            {label:'ROAS',data:PERIODS.map(function(m){var d=getMonthData(m).find(function(r){return r.name===name;});return d?parseFloat(d.roas.toFixed(2)):0;}),borderColor:'#a855f7',tension:0.4,pointRadius:6,pointBackgroundColor:'#a855f7',yAxisID:'y2',hidden:true}
-        ]},
-        options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#7a7a8e',font:{family:'Outfit'}}}},scales:{x:{ticks:{color:'#7a7a8e'},grid:{color:'rgba(30,30,46,0.5)'}},y:{type:'linear',position:'left',title:{display:true,text:'銷售額',color:'#00e88f',font:{family:'Outfit'}},ticks:{color:'#00e88f',font:{family:'JetBrains Mono',size:11},callback:function(v){return 'NT$ '+v.toLocaleString();}},grid:{color:'rgba(30,30,46,0.3)'}},y1:{type:'linear',position:'right',title:{display:true,text:'訂單',color:'#4d9cff',font:{family:'Outfit'}},ticks:{color:'#4d9cff',font:{family:'JetBrains Mono',size:11}},grid:{drawOnChartArea:false}},y2:{display:false}}}
+    var ctx = document.getElementById('chartPersonalTrend').getContext('2d');
+    var datasets = selectedKols.map(function(name, i) {
+        var color = CHART_COLORS[i % CHART_COLORS.length];
+        return {
+            label: name,
+            data: selectedMonths.map(function(m) {
+                var d = getMonthData(m).find(function(r) { return r.name === name; });
+                return d ? Math.round(d.amount) : 0;
+            }),
+            borderColor: color,
+            backgroundColor: color.replace(')', ',0.08)').replace('rgb', 'rgba'),
+            tension: 0.4,
+            pointRadius: 6,
+            pointBackgroundColor: color,
+            fill: selectedKols.length === 1
+        };
+    });
+    chartInstances['chartPersonalTrend'] = new Chart(ctx, {
+        type: 'line',
+        data: { labels: selectedMonths, datasets: datasets },
+        options: {
+            responsive: true,
+            interaction: { mode: 'index', intersect: false },
+            plugins: { legend: { labels: { color: '#7a7a8e', font: { family: 'Outfit' } } },
+                tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': NT$ ' + ctx.parsed.y.toLocaleString(); } } }
+            },
+            scales: {
+                x: { ticks: { color: '#7a7a8e', font: { family: 'Outfit' } }, grid: { color: 'rgba(30,30,46,0.5)' } },
+                y: { ticks: { color: '#7a7a8e', font: { family: 'JetBrains Mono', size: 11 }, callback: function(v) { return 'NT$ ' + v.toLocaleString(); } }, grid: { color: 'rgba(30,30,46,0.3)' } }
+            }
+        }
     });
 
-    destroyChart('chartRadar');
-    var latestData=getMonthData(currentPeriod);
-    var me=latestData.find(function(r){return r.name===name;});
-    if(!me) return;
-    function percentileRank(arr,val){var below=arr.filter(function(v){return v<val;}).length;return (below/arr.length)*100;}
-    var allAmounts=latestData.map(function(r){return r.amount;});
-    var allOrders=latestData.map(function(r){return r.orders;});
-    var allRoas=latestData.map(function(r){return r.roas;});
-    var mom=getMoM(name,currentPeriod);
-    var growthScore=mom.pct?Math.min(100,Math.max(0,50+mom.pct/2)):50;
-    var myAmounts=PERIODS.map(function(m){var d=getMonthData(m).find(function(r){return r.name===name;});return d?d.amount:0;});
-    var meanAmt=myAmounts.reduce(function(a,b){return a+b;},0)/PERIODS.length;
-    var stdAmt=Math.sqrt(myAmounts.reduce(function(s,v){return s+Math.pow(v-meanAmt,2);},0)/PERIODS.length);
-    var cv=meanAmt>0?stdAmt/meanAmt:1;
-    var stabilityScore=Math.max(0,Math.min(100,(1-cv)*100));
-    var radarData=[percentileRank(allAmounts,me.amount),percentileRank(allOrders,me.orders),growthScore,percentileRank(allRoas,me.roas),stabilityScore];
-    var ctx2=document.getElementById('chartRadar').getContext('2d');
-    chartInstances['chartRadar']=new Chart(ctx2,{
-        type:'radar',
-        data:{labels:['銷售力','轉化率','成長性','效率','穩定性'],datasets:[{label:name,data:radarData,backgroundColor:'rgba(0,232,143,0.2)',borderColor:'#00e88f',pointBackgroundColor:'#00e88f',pointBorderColor:'#00e88f'}]},
-        options:{responsive:true,plugins:{legend:{labels:{color:'#7a7a8e',font:{family:'Outfit'}}}},scales:{r:{min:0,max:100,ticks:{color:'#4a4a5e',backdropColor:'transparent',font:{family:'JetBrains Mono',size:10}},grid:{color:'rgba(30,30,46,0.8)'},pointLabels:{color:'#7a7a8e',font:{family:'Outfit',size:12}},angleLines:{color:'rgba(30,30,46,0.8)'}}}}
-    });
-
-    document.getElementById('personalBody').innerHTML=PERIODS.map(function(m){
-        var d=getMonthData(m).find(function(r){return r.name===name;});
-        if(!d) return '';
-        return '<tr><td class="text-col">'+m+'</td><td>'+d.orders+'</td><td>'+fmt(d.amount)+'</td><td>'+(d.aov>0?fmt(d.aov):'—')+'</td><td>'+fmt(d.sponsorship)+'</td><td>'+fmt(d.credit)+'</td><td>'+fmt(d.commission)+'</td><td>'+fmt(d.totalCost)+'</td><td><span class="badge badge-'+getTier(d).toLowerCase()+'">'+fmtDec(d.roas)+'x</span></td></tr>';
+    // ── 表格 A：以人為主 ─────────────────────────────────────────
+    var tableAHtml = selectedKols.map(function(name) {
+        var rows = selectedMonths.map(function(m) {
+            var d = getMonthData(m).find(function(r) { return r.name === name; });
+            if (!d) return '<tr><td class="text-col">' + m + '</td><td colspan="5" style="color:var(--text-muted)">無資料</td></tr>';
+            return '<tr>' +
+                '<td class="text-col">' + m + '</td>' +
+                '<td>' + d.orders + '</td>' +
+                '<td>' + fmt(d.amount) + '</td>' +
+                '<td>' + fmt(d.sponsorship) + '</td>' +
+                '<td>' + fmt(d.credit) + '</td>' +
+                '<td>' + fmt(d.commission) + '</td>' +
+                '</tr>';
+        }).join('');
+        return '<div class="compare-section">' +
+            '<div class="compare-section-title">' + name + '</div>' +
+            '<div class="table-wrap"><table class="compare-table">' +
+            '<thead><tr><th>月份</th><th>訂單</th><th>銷售額</th><th>底薪</th><th>Credit</th><th>分潤額</th></tr></thead>' +
+            '<tbody>' + rows + '</tbody></table></div></div>';
     }).join('');
+    document.getElementById('tableByPerson').innerHTML = tableAHtml;
+
+    // ── 表格 B：以月份為主 ───────────────────────────────────────
+    var tableBHtml = selectedMonths.map(function(m) {
+        var rows = selectedKols.map(function(name) {
+            var d = getMonthData(m).find(function(r) { return r.name === name; });
+            if (!d) return '<tr><td class="text-col">' + name + '</td><td colspan="5" style="color:var(--text-muted)">無資料</td></tr>';
+            return '<tr>' +
+                '<td class="text-col"><strong>' + name + '</strong></td>' +
+                '<td>' + d.orders + '</td>' +
+                '<td>' + fmt(d.amount) + '</td>' +
+                '<td>' + fmt(d.sponsorship) + '</td>' +
+                '<td>' + fmt(d.credit) + '</td>' +
+                '<td>' + fmt(d.commission) + '</td>' +
+                '</tr>';
+        }).join('');
+        return '<div class="compare-section">' +
+            '<div class="compare-section-title">' + m + '</div>' +
+            '<div class="table-wrap"><table class="compare-table">' +
+            '<thead><tr><th>KOL</th><th>訂單</th><th>銷售額</th><th>底薪</th><th>Credit</th><th>分潤額</th></tr></thead>' +
+            '<tbody>' + rows + '</tbody></table></div></div>';
+    }).join('');
+    document.getElementById('tableByMonth').innerHTML = tableBHtml;
 }
 
 function renderAll() {
