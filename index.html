@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HDEX KOL Performance Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root {
+    --bg-primary: #0a0a0f;
+    --bg-card: #12121a;
+    --bg-card-hover: #1a1a26;
+    --border: #1e1e2e;
+    --text-primary: #e8e8ef;
+    --text-secondary: #7a7a8e;
+    --text-muted: #4a4a5e;
+    --accent-green: #00e88f;
+    --accent-green-dim: rgba(0,232,143,0.15);
+    --accent-red: #ff4d6a;
+    --accent-red-dim: rgba(255,77,106,0.15);
+    --accent-yellow: #ffc542;
+    --accent-yellow-dim: rgba(255,197,66,0.15);
+    --accent-blue: #4d9cff;
+    --accent-blue-dim: rgba(77,156,255,0.15);
+    --accent-purple: #a855f7;
+    --accent-purple-dim: rgba(168,85,247,0.15);
+    --radius: 14px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+[data-theme="light"] {
+    --bg-primary: #f0f2f5;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f5f5fa;
+    --border: #d8dae0;
+    --text-primary: #1a1a2e;
+    --text-secondary: #5a5a72;
+    --text-muted: #8a8a9e;
+    --accent-green: #00b870;
+    --accent-green-dim: rgba(0,184,112,0.12);
+    --accent-red: #e63956;
+    --accent-red-dim: rgba(230,57,86,0.12);
+    --accent-yellow: #e6a800;
+    --accent-yellow-dim: rgba(230,168,0,0.12);
+    --accent-blue: #2b7de9;
+    --accent-blue-dim: rgba(43,125,233,0.12);
+    --accent-purple: #8b3fd6;
+    --accent-purple-dim: rgba(139,63,214,0.12);
+    --shadow: 0 4px 24px rgba(0,0,0,0.08);
+}
+
+/* Password Gate */
+#loginGate {
+    position: fixed; top:0; left:0; width:100%; height:100%;
+    background: #0a0a0f;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 99999;
+}
+[data-theme="light"] #loginGate { background: #f0f2f5; }
+.login-box {
+    background: #12121a; border: 1px solid #1e1e2e; border-radius: 16px;
+    padding: 48px 40px; text-align: center; width: 360px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+}
+[data-theme="light"] .login-box { background:#fff; border-color:#d8dae0; box-shadow:0 8px 40px rgba(0,0,0,0.1); }
+.login-box h2 {
+    font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 700;
+    color: #e8e8ef; margin-bottom: 8px;
+}
+[data-theme="light"] .login-box h2 { color:#1a1a2e; }
+.login-box p { font-size: 13px; color: #7a7a8e; margin-bottom: 28px; }
+.login-input {
+    width: 100%; padding: 12px 16px; font-family: 'JetBrains Mono', monospace;
+    font-size: 16px; text-align: center; letter-spacing: 0.15em;
+    background: #0a0a0f; color: #e8e8ef; border: 1px solid #2a2a3e;
+    border-radius: 10px; outline: none; transition: border-color 0.2s;
+}
+[data-theme="light"] .login-input { background:#f0f2f5; color:#1a1a2e; border-color:#d0d0dd; }
+.login-input:focus { border-color: #00e88f; }
+.login-btn {
+    width: 100%; margin-top: 16px; padding: 12px; font-family: 'Outfit', sans-serif;
+    font-size: 15px; font-weight: 600; border: none; border-radius: 10px;
+    background: #00e88f; color: #0a0a0f; cursor: pointer; transition: opacity 0.2s;
+}
+.login-btn:hover { opacity: 0.85; }
+.login-error { margin-top: 12px; font-size: 13px; color: #ff4d6a; display: none; }
+
+/* Theme Toggle */
+.theme-toggle {
+    width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--border);
+    background: var(--bg-card); color: var(--text-secondary); font-size: 18px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+}
+.theme-toggle:hover { background: var(--bg-card-hover); color: var(--text-primary); }
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Outfit', sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+}
+.mono { font-family: 'JetBrains Mono', monospace; }
+.container { max-width: 1440px; margin: 0 auto; padding: 24px 32px; }
+@media(max-width:768px){ .container { padding: 16px; } }
+
+#loading {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; min-height: 60vh; gap: 20px;
+}
+.spinner {
+    width: 48px; height: 48px; border: 4px solid var(--border);
+    border-top-color: var(--accent-green); border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 16px; color: var(--text-secondary); }
+
+@keyframes fadeUp {
+    from { opacity:0; transform:translateY(24px); }
+    to { opacity:1; transform:translateY(0); }
+}
+.fade-up { opacity:0; animation: fadeUp 0.6s ease forwards; }
+.delay-1 { animation-delay: 0.05s; } .delay-2 { animation-delay: 0.1s; }
+.delay-3 { animation-delay: 0.15s; } .delay-4 { animation-delay: 0.2s; }
+.delay-5 { animation-delay: 0.25s; } .delay-6 { animation-delay: 0.3s; }
+.delay-7 { animation-delay: 0.35s; } .delay-8 { animation-delay: 0.4s; }
+.delay-9 { animation-delay: 0.45s; } .delay-10 { animation-delay: 0.5s; }
+
+.card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow);
+    transition: background 0.3s, border-color 0.3s;
+}
+.card:hover { background: var(--bg-card-hover); border-color: #2a2a3e; }
+.card-title { font-size: 16px; font-weight: 600; color: var(--text-secondary); margin-bottom: 16px; }
+.card-subtitle { font-size: 13px; color: var(--text-muted); margin-top: -10px; margin-bottom: 16px; }
+
+.header {
+    display: flex; flex-wrap: wrap; align-items: center;
+    justify-content: space-between; margin-bottom: 28px; gap: 16px;
+}
+.header-left h1 {
+    font-size: 28px; font-weight: 700;
+    background: linear-gradient(135deg, #ffffff, var(--accent-green));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+[data-theme="light"] .header-left h1 {
+    background: linear-gradient(135deg, #1a1a2e, var(--accent-green));
+    -webkit-background-clip: text; background-clip: text;
+}
+.header-left p { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+.header-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.tab-group {
+    display: flex; background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 10px; overflow: hidden;
+}
+.tab-btn {
+    padding: 8px 20px; font-family: 'Outfit', sans-serif; font-size: 14px;
+    font-weight: 500; border: none; background: transparent; color: var(--text-secondary);
+    cursor: pointer; transition: all 0.3s;
+}
+.tab-btn.active { background: var(--accent-green); color: #0a0a0f; font-weight: 600; }
+.tab-btn:hover:not(.active) { background: var(--bg-card-hover); color: var(--text-primary); }
+
+.kpi-row {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px;
+}
+@media(max-width:1024px) { .kpi-row { grid-template-columns: repeat(3,1fr); } }
+@media(max-width:600px) { .kpi-row { grid-template-columns: repeat(2,1fr); } }
+.kpi-card { text-align: center; padding: 20px 16px; }
+.kpi-card .kpi-label { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; }
+.kpi-card .kpi-value { font-family: 'JetBrains Mono', monospace; font-size: 26px; font-weight: 700; color: var(--text-primary); }
+.kpi-card .kpi-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+.mom-badge {
+    display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    font-weight: 600; padding: 2px 8px; border-radius: 6px; margin-top: 6px;
+}
+.mom-up { background: var(--accent-green-dim); color: var(--accent-green); }
+.mom-down { background: var(--accent-red-dim); color: var(--accent-red); }
+.mom-flat { background: rgba(122,122,142,0.15); color: var(--text-secondary); }
+
+.grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
+.grid-1-1 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+@media(max-width:900px) { .grid-2-1, .grid-1-1 { grid-template-columns: 1fr; } }
+.full-width { margin-bottom: 24px; }
+
+.table-wrap { overflow-x: auto; border-radius: 10px; }
+.table-wrap::-webkit-scrollbar { height: 6px; }
+.table-wrap::-webkit-scrollbar-track { background: var(--bg-primary); border-radius: 3px; }
+.table-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.table-wrap::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 1100px; }
+table th {
+    text-align: left; padding: 12px 10px; font-weight: 600; color: var(--text-secondary);
+    border-bottom: 1px solid var(--border); white-space: nowrap; font-size: 12px;
+}
+table td {
+    padding: 10px 10px; border-bottom: 1px solid rgba(30,30,46,0.5); white-space: nowrap;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-primary);
+}
+table td.text-col { font-family: 'Outfit', sans-serif; font-size: 13px; }
+table tr:hover td { background: rgba(26,26,38,0.5); }
+
+.badge { display: inline-block; padding: 2px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+.badge-s { background: var(--accent-green-dim); color: var(--accent-green); }
+.badge-a { background: var(--accent-blue-dim); color: var(--accent-blue); }
+.badge-b { background: var(--accent-yellow-dim); color: var(--accent-yellow); }
+.badge-c { background: var(--accent-red-dim); color: var(--accent-red); }
+.badge-d { background: rgba(74,74,94,0.25); color: var(--text-muted); }
+
+.sort-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.sort-btn {
+    padding: 5px 14px; font-family: 'Outfit', sans-serif; font-size: 12px; font-weight: 500;
+    border: 1px solid var(--border); border-radius: 8px; background: transparent;
+    color: var(--text-secondary); cursor: pointer; transition: all 0.2s;
+}
+.sort-btn.active { border-color: var(--accent-green); color: var(--accent-green); background: var(--accent-green-dim); }
+.sort-btn:hover:not(.active) { border-color: var(--text-muted); color: var(--text-primary); }
+
+.tier-section { display: flex; flex-direction: column; gap: 14px; }
+.tier-row {
+    display: flex; align-items: flex-start; gap: 16px; padding: 14px 18px;
+    border-radius: 10px; border: 1px solid var(--border); background: var(--bg-primary);
+}
+.tier-label { min-width: 50px; text-align: center; font-weight: 700; font-size: 16px; padding: 4px 0; }
+.tier-kols { display: flex; flex-wrap: wrap; gap: 8px; flex: 1; }
+.tier-kol-chip {
+    display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px;
+    border-radius: 8px; font-size: 12px; border: 1px solid var(--border); background: var(--bg-card);
+}
+.tier-kol-chip .chip-name { font-weight: 600; font-family: 'Outfit', sans-serif; }
+.tier-kol-chip .chip-stat { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-secondary); }
+.rec-tag { font-size: 10px; padding: 1px 6px; border-radius: 4px; font-weight: 600; }
+.rec-boost { background: var(--accent-green-dim); color: var(--accent-green); }
+.rec-keep { background: var(--accent-blue-dim); color: var(--accent-blue); }
+.rec-watch { background: var(--accent-yellow-dim); color: var(--accent-yellow); }
+.rec-reduce { background: var(--accent-red-dim); color: var(--accent-red); }
+.rec-stop { background: rgba(74,74,94,0.25); color: var(--text-muted); }
+
+.insight-list { list-style: none; }
+.insight-list li {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 0; border-bottom: 1px solid rgba(30,30,46,0.5); font-size: 13px;
+}
+.insight-list li:last-child { border-bottom: none; }
+.insight-rank { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted); min-width: 24px; }
+.insight-name { flex: 1; font-weight: 500; margin-left: 8px; }
+.insight-val { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; }
+
+.budget-table { min-width: 900px; }
+.budget-table td.text-col { white-space: normal; max-width: 280px; font-size: 12px; line-height: 1.5; }
+
+.individual-section { display: none; }
+.individual-section.visible { display: block; }
+.overview-section.hidden { display: none; }
+.kol-select-wrap { margin-bottom: 20px; }
+.kol-select {
+    padding: 10px 16px; font-family: 'Outfit', sans-serif; font-size: 14px;
+    border: 1px solid var(--border); border-radius: 10px;
+    background: var(--bg-card); color: var(--text-primary); cursor: pointer; min-width: 200px;
+}
+.kol-select option { background: var(--bg-card); color: var(--text-primary); }
+.personal-kpi-row {
+    display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 20px;
+}
+@media(max-width:768px){ .personal-kpi-row { grid-template-columns: repeat(2,1fr); } }
+.personal-kpi { text-align: center; padding: 16px; }
+
+.chart-container { position: relative; width: 100%; }
+.chart-container canvas { width: 100% !important; }
+
+.legend-text { font-size: 11px; color: var(--text-muted); margin-top: 12px; line-height: 1.8; }
+
+.hidden { display: none !important; }
+
+.quick-actions { display: flex; gap: 8px; align-items: center; }
+.action-btn {
+    padding: 8px 16px; border-radius: 8px; font-family: 'Outfit', sans-serif;
+    font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid var(--border);
+    background: var(--bg-card); color: var(--text-primary); transition: all 0.2s ease; white-space: nowrap;
+}
+.action-btn:hover { background: var(--bg-card-hover); border-color: var(--text-secondary); }
+.action-btn.upload-btn { background: var(--accent-green-dim); border-color: var(--accent-green); color: var(--accent-green); }
+.action-btn.upload-btn:hover { background: var(--accent-green); color: #000; }
+
+.modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.75); z-index: 1000;
+    display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px);
+}
+.modal-box {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 32px; width: 480px; max-width: 90vw; box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+.modal-title { font-size: 20px; font-weight: 600; margin-bottom: 6px; color: var(--text-primary); }
+.modal-subtitle { font-size: 13px; color: var(--text-secondary); margin-bottom: 24px; line-height: 1.6; }
+.modal-step { background: var(--bg-primary); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+.modal-step-label { font-size: 12px; font-weight: 600; color: var(--accent-green); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
+.file-drop-zone {
+    border: 2px dashed var(--border); border-radius: 8px; padding: 24px;
+    text-align: center; cursor: pointer; transition: all 0.2s; color: var(--text-secondary); font-size: 14px;
+}
+.file-drop-zone:hover, .file-drop-zone.dragover { border-color: var(--accent-green); color: var(--accent-green); background: var(--accent-green-dim); }
+.file-drop-zone input[type="file"] { display: none; }
+.file-selected-name { font-size: 13px; color: var(--accent-green); margin-top: 10px; font-family: 'JetBrains Mono', monospace; }
+.modal-actions { display: flex; gap: 10px; margin-top: 24px; justify-content: flex-end; }
+.modal-btn { padding: 10px 22px; border-radius: 8px; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); transition: all 0.2s; }
+.modal-btn-cancel { background: transparent; color: var(--text-secondary); }
+.modal-btn-cancel:hover { background: var(--bg-card-hover); color: var(--text-primary); }
+.modal-btn-submit { background: var(--accent-green); color: #000; border-color: var(--accent-green); font-weight: 600; }
+.modal-btn-submit:hover { opacity: 0.85; }
+.modal-btn-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+.modal-result { margin-top: 16px; padding: 14px 16px; border-radius: 8px; font-size: 14px; line-height: 1.8; white-space: pre-line; }
+.modal-result.success { background: var(--accent-green-dim); border: 1px solid var(--accent-green); color: var(--accent-green); }
+.modal-result.error { background: var(--accent-red-dim); border: 1px solid var(--accent-red); color: var(--accent-red); }
+
+.badge-ambassador { background: rgba(255,197,66,0.15); color: #ffc542; border: 1px solid rgba(255,197,66,0.35); padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; letter-spacing: 0.03em; white-space: nowrap; }
+.badge-partner { background: rgba(77,156,255,0.15); color: #4d9cff; border: 1px solid rgba(77,156,255,0.35); padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; letter-spacing: 0.03em; white-space: nowrap; }
+.ig-yes { color: #00e88f; font-size: 15px; }
+.ig-no  { color: #ff4d6a; font-size: 15px; }
+.ig-na  { color: #4a4a5e; font-size: 13px; }
+
+.filter-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+.filter-btn { padding:5px 14px; border-radius:6px; font-family:'Outfit',sans-serif; font-size:12px; font-weight:500; cursor:pointer; border:1px solid var(--border); background:var(--bg-primary); color:var(--text-secondary); transition:all 0.18s; }
+.filter-btn:hover { border-color:var(--text-secondary); color:var(--text-primary); }
+.filter-btn.active { background:var(--bg-card-hover); border-color:var(--text-primary); color:var(--text-primary); }
+.filter-btn.fb-ambassador.active { background:rgba(255,197,66,0.12); border-color:#ffc542; color:#ffc542; }
+.filter-btn.fb-partner.active { background:rgba(77,156,255,0.12); border-color:#4d9cff; color:#4d9cff; }
+.filter-btn.fb-nopost.active { background:rgba(255,77,106,0.12); border-color:#ff4d6a; color:#ff4d6a; }
+
+.kpi-label { font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; }
+.kpi-value { font-size: 28px; font-weight: 700; line-height: 1.1; }
+table th { font-size: 12px; color: #a0a0b8; font-weight: 600; letter-spacing: 0.04em; padding: 10px 12px; }
+table td { font-size: 13px; color: #d0d0e0; padding: 10px 12px; }
+.card-title { font-size: 15px; font-weight: 600; color: #e0e0ee; margin-bottom: 4px; }
+.card-subtitle { font-size: 12px; color: #7a7a8e; }
+.insight-name { font-size: 13px; color: #d0d0e0; }
+.insight-val  { font-size: 13px; }
+.legend-text { font-size: 12px; color: #7a7a8e; margin-top: 14px; line-height: 2; }
+[data-theme="light"] table th { color: #5a5a72; }
+[data-theme="light"] table td { color: #2a2a42; }
+[data-theme="light"] .card-title { color: #1a1a2e; }
+[data-theme="light"] .card-subtitle { color: #5a5a72; }
+[data-theme="light"] .insight-name { color: #2a2a42; }
+[data-theme="light"] .legend-text { color: #5a5a72; }
+[data-theme="light"] .tab-btn.active { color: #fff; }
+[data-theme="light"] .kpi-card { border-color: var(--border); }
+</style>
+</head>
+<body>
+
+<!-- PASSWORD GATE -->
+<div id="loginGate">
+    <div class="login-box">
+        <h2>HDEX KOL Dashboard</h2>
+        <p>請輸入存取密碼</p>
+        <input type="password" class="login-input" id="loginPassword" placeholder="Password" autocomplete="off">
+        <button class="login-btn" id="loginBtn" onclick="checkPassword()">進入</button>
+        <div class="login-error" id="loginError">密碼錯誤，請重新輸入</div>
+    </div>
+</div>
+
+<div class="container" id="app" style="display:none;">
+
+<div id="loading">
+    <div class="spinner"></div>
+    <div class="loading-text">正在載入儀表板資料...</div>
+</div>
+
+<div id="dashboard" style="display:none;">
+
+<div class="header fade-up delay-1">
+    <div class="header-left">
+        <h1>HDEX KOL Performance</h1>
+        <p>KOL 合作成效儀表板 — 銷售額 · ROAS · 投資報酬 · 成長分析</p>
+    </div>
+    <div class="header-right">
+        <div class="tab-group" id="monthTabs"></div>
+        <div class="tab-group" id="viewTabs">
+            <button class="tab-btn active" data-view="overview">總覽</button>
+            <button class="tab-btn" data-view="individual">個人分析</button>
+        </div>
+        <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="切換深色/淺色模式">🌙</button>
+        <div class="quick-actions">
+            <button class="action-btn" onclick="openSettings()">⚙️ 前往月設定</button>
+            <button class="action-btn upload-btn" onclick="showUploadModal()">📤 上傳本月資料</button>
+        </div>
+    </div>
+</div>
+
+<div id="overviewSection" class="overview-section">
+<div class="kpi-row" id="kpiRow"></div>
+<div class="grid-2-1 fade-up delay-3">
+    <div class="card">
+        <div class="card-title">各 KOL 銷售額 vs 總支出</div>
+        <div class="chart-container"><canvas id="chartSalesVsCost"></canvas></div>
+    </div>
+    <div class="card">
+        <div class="card-title">ROAS 分佈</div>
+        <div class="chart-container"><canvas id="chartRoasDist"></canvas></div>
+    </div>
+</div>
+<div class="card full-width fade-up delay-4" id="tierCard">
+    <div class="card-title">🏅 KOL 分級制度</div>
+    <div class="card-subtitle">依 ROAS 與銷售額自動分級，作為續約決策依據</div>
+    <div class="tier-section" id="tierSection"></div>
+</div>
+<div class="card full-width fade-up delay-5">
+    <div class="card-title">📊 KOL 詳細數據</div>
+    <div class="filter-row" id="classFilterGroup">
+        <button class="filter-btn active" data-filter="all">全部</button>
+        <button class="filter-btn fb-ambassador" data-filter="AMBASSADOR">Ambassador</button>
+        <button class="filter-btn fb-partner" data-filter="PARTNER">Partner</button>
+        <button class="filter-btn fb-nopost" data-filter="nopost">❌ 未發文</button>
+    </div>
+    <div class="sort-group" id="sortGroup">
+        <button class="sort-btn active" data-sort="roas">ROAS↓</button>
+        <button class="sort-btn" data-sort="amount">銷售額↓</button>
+        <button class="sort-btn" data-sort="followers">粉絲數↓</button>
+        <button class="sort-btn" data-sort="efficiency">效率↓</button>
+        <button class="sort-btn" data-sort="growth">成長率↓</button>
+    </div>
+    <div class="table-wrap">
+        <table id="detailTable">
+            <thead>
+                <tr>
+                    <th>#</th><th>分類</th><th>KOL</th><th>粉絲數</th><th>訂單</th>
+                    <th>銷售額</th><th>客單價</th><th>底薪</th><th>Credit</th>
+                    <th>分潤</th><th>總成本</th><th>ROAS</th><th>MoM 銷售</th><th>等級</th><th>IG發文</th>
+                </tr>
+            </thead>
+            <tbody id="detailBody"></tbody>
+        </table>
+    </div>
+    <div class="legend-text">
+        等級說明：<span class="badge badge-s">S級</span> ROAS≥3 且銷售≥50K &nbsp;
+        <span class="badge badge-a">A級</span> ROAS≥2 或銷售≥30K &nbsp;
+        <span class="badge badge-b">B級</span> ROAS 1~2 &nbsp;
+        <span class="badge badge-c">C級</span> ROAS&lt;1 有成本 &nbsp;
+        <span class="badge badge-d">D級</span> 零產出
+    </div>
+</div>
+<div class="grid-1-1 fade-up delay-6">
+    <div class="card"><div class="card-title">🏆 銷售 Top 5</div><ul class="insight-list" id="topSalesList"></ul></div>
+    <div class="card"><div class="card-title">🚨 需關注：高成本低產出</div><ul class="insight-list" id="alertList"></ul></div>
+</div>
+<div class="card full-width fade-up delay-7">
+    <div class="card-title">📈 KOL 成長追蹤</div>
+    <div class="card-subtitle">月對月銷售額變化，追蹤誰在成長、誰在衰退</div>
+    <div class="chart-container"><canvas id="chartGrowth"></canvas></div>
+</div>
+<div class="grid-2-1 fade-up delay-8">
+    <div class="card">
+        <div class="card-title">💰 投資效率分析</div>
+        <div class="card-subtitle">每花 NT$1 帶回的銷售額</div>
+        <div class="chart-container"><canvas id="chartEfficiency"></canvas></div>
+    </div>
+    <div class="card"><div class="card-title">🎯 客單價分析</div><div class="chart-container"><canvas id="chartAOV"></canvas></div></div>
+</div>
+<div class="card full-width fade-up delay-9">
+    <div class="card-title">💡 下月預算配置建議</div>
+    <div class="card-subtitle">基於本月表現，自動產生續約與預算調整建議</div>
+    <div class="table-wrap">
+        <table class="budget-table" id="budgetTable">
+            <thead>
+                <tr><th>KOL</th><th>本月銷售額</th><th>本月 ROAS</th><th>成長趨勢</th><th>等級</th><th>建議</th><th>建議預算調整</th></tr>
+            </thead>
+            <tbody id="budgetBody"></tbody>
+        </table>
+    </div>
+</div>
+<div class="grid-1-1 fade-up delay-10">
+    <div class="card"><div class="card-title">月度趨勢：總銷售額 vs 總支出</div><div class="chart-container"><canvas id="chartTrend"></canvas></div></div>
+    <div class="card"><div class="card-title">粉絲數 vs 銷售額（散佈圖）</div><div class="chart-container"><canvas id="chartBubble"></canvas></div></div>
+</div>
+</div><!-- end overviewSection -->
+
+<div id="individualSection" class="individual-section">
+    <div class="kol-select-wrap fade-up delay-1"><select class="kol-select" id="kolSelect"></select></div>
+    <div class="personal-kpi-row fade-up delay-2" id="personalKpi"></div>
+    <div class="grid-1-1 fade-up delay-3">
+        <div class="card"><div class="card-title">三個月趨勢</div><div class="chart-container"><canvas id="chartPersonalTrend"></canvas></div></div>
+        <div class="card"><div class="card-title">能力雷達圖</div><div class="chart-container"><canvas id="chartRadar"></canvas></div></div>
+    </div>
+    <div class="card full-width fade-up delay-4">
+        <div class="card-title">月度比較</div>
+        <div class="table-wrap">
+            <table id="personalTable">
+                <thead><tr><th>月份</th><th>訂單</th><th>銷售額</th><th>客單價</th><th>底薪</th><th>Credit</th><th>分潤</th><th>總成本</th><th>ROAS</th></tr></thead>
+                <tbody id="personalBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</div><!-- end dashboard -->
+</div><!-- end container -->
+
+<div id="uploadModal" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+        <div class="modal-title">📤 上傳本月 CSV 資料</div>
+        <div class="modal-subtitle">上傳後系統會自動比對 KOL 折扣碼並更新 Google Sheet，儀表板隨即自動刷新。</div>
+        <div class="modal-step">
+            <div class="modal-step-label">選擇 Shopify CSV 檔案</div>
+            <div class="file-drop-zone" id="dropZone" onclick="document.getElementById('csvFileInput').click()">
+                <div>點擊選擇，或直接拖曳 CSV 到這裡</div>
+                <input type="file" id="csvFileInput" accept=".csv" onchange="onFileSelected(this)">
+            </div>
+            <div class="file-selected-name" id="selectedFileName"></div>
+        </div>
+        <div id="modalResult"></div>
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-cancel" onclick="hideUploadModal()">取消</button>
+            <button class="modal-btn modal-btn-submit" id="uploadSubmitBtn" onclick="submitCsvUpload()" disabled>開始匯入</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// =====================================================================
+// ★ 在這裡填入你的 Apps Script 部署網址（/exec 結尾）
+// =====================================================================
+var API_URL = 'https://script.google.com/macros/s/AKfycbyux5KbUFdQonvSn5EVTsS7pTt5irD0e-WKPsTDN3dlCXsV1BSX2NWvol_zsDxiPgmu/exec';
+
+// =====================================================================
+// API 呼叫封裝（取代所有 google.script.run）
+// =====================================================================
+function apiGet(action) {
+    return fetch(API_URL + '?action=' + action)
+        .then(function(r) { return r.json(); });
+}
+
+function apiPost(action, csvText) {
+    return fetch(API_URL + '?action=' + action, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: csvText
+    }).then(function(r) { return r.json(); });
+}
+
+// =====================================================================
+// PASSWORD GATE
+// =====================================================================
+function checkPassword() {
+    var pw = document.getElementById('loginPassword').value.toLowerCase().trim();
+    if (pw === 'notag') {
+        sessionStorage.setItem('hdex_auth', '1');
+        document.getElementById('loginGate').style.display = 'none';
+        document.getElementById('app').style.display = '';
+        loadDashboard();
+    } else {
+        var errEl = document.getElementById('loginError');
+        errEl.style.display = 'block';
+        document.getElementById('loginPassword').value = '';
+        document.getElementById('loginPassword').focus();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    var pwInput = document.getElementById('loginPassword');
+    if (pwInput) {
+        pwInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') checkPassword();
+        });
+    }
+    if (sessionStorage.getItem('hdex_auth') === '1') {
+        document.getElementById('loginGate').style.display = 'none';
+        document.getElementById('app').style.display = '';
+        loadDashboard();
+    }
+    var tBtn = document.getElementById('themeToggle');
+    if (tBtn && localStorage.getItem('hdex_theme') === 'light') {
+        tBtn.textContent = '☀️';
+    }
+});
+
+// =====================================================================
+// THEME TOGGLE
+// =====================================================================
+function toggleTheme() {
+    var html = document.documentElement;
+    var current = html.getAttribute('data-theme');
+    if (current === 'light') {
+        html.removeAttribute('data-theme');
+        localStorage.setItem('hdex_theme', 'dark');
+        document.getElementById('themeToggle').textContent = '🌙';
+    } else {
+        html.setAttribute('data-theme', 'light');
+        localStorage.setItem('hdex_theme', 'light');
+        document.getElementById('themeToggle').textContent = '☀️';
+    }
+    if (typeof renderOverview === 'function' && currentPeriod) {
+        try { renderAll(); } catch(e) {}
+    }
+}
+(function() {
+    var saved = localStorage.getItem('hdex_theme');
+    if (saved === 'light') document.documentElement.setAttribute('data-theme', 'light');
+})();
+
+// =====================================================================
+// GLOBALS
+// =====================================================================
+var RAW_DATA = [];
+var PERIODS = [];
+var PREV_MONTH_MAP = {};
+var currentPeriod = '';
+var currentSort = 'roas';
+var currentView = 'overview';
+var currentClassFilter = 'all';
+var chartInstances = {};
+
+// =====================================================================
+// LOAD DATA（取代 google.script.run.getDashboardData()）
+// =====================================================================
+function loadDashboard() {
+    document.getElementById('loading').style.display = 'flex';
+    document.getElementById('dashboard').style.display = 'none';
+
+    apiGet('getData')
+        .then(function(result) {
+            RAW_DATA = result.data;
+            PERIODS = result.periods;
+            currentPeriod = PERIODS[PERIODS.length - 1];
+
+            PREV_MONTH_MAP = {};
+            for (var i = 1; i < PERIODS.length; i++) {
+                PREV_MONTH_MAP[PERIODS[i]] = PERIODS[i - 1];
+            }
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+
+            buildMonthTabs();
+            initEventHandlers();
+            initKolSelect();
+            renderAll();
+        })
+        .catch(function(err) {
+            document.getElementById('loading').innerHTML =
+                '<div style="text-align:center;color:var(--accent-red);font-size:16px;">' +
+                '載入失敗: ' + (err.message || err) +
+                '<br><br><button onclick="loadDashboard()" style="padding:8px 24px;border:1px solid var(--accent-red);border-radius:8px;background:transparent;color:var(--accent-red);cursor:pointer;font-family:Outfit,sans-serif;font-size:14px;">重新載入</button>' +
+                '</div>';
+        });
+}
+
+// =====================================================================
+// HELPERS
+// =====================================================================
+function fmt(n) { return 'NT$ ' + Math.round(n).toLocaleString('en-US'); }
+function fmtNum(n) { return Math.round(n).toLocaleString('en-US'); }
+function fmtDec(n, d) { d = d || 2; return n.toFixed(d); }
+function pct(n) {
+    if (n === Infinity || n === -Infinity) return '—';
+    return (n >= 0 ? '+' : '') + n.toFixed(1) + '%';
+}
+
+function buildMonthTabs() {
+    var tabsContainer = document.getElementById('monthTabs');
+    tabsContainer.innerHTML = PERIODS.map(function(p) {
+        var activeClass = (p === currentPeriod) ? ' active' : '';
+        return '<button class="tab-btn' + activeClass + '" data-month="' + p + '">' + p + '</button>';
+    }).join('');
+}
+
+function computeRow(r) {
+    var commission = r.amount * r.rate;
+    var totalPayment = r.sponsorship + commission;
+    var totalCost = totalPayment + r.credit;
+    var roas = totalCost > 0 ? r.amount / totalCost : (r.amount > 0 ? 999 : 0);
+    var aov = r.orders > 0 ? r.amount / r.orders : 0;
+    var costPerOrder = r.orders > 0 ? totalCost / r.orders : 0;
+    var salesPerFollower = r.followers > 0 ? r.amount / r.followers : 0;
+    var result = {};
+    for (var key in r) { result[key] = r[key]; }
+    result.commission = commission;
+    result.totalPayment = totalPayment;
+    result.totalCost = totalCost;
+    result.roas = roas;
+    result.aov = aov;
+    result.costPerOrder = costPerOrder;
+    result.salesPerFollower = salesPerFollower;
+    return result;
+}
+
+function getMonthData(month) {
+    return RAW_DATA.filter(function(r) { return r.period === month; }).map(computeRow);
+}
+
+function getTier(r) {
+    if (r.roas >= 3 && r.amount >= 50000) return 'S';
+    if (r.roas >= 2 || r.amount >= 30000) return 'A';
+    if (r.roas >= 1 && r.roas < 2 && r.totalCost > 0 && r.amount > 0) return 'B';
+    if (r.roas < 1 && r.totalCost > 0) return 'C';
+    if (r.amount === 0 && r.orders === 0) return 'D';
+    if (r.roas >= 3) return 'S';
+    if (r.roas >= 2) return 'A';
+    if (r.roas >= 1) return 'B';
+    return 'C';
+}
+
+function getRecTag(tier) {
+    if (tier === 'S' || tier === 'A') return { text:'加碼', cls:'rec-boost' };
+    if (tier === 'B') return { text:'觀察', cls:'rec-watch' };
+    if (tier === 'C') return { text:'減碼', cls:'rec-reduce' };
+    return { text:'停止', cls:'rec-stop' };
+}
+
+function getMoM(name, month) {
+    var prev = PREV_MONTH_MAP[month];
+    if (!prev) return { type:'none' };
+    var curData = getMonthData(month).find(function(r) { return r.name === name; });
+    var prevData = getMonthData(prev).find(function(r) { return r.name === name; });
+    var cur = curData ? curData.amount : 0;
+    var prv = prevData ? prevData.amount : 0;
+    if (prv === 0 && cur === 0) return { type:'flat', text:'—' };
+    if (prv === 0 && cur > 0) return { type:'new', text:'NEW', pct: 100 };
+    var change = ((cur - prv) / prv) * 100;
+    if (change > 0) return { type:'up', text:'▲ ' + pct(change), pct: change };
+    if (change < 0) return { type:'down', text:'▼ ' + pct(change), pct: change };
+    return { type:'flat', text:'—', pct: 0 };
+}
+
+function getGrowthTrend(name, month) {
+    var mom = getMoM(name, month);
+    if (mom.type === 'up' || mom.type === 'new') return 'growing';
+    if (mom.type === 'down') return 'declining';
+    return 'flat';
+}
+
+function destroyChart(id) {
+    if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; }
+}
+function destroyAllCharts() {
+    Object.keys(chartInstances).forEach(function(id) { chartInstances[id].destroy(); });
+    chartInstances = {};
+}
+
+// =====================================================================
+// RENDER FUNCTIONS（與原版完全相同，不重複說明）
+// =====================================================================
+function renderKPI() {
+    var data = getMonthData(currentPeriod);
+    var prev = PREV_MONTH_MAP[currentPeriod];
+    var prevData = prev ? getMonthData(prev) : null;
+    var totalSales = data.reduce(function(s,r) { return s + r.amount; }, 0);
+    var totalCost = data.reduce(function(s,r) { return s + r.totalCost; }, 0);
+    var overallRoas = totalCost > 0 ? totalSales / totalCost : 0;
+    var totalOrders = data.reduce(function(s,r) { return s + r.orders; }, 0);
+    var activeKols = data.filter(function(r) { return r.amount > 0 || r.orders > 0; }).length;
+    var prevTotalSales=0, prevTotalCost=0, prevOverallRoas=0, prevTotalOrders=0, prevActiveKols=0;
+    if (prevData) {
+        prevTotalSales = prevData.reduce(function(s,r) { return s + r.amount; }, 0);
+        prevTotalCost = prevData.reduce(function(s,r) { return s + r.totalCost; }, 0);
+        prevOverallRoas = prevTotalCost > 0 ? prevTotalSales / prevTotalCost : 0;
+        prevTotalOrders = prevData.reduce(function(s,r) { return s + r.orders; }, 0);
+        prevActiveKols = prevData.filter(function(r) { return r.amount > 0 || r.orders > 0; }).length;
+    }
+    function momBadge(cur, prv) {
+        if (!prev) return '<span class="mom-badge mom-flat">—</span>';
+        if (prv === 0 && cur === 0) return '<span class="mom-badge mom-flat">—</span>';
+        if (prv === 0 && cur > 0) return '<span class="mom-badge mom-up">NEW</span>';
+        var ch = ((cur - prv) / prv) * 100;
+        if (ch > 0) return '<span class="mom-badge mom-up">▲ +' + ch.toFixed(1) + '%</span>';
+        if (ch < 0) return '<span class="mom-badge mom-down">▼ ' + ch.toFixed(1) + '%</span>';
+        return '<span class="mom-badge mom-flat">—</span>';
+    }
+    var ambassadorPosted = data.filter(function(r) { return r.classification === 'AMBASSADOR' && r.igPosted === true; }).length;
+    var ambassadorTotal  = data.filter(function(r) { return r.classification === 'AMBASSADOR'; }).length;
+    var partnerPosted    = data.filter(function(r) { return r.classification === 'PARTNER' && r.igPosted === true; }).length;
+    var partnerTotal     = data.filter(function(r) { return r.classification === 'PARTNER'; }).length;
+    var kpis = [
+        { label:'總銷售額', value: fmt(totalSales), mom: momBadge(totalSales, prevTotalSales) },
+        { label:'總支出（含 Credit）', value: fmt(totalCost), mom: momBadge(totalCost, prevTotalCost) },
+        { label:'整體 ROAS', value: fmtDec(overallRoas) + 'x', mom: momBadge(overallRoas, prevOverallRoas) },
+        { label:'總訂單數', value: fmtNum(totalOrders), mom: momBadge(totalOrders, prevTotalOrders) },
+        { label:'有產出 KOL', value: activeKols + ' / ' + data.length, mom: momBadge(activeKols, prevActiveKols) },
+        { label:'✨ Ambassador 發文', value: ambassadorPosted + ' / ' + ambassadorTotal, mom: '<span style="color:#ffc542;font-size:12px;">Post/Reels</span>' },
+        { label:'👥 Partner 發文', value: partnerPosted + ' / ' + partnerTotal, mom: '<span style="color:#4d9cff;font-size:12px;">Story/Post/Reels</span>' },
+    ];
+    var row = document.getElementById('kpiRow');
+    row.innerHTML = kpis.map(function(k,i) {
+        return '<div class="card kpi-card fade-up delay-' + (i+2) + '">' +
+            '<div class="kpi-label">' + k.label + '</div>' +
+            '<div class="kpi-value mono">' + k.value + '</div>' +
+            k.mom + '</div>';
+    }).join('');
+}
+
+function renderSalesVsCost() {
+    destroyChart('chartSalesVsCost');
+    var data = getMonthData(currentPeriod).filter(function(r) { return r.amount > 0 || r.totalCost > 0; }).sort(function(a,b) { return b.amount - a.amount; });
+    var ctx = document.getElementById('chartSalesVsCost').getContext('2d');
+    chartInstances['chartSalesVsCost'] = new Chart(ctx, {
+        type: 'bar',
+        data: { labels: data.map(function(r) { return r.name; }), datasets: [
+            { label:'銷售額', data: data.map(function(r) { return Math.round(r.amount); }), backgroundColor:'rgba(0,232,143,0.7)', borderRadius:4 },
+            { label:'總支出', data: data.map(function(r) { return Math.round(r.totalCost); }), backgroundColor:'rgba(255,77,106,0.7)', borderRadius:4 },
+        ]},
+        options: { responsive:true, plugins:{ legend:{labels:{color:'#7a7a8e',font:{family:'Outfit'}}}, tooltip:{callbacks:{label:function(ctx){return ctx.dataset.label+': NT$ '+ctx.parsed.y.toLocaleString();}}} }, scales:{ x:{ticks:{color:'#7a7a8e',font:{family:'Outfit',size:11},maxRotation:45},grid:{color:'rgba(30,30,46,0.5)'}}, y:{ticks:{color:'#7a7a8e',font:{family:'JetBrains Mono',size:11},callback:function(v){return 'NT$ '+v.toLocaleString();}},grid:{color:'rgba(30,30,46,0.5)'}} } }
+    });
+}
+
+function renderRoasDist() {
+    destroyChart('chartRoasDist');
+    var data = getMonthData(currentPeriod);
+    var tiers = { S:0, A:0, B:0, C:0, D:0 };
+    data.forEach(function(r) { tiers[getTier(r)]++; });
+    var ctx = document.getElementById('chartRoasDist').getContext('2d');
+    chartInstances['chartRoasDist'] = new Chart(ctx, {
+        type: 'doughnut',
+        data: { labels:['S 級','A 級','B 級','C 級','D 級'], datasets:[{ data:[tiers.S,tiers.A,tiers.B,tiers.C,tiers.D], backgroundColor:['#00e88f','#4d9cff','#ffc542','#ff4d6a','#4a4a5e'], borderColor:'#12121a', borderWidth:3 }] },
+        options: { responsive:true, cutout:'60%', plugins:{ legend:{position:'bottom',labels:{color:'#7a7a8e',font:{family:'Outfit'},padding:12}} } }
+    });
+}
+
+function renderTiers() {
+    var data = getMonthData(currentPeriod);
+    var tiered = { S:[], A:[], B:[], C:[], D:[] };
+    data.forEach(function(r) { tiered[getTier(r)].push(r); });
+    var tierInfo = [
+        { key:'S', label:'S 級', cls:'badge-s' },
+        { key:'A', label:'A 級', cls:'badge-a' },
+        { key:'B', label:'B 級', cls:'badge-b' },
+        { key:'C', label:'C 級', cls:'badge-c' },
+        { key:'D', label:'D 級', cls:'badge-d' },
+    ];
+    var section = document.getElementById('tierSection');
+    section.innerHTML = tierInfo.map(function(t) {
+        var kols = tiered[t.key].sort(function(a,b) { return b.amount - a.amount; });
+        var rec = getRecTag(t.key);
+        var chips = kols.length === 0 ? '<span style="color:var(--text-muted);font-size:12px;">無</span>' :
+            kols.map(function(k) {
+                return '<div class="tier-kol-chip"><span class="chip-name">' + k.name + '</span><span class="chip-stat">' + k.orders + '單 ' + fmt(k.amount) + ' ROAS:' + fmtDec(k.roas) + '</span><span class="rec-tag ' + rec.cls + '">' + rec.text + '</span></div>';
+            }).join('');
+        return '<div class="tier-row"><div class="tier-label"><span class="badge ' + t.cls + '">' + t.label + '</span></div><div class="tier-kols">' + chips + '</div></div>';
+    }).join('');
+}
+
+function renderDetailTable() {
+    var data = getMonthData(currentPeriod);
+    if (currentClassFilter === 'AMBASSADOR') data = data.filter(function(r) { return r.classification === 'AMBASSADOR'; });
+    else if (currentClassFilter === 'PARTNER') data = data.filter(function(r) { return r.classification === 'PARTNER'; });
+    else if (currentClassFilter === 'nopost') data = data.filter(function(r) { return r.igPosted === false || r.igPosted === null; });
+    var sortFns = {
+        roas: function(a,b) { return b.roas - a.roas; },
+        amount: function(a,b) { return b.amount - a.amount; },
+        followers: function(a,b) { return b.followers - a.followers; },
+        efficiency: function(a,b) { var ea=a.totalCost>0?a.amount/a.totalCost:(a.amount>0?999:0); var eb=b.totalCost>0?b.amount/b.totalCost:(b.amount>0?999:0); return eb-ea; },
+        growth: function(a,b) { var pa=getMoM(a.name,currentPeriod).pct||0; var pb=getMoM(b.name,currentPeriod).pct||0; return pb-pa; }
+    };
+    data.sort(sortFns[currentSort] || sortFns.roas);
+    var tbody = document.getElementById('detailBody');
+    tbody.innerHTML = data.map(function(r, i) {
+        var tier = getTier(r);
+        var tierCls = 'badge-' + tier.toLowerCase();
+        var mom = getMoM(r.name, currentPeriod);
+        var momHtml = '';
+        if (mom.type==='up') momHtml='<span style="color:var(--accent-green)">'+mom.text+'</span>';
+        else if (mom.type==='new') momHtml='<span class="badge badge-s">NEW</span>';
+        else if (mom.type==='down') momHtml='<span style="color:var(--accent-red)">'+mom.text+'</span>';
+        else momHtml='<span style="color:var(--text-muted)">—</span>';
+        var clsBadge = r.classification==='AMBASSADOR' ? '<span class="badge-ambassador">AMB</span>' : '<span class="badge-partner">PAR</span>';
+        var igHtml;
+        if (r.igPosted===true) {
+            var details=[];
+            if(r.story>0) details.push('S:'+r.story);
+            if(r.post>0) details.push('P:'+r.post);
+            if(r.reels>0) details.push('R:'+r.reels);
+            igHtml='<span class="ig-yes">✅</span><br><small style="color:#7a7a8e;font-size:10px;">'+details.join(' ')+'</small>';
+        } else if (r.igPosted===false) { igHtml='<span class="ig-no">❌</span>'; }
+        else { igHtml='<span class="ig-na">—</span>'; }
+        return '<tr><td>'+(i+1)+'</td><td>'+clsBadge+'</td><td class="text-col"><strong>'+r.name+'</strong><br><small style="color:var(--text-muted)">'+fmtNum(r.followers)+' 粉絲</small></td><td>'+fmtNum(r.followers)+'</td><td>'+r.orders+'</td><td>'+fmt(r.amount)+'</td><td>'+(r.aov>0?fmt(r.aov):'—')+'</td><td>'+fmt(r.sponsorship)+'</td><td>'+fmt(r.credit)+'</td><td>'+fmt(r.commission)+'</td><td>'+fmt(r.totalCost)+'</td><td><span class="badge '+tierCls+'">'+fmtDec(r.roas)+'x</span></td><td>'+momHtml+'</td><td><span class="badge '+tierCls+'">'+tier+'</span></td><td style="text-align:center;">'+igHtml+'</td></tr>';
+    }).join('');
+}
+
+function renderInsights() {
+    var data = getMonthData(currentPeriod);
+    var top5 = data.slice().sort(function(a,b){return b.amount-a.amount;}).slice(0,5);
+    document.getElementById('topSalesList').innerHTML = top5.map(function(r,i) {
+        return '<li><span class="insight-rank">'+(i+1)+'</span><span class="insight-name">'+r.name+'</span><span class="insight-val" style="color:var(--accent-green)">'+fmt(r.amount)+'</span></li>';
+    }).join('');
+    var alerts = data.filter(function(r){return r.totalCost>0&&r.roas<1;}).sort(function(a,b){return b.totalCost-a.totalCost;});
+    document.getElementById('alertList').innerHTML = alerts.length===0 ?
+        '<li><span style="color:var(--text-muted)">無高成本低產出 KOL</span></li>' :
+        alerts.map(function(r,i){return '<li><span class="insight-rank">'+(i+1)+'</span><span class="insight-name">'+r.name+'</span><span class="insight-val" style="color:var(--accent-red)">ROAS '+fmtDec(r.roas)+'x · 成本 '+fmt(r.totalCost)+'</span></li>';}).join('');
+}
+
+function renderGrowthChart() {
+    destroyChart('chartGrowth');
+    var prev = PREV_MONTH_MAP[currentPeriod];
+    if (!prev) { document.getElementById('chartGrowth').parentElement.innerHTML='<p style="color:var(--text-muted);text-align:center;padding:40px 0;">首月無比較數據</p>'; return; }
+    var curData = getMonthData(currentPeriod);
+    var prevData = getMonthData(prev);
+    var growthData = [];
+    curData.forEach(function(r) {
+        var p = prevData.find(function(x){return x.name===r.name;});
+        var prv = p?p.amount:0;
+        if(r.amount===0&&prv===0) return;
+        var change = prv===0&&r.amount>0?100:(prv>0&&r.amount===0?-100:((r.amount-prv)/prv)*100);
+        growthData.push({name:r.name,change:change});
+    });
+    growthData.sort(function(a,b){return b.change-a.change;});
+    var ctx = document.getElementById('chartGrowth').getContext('2d');
+    chartInstances['chartGrowth'] = new Chart(ctx, {
+        type:'bar',
+        data:{labels:growthData.map(function(d){return d.name;}),datasets:[{label:'MoM 變化 %',data:growthData.map(function(d){return Math.round(d.change);}),backgroundColor:growthData.map(function(d){return d.change>=0?'rgba(0,232,143,0.7)':'rgba(255,77,106,0.7)';}),borderRadius:4}]},
+        options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ctx.parsed.x+'%';}}}},scales:{x:{ticks:{color:'#7a7a8e',font:{family:'JetBrains Mono',size:11},callback:function(v){return v+'%';}},grid:{color:'rgba(30,30,46,0.5)'}},y:{ticks:{color:'#7a7a8e',font:{family:'Outfit',size:11}},grid:{display:false}}}}
+    });
+}
+
+function renderEfficiencyChart() {
+    destroyChart('chartEfficiency');
+    var data = getMonthData(currentPeriod).filter(function(r){return r.totalCost>0&&r.amount>0;});
+    data.sort(function(a,b){return (b.amount/b.totalCost)-(a.amount/a.totalCost);});
+    var ctx = document.getElementById('chartEfficiency').getContext('2d');
+    chartInstances['chartEfficiency'] = new Chart(ctx, {
+        type:'bar',
+        data:{labels:data.map(function(r){return r.name;}),datasets:[{label:'每 NT$1 帶回銷售額',data:data.map(function(r){return parseFloat((r.amount/r.totalCost).toFixed(2));}),backgroundColor:data.map(function(r){var e=r.amount/r.totalCost;return e>=3?'rgba(0,232,143,0.7)':(e>=1?'rgba(77,156,255,0.7)':'rgba(255,77,106,0.7)');}),borderRadius:4}]},
+        options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return 'NT$ '+ctx.parsed.x.toFixed(2);}}}},scales:{x:{ticks:{color:'#7a7a8e',font:{family:'JetBrains Mono',size:11}},grid:{color:'rgba(30,30,46,0.5)'}},y:{ticks:{color:'#7a7a8e',font:{family:'Outfit',size:11}},grid:{display:false}}}}
+    });
+}
+
+function renderAOVChart() {
+    destroyChart('chartAOV');
+    var data = getMonthData(currentPeriod).filter(function(r){return r.orders>0;}).sort(function(a,b){return b.aov-a.aov;});
+    var ctx = document.getElementById('chartAOV').getContext('2d');
+    chartInstances['chartAOV'] = new Chart(ctx, {
+        type:'bar',
+        data:{labels:data.map(function(r){return r.name;}),datasets:[{label:'客單價',data:data.map(function(r){return Math.round(r.aov);}),backgroundColor:'rgba(168,85,247,0.7)',borderRadius:4}]},
+        options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return 'NT$ '+ctx.parsed.y.toLocaleString();}}}},scales:{x:{ticks:{color:'#7a7a8e',font:{family:'Outfit',size:11},maxRotation:45},grid:{color:'rgba(30,30,46,0.5)'}},y:{ticks:{color:'#7a7a8e',font:{family:'JetBrains Mono',size:11},callback:function(v){return 'NT$ '+v.toLocaleString();}},grid:{color:'rgba(30,30,46,0.5)'}}}}
+    });
+}
+
+function renderBudgetRec() {
+    var data = getMonthData(currentPeriod);
+    function zeroMonths(name) {
+        var count=0; var mi=PERIODS.indexOf(currentPeriod);
+        for(var i=mi;i>=0;i--){var md=getMonthData(PERIODS[i]).find(function(r){return r.name===name;});if(md&&md.amount===0&&md.orders===0)count++;else break;}
+        return count;
+    }
+    var rows = data.map(function(r) {
+        var tier=getTier(r); var trend=getGrowthTrend(r.name,currentPeriod); var mom=getMoM(r.name,currentPeriod); var rec='',budget='';
+        if(tier==='S'&&trend==='growing'){rec='🔥 強力加碼 — 提高底薪或 Credit，爭取獨家合作';budget='▲ +30~50%';}
+        else if(tier==='S'){rec='✅ 維持投入 — 持續合作，嘗試新活動類型';budget='維持';}
+        else if(tier==='A'&&trend==='growing'){rec='📈 適度加碼 — 增加 Credit 或提高抽傭比例';budget='▲ +15~30%';}
+        else if(tier==='A'){rec='✅ 維持觀察 — 保持現有投入，關注下月表現';budget='維持';}
+        else if(tier==='B'){rec='⚠️ 觀察期 — 維持最低投入，設定 KPI 目標';budget='維持或 ▼ -10%';}
+        else if(tier==='C'){rec='🔻 考慮減碼 — 降低底薪或 Credit，轉為純分潤';budget='▼ -30~50%';}
+        else if(tier==='D'&&zeroMonths(r.name)>=2){rec='❌ 建議停止 — 連續無產出，建議終止合作';budget='歸零';}
+        else{rec='⏳ 最後觀察 — 給予一個月觀察期';budget='維持最低';}
+        var trendHtml=mom.type==='up'?'<span style="color:var(--accent-green)">▲</span>':(mom.type==='new'?'<span style="color:var(--accent-green)">▲ NEW</span>':(mom.type==='down'?'<span style="color:var(--accent-red)">▼</span>':'<span style="color:var(--text-muted)">—</span>'));
+        var tierCls='badge-'+tier.toLowerCase();
+        return Object.assign({},r,{tier:tier,rec:rec,budget:budget,trendHtml:trendHtml,tierCls:tierCls});
+    });
+    var tierOrder={S:0,A:1,B:2,C:3,D:4};
+    rows.sort(function(a,b){return tierOrder[a.tier]-tierOrder[b.tier]||b.amount-a.amount;});
+    document.getElementById('budgetBody').innerHTML = rows.map(function(r) {
+        return '<tr><td class="text-col"><strong>'+r.name+'</strong></td><td>'+fmt(r.amount)+'</td><td><span class="badge '+r.tierCls+'">'+fmtDec(r.roas)+'x</span></td><td>'+r.trendHtml+'</td><td><span class="badge '+r.tierCls+'">'+r.tier+'</span></td><td class="text-col">'+r.rec+'</td><td class="text-col" style="font-weight:600">'+r.budget+'</td></tr>';
+    }).join('');
+}
+
+function renderTrendChart() {
+    destroyChart('chartTrend');
+    var monthlyAgg = PERIODS.map(function(m) {
+        var d=getMonthData(m);
+        return {month:m,sales:d.reduce(function(s,r){return s+r.amount;},0),cost:d.reduce(function(s,r){return s+r.totalCost;},0)};
+    });
+    var ctx = document.getElementById('chartTrend').getContext('2d');
+    chartInstances['chartTrend'] = new Chart(ctx, {
+        type:'line',
+        data:{labels:monthlyAgg.map(function(d){return d.month;}),datasets:[
+            {label:'總銷售額',data:monthlyAgg.map(function(d){return Math.round(d.sales);}),borderColor:'#00e88f',backgroundColor:'rgba(0,232,143,0.1)',fill:true,tension:0.4,pointRadius:6,pointBackgroundColor:'#00e88f',yAxisID:'y'},
+            {label:'總支出',data:monthlyAgg.map(function(d){return Math.round(d.cost);}),borderColor:'#ff4d6a',backgroundColor:'rgba(255,77,106,0.1)',fill:true,tension:0.4,pointRadius:6,pointBackgroundColor:'#ff4d6a',yAxisID:'y1'}
+        ]},
+        options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#7a7a8e',font:{family:'Outfit'}}},tooltip:{callbacks:{label:function(ctx){return ctx.dataset.label+': NT$ '+ctx.parsed.y.toLocaleString();}}}},scales:{x:{ticks:{color:'#7a7a8e',font:{family:'Outfit'}},grid:{color:'rgba(30,30,46,0.5)'}},y:{type:'linear',position:'left',ticks:{color:'#00e88f',font:{family:'JetBrains Mono',size:11},callback:function(v){return 'NT$ '+(v/1000).toFixed(0)+'K';}},grid:{color:'rgba(30,30,46,0.3)'}},y1:{type:'linear',position:'right',ticks:{color:'#ff4d6a',font:{family:'JetBrains Mono',size:11},callback:function(v){return 'NT$ '+(v/1000).toFixed(0)+'K';}},grid:{drawOnChartArea:false}}}}
+    });
+}
+
+function renderBubbleChart() {
+    destroyChart('chartBubble');
+    var data = getMonthData(currentPeriod).filter(function(r){return r.amount>0;});
+    var ctx = document.getElementById('chartBubble').getContext('2d');
+    chartInstances['chartBubble'] = new Chart(ctx, {
+        type:'bubble',
+        data:{datasets:[{label:'KOL',data:data.map(function(r){return {x:r.followers/1000,y:Math.round(r.amount),r:Math.max(4,Math.min(30,r.orders*1.5)),name:r.name};}),backgroundColor:data.map(function(r){var t=getTier(r);return t==='S'?'rgba(0,232,143,0.6)':(t==='A'?'rgba(77,156,255,0.6)':(t==='B'?'rgba(255,197,66,0.6)':'rgba(255,77,106,0.6))'));})}]},
+        options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){var d=ctx.raw;return d.name+': '+d.x.toFixed(1)+'K 粉絲, NT$ '+d.y.toLocaleString();}}}},scales:{x:{title:{display:true,text:'粉絲數 (K)',color:'#7a7a8e',font:{family:'Outfit'}},ticks:{color:'#7a7a8e',font:{family:'JetBrains Mono',size:11}},grid:{color:'rgba(30,30,46,0.5)'}},y:{title:{display:true,text:'銷售額 (NT$)',color:'#7a7a8e',font:{family:'Outfit'}},ticks:{color:'#7a7a8e',font:{family:'JetBrains Mono',size:11},callback:function(v){return 'NT$ '+v.toLocaleString();}},grid:{color:'rgba(30,30,46,0.5)'}}}}
+    });
+}
+
+function initKolSelect() {
+    var namesSet={};
+    RAW_DATA.forEach(function(r){namesSet[r.name]=true;});
+    var names=Object.keys(namesSet).sort();
+    var sel=document.getElementById('kolSelect');
+    sel.innerHTML=names.map(function(n){return '<option value="'+n+'">'+n+'</option>';}).join('');
+    sel.addEventListener('change',renderIndividual);
+}
+
+function renderIndividual() {
+    var name=document.getElementById('kolSelect').value;
+    if(!name) return;
+    var allData=PERIODS.map(function(m){return getMonthData(m).find(function(r){return r.name===name;});}).filter(Boolean);
+    var totalSales3=allData.reduce(function(s,r){return s+r.amount;},0);
+    var roasFiltered=allData.filter(function(r){return r.roas>0;});
+    var avgRoas=roasFiltered.length>0?allData.reduce(function(s,r){return s+r.roas;},0)/roasFiltered.length:0;
+    var aovFiltered=allData.filter(function(r){return r.aov>0;});
+    var avgAov=aovFiltered.length>0?aovFiltered.reduce(function(s,r){return s+r.aov;},0)/aovFiltered.length:0;
+    var bestMonth=allData.reduce(function(best,r){return r.amount>best.amount?r:best;},allData[0]);
+    var personalKpis=[
+        {label:'三個月總銷售額',value:fmt(totalSales3)},
+        {label:'平均 ROAS',value:fmtDec(avgRoas)+'x'},
+        {label:'平均客單價',value:avgAov>0?fmt(avgAov):'—'},
+        {label:'最佳月份',value:bestMonth.period+' '+fmt(bestMonth.amount)},
+    ];
+    document.getElementById('personalKpi').innerHTML=personalKpis.map(function(k){return '<div class="card personal-kpi" style="padding:16px"><div class="kpi-label">'+k.label+'</div><div class="kpi-value mono" style="font-size:20px">'+k.value+'</div></div>';}).join('');
+
+    destroyChart('chartPersonalTrend');
+    var ctx1=document.getElementById('chartPersonalTrend').getContext('2d');
+    chartInstances['chartPersonalTrend']=new Chart(ctx1,{
+        type:'line',
+        data:{labels:PERIODS,datasets:[
+            {label:'銷售額',data:PERIODS.map(function(m){var d=getMonthData(m).find(function(r){return r.name===name;});return d?Math.round(d.amount):0;}),borderColor:'#00e88f',backgroundColor:'rgba(0,232,143,0.1)',fill:true,tension:0.4,pointRadius:6,pointBackgroundColor:'#00e88f',yAxisID:'y'},
+            {label:'訂單數',data:PERIODS.map(function(m){var d=getMonthData(m).find(function(r){return r.name===name;});return d?d.orders:0;}),borderColor:'#4d9cff',tension:0.4,pointRadius:6,pointBackgroundColor:'#4d9cff',yAxisID:'y1'},
+            {label:'ROAS',data:PERIODS.map(function(m){var d=getMonthData(m).find(function(r){return r.name===name;});return d?parseFloat(d.roas.toFixed(2)):0;}),borderColor:'#a855f7',tension:0.4,pointRadius:6,pointBackgroundColor:'#a855f7',yAxisID:'y2',hidden:true}
+        ]},
+        options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#7a7a8e',font:{family:'Outfit'}}}},scales:{x:{ticks:{color:'#7a7a8e'},grid:{color:'rgba(30,30,46,0.5)'}},y:{type:'linear',position:'left',title:{display:true,text:'銷售額',color:'#00e88f',font:{family:'Outfit'}},ticks:{color:'#00e88f',font:{family:'JetBrains Mono',size:11},callback:function(v){return 'NT$ '+v.toLocaleString();}},grid:{color:'rgba(30,30,46,0.3)'}},y1:{type:'linear',position:'right',title:{display:true,text:'訂單',color:'#4d9cff',font:{family:'Outfit'}},ticks:{color:'#4d9cff',font:{family:'JetBrains Mono',size:11}},grid:{drawOnChartArea:false}},y2:{display:false}}}
+    });
+
+    destroyChart('chartRadar');
+    var latestData=getMonthData(currentPeriod);
+    var me=latestData.find(function(r){return r.name===name;});
+    if(!me) return;
+    function percentileRank(arr,val){var below=arr.filter(function(v){return v<val;}).length;return (below/arr.length)*100;}
+    var allAmounts=latestData.map(function(r){return r.amount;});
+    var allOrders=latestData.map(function(r){return r.orders;});
+    var allRoas=latestData.map(function(r){return r.roas;});
+    var mom=getMoM(name,currentPeriod);
+    var growthScore=mom.pct?Math.min(100,Math.max(0,50+mom.pct/2)):50;
+    var myAmounts=PERIODS.map(function(m){var d=getMonthData(m).find(function(r){return r.name===name;});return d?d.amount:0;});
+    var meanAmt=myAmounts.reduce(function(a,b){return a+b;},0)/PERIODS.length;
+    var stdAmt=Math.sqrt(myAmounts.reduce(function(s,v){return s+Math.pow(v-meanAmt,2);},0)/PERIODS.length);
+    var cv=meanAmt>0?stdAmt/meanAmt:1;
+    var stabilityScore=Math.max(0,Math.min(100,(1-cv)*100));
+    var radarData=[percentileRank(allAmounts,me.amount),percentileRank(allOrders,me.orders),growthScore,percentileRank(allRoas,me.roas),stabilityScore];
+    var ctx2=document.getElementById('chartRadar').getContext('2d');
+    chartInstances['chartRadar']=new Chart(ctx2,{
+        type:'radar',
+        data:{labels:['銷售力','轉化率','成長性','效率','穩定性'],datasets:[{label:name,data:radarData,backgroundColor:'rgba(0,232,143,0.2)',borderColor:'#00e88f',pointBackgroundColor:'#00e88f',pointBorderColor:'#00e88f'}]},
+        options:{responsive:true,plugins:{legend:{labels:{color:'#7a7a8e',font:{family:'Outfit'}}}},scales:{r:{min:0,max:100,ticks:{color:'#4a4a5e',backdropColor:'transparent',font:{family:'JetBrains Mono',size:10}},grid:{color:'rgba(30,30,46,0.8)'},pointLabels:{color:'#7a7a8e',font:{family:'Outfit',size:12}},angleLines:{color:'rgba(30,30,46,0.8)'}}}}
+    });
+
+    document.getElementById('personalBody').innerHTML=PERIODS.map(function(m){
+        var d=getMonthData(m).find(function(r){return r.name===name;});
+        if(!d) return '';
+        return '<tr><td class="text-col">'+m+'</td><td>'+d.orders+'</td><td>'+fmt(d.amount)+'</td><td>'+(d.aov>0?fmt(d.aov):'—')+'</td><td>'+fmt(d.sponsorship)+'</td><td>'+fmt(d.credit)+'</td><td>'+fmt(d.commission)+'</td><td>'+fmt(d.totalCost)+'</td><td><span class="badge badge-'+getTier(d).toLowerCase()+'">'+fmtDec(d.roas)+'x</span></td></tr>';
+    }).join('');
+}
+
+function renderAll() {
+    renderKPI(); renderSalesVsCost(); renderRoasDist(); renderTiers();
+    renderDetailTable(); renderInsights(); renderGrowthChart();
+    renderEfficiencyChart(); renderAOVChart(); renderBudgetRec();
+    renderTrendChart(); renderBubbleChart();
+}
+
+function initEventHandlers() {
+    document.getElementById('monthTabs').addEventListener('click', function(e) {
+        var btn=e.target.closest('.tab-btn'); if(!btn) return;
+        document.querySelectorAll('#monthTabs .tab-btn').forEach(function(b){b.classList.remove('active');});
+        btn.classList.add('active'); currentPeriod=btn.dataset.month;
+        destroyAllCharts(); renderAll();
+        if(currentView==='individual') renderIndividual();
+    });
+    var viewBtns=document.querySelectorAll('#viewTabs .tab-btn');
+    viewBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            viewBtns.forEach(function(b){b.classList.remove('active');}); this.classList.add('active');
+            currentView=this.dataset.view;
+            if(currentView==='overview'){
+                document.getElementById('overviewSection').classList.remove('hidden');
+                document.getElementById('individualSection').classList.remove('visible');
+                destroyAllCharts(); renderAll();
+            } else {
+                document.getElementById('overviewSection').classList.add('hidden');
+                document.getElementById('individualSection').classList.add('visible');
+                destroyAllCharts(); renderIndividual();
+            }
+        });
+    });
+    document.querySelectorAll('#sortGroup .sort-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('#sortGroup .sort-btn').forEach(function(b){b.classList.remove('active');}); this.classList.add('active');
+            currentSort=this.dataset.sort; renderDetailTable();
+        });
+    });
+    document.querySelectorAll('#classFilterGroup .filter-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('#classFilterGroup .filter-btn').forEach(function(b){b.classList.remove('active');}); this.classList.add('active');
+            currentClassFilter=this.dataset.filter; renderDetailTable();
+        });
+    });
+    var zone=document.getElementById('dropZone');
+    if(zone) {
+        zone.addEventListener('dragover',function(e){e.preventDefault();zone.classList.add('dragover');});
+        zone.addEventListener('dragleave',function(){zone.classList.remove('dragover');});
+        zone.addEventListener('drop',function(e){
+            e.preventDefault(); zone.classList.remove('dragover');
+            var file=e.dataTransfer.files[0];
+            if(file&&file.name.toLowerCase().endsWith('.csv')){
+                document.getElementById('selectedFileName').textContent='已選：'+file.name;
+                var reader=new FileReader();
+                reader.onload=function(ev){_csvFileContent=ev.target.result;document.getElementById('uploadSubmitBtn').disabled=false;};
+                reader.readAsText(file,'UTF-8');
+            }
+        });
+    }
+}
+
+// =====================================================================
+// QUICK ACTIONS（取代 google.script.run）
+// =====================================================================
+var _settingsUrl = null;
+
+function openSettings() {
+    if (_settingsUrl) { window.open(_settingsUrl, '_blank'); return; }
+    apiGet('getSettingsUrl')
+        .then(function(data) { _settingsUrl = data.url; window.open(_settingsUrl, '_blank'); })
+        .catch(function() { window.open('https://docs.google.com/spreadsheets/d/1Mui2WGqrxfpm_KDUxkTYCNdvvM_xH4qMQsyHHy8wYCE', '_blank'); });
+}
+
+var _csvFileContent = null;
+
+function showUploadModal() {
+    _csvFileContent=null;
+    document.getElementById('selectedFileName').textContent='';
+    document.getElementById('uploadSubmitBtn').disabled=true;
+    document.getElementById('modalResult').innerHTML='';
+    document.getElementById('csvFileInput').value='';
+    document.getElementById('uploadModal').style.display='flex';
+}
+function hideUploadModal() { document.getElementById('uploadModal').style.display='none'; }
+
+function onFileSelected(input) {
+    var file=input.files[0]; if(!file) return;
+    document.getElementById('selectedFileName').textContent='已選：'+file.name;
+    var reader=new FileReader();
+    reader.onload=function(e){_csvFileContent=e.target.result;document.getElementById('uploadSubmitBtn').disabled=false;};
+    reader.readAsText(file,'UTF-8');
+}
+
+function submitCsvUpload() {
+    if(!_csvFileContent) return;
+    var btn=document.getElementById('uploadSubmitBtn');
+    btn.disabled=true; btn.textContent='匯入中...';
+    document.getElementById('modalResult').innerHTML='';
+
+    // 使用 POST 傳送 CSV（避免 URL 長度限制）
+    apiPost('importCsv', _csvFileContent)
+        .then(function(result) {
+            btn.textContent='開始匯入';
+            var el=document.getElementById('modalResult');
+            if(result.success){
+                el.className='modal-result success';
+                el.textContent='✅ '+result.message;
+                setTimeout(function(){
+                    hideUploadModal();
+                    document.getElementById('dashboard').style.display='none';
+                    var loadingEl=document.getElementById('loading');
+                    loadingEl.style.display='flex';
+                    loadingEl.querySelector('.loading-text').textContent='正在重新載入資料...';
+                    apiGet('getData').then(function(rawData){
+                        RAW_DATA=rawData.data; PERIODS=rawData.periods;
+                        currentPeriod=PERIODS[PERIODS.length-1];
+                        PREV_MONTH_MAP={};
+                        for(var i=1;i<PERIODS.length;i++) PREV_MONTH_MAP[PERIODS[i]]=PERIODS[i-1];
+                        loadingEl.style.display='none';
+                        document.getElementById('dashboard').style.display='block';
+                        buildMonthTabs(); destroyAllCharts(); renderAll();
+                    });
+                }, 2000);
+            } else {
+                el.className='modal-result error';
+                el.textContent='❌ '+result.message;
+                btn.disabled=false;
+            }
+        })
+        .catch(function(err){
+            btn.disabled=false; btn.textContent='開始匯入';
+            var el=document.getElementById('modalResult');
+            el.className='modal-result error';
+            el.textContent='❌ 執行錯誤：'+(err.message||err);
+        });
+}
+</script>
+</body>
+</html>
