@@ -328,7 +328,8 @@ table tr:hover td { background: rgba(26,26,38,0.5); }
 .filter-btn.active { background:var(--bg-card-hover); border-color:var(--text-primary); color:var(--text-primary); }
 .filter-btn.fb-ambassador.active { background:rgba(255,197,66,0.12); border-color:#ffc542; color:#ffc542; }
 .filter-btn.fb-partner.active { background:rgba(77,156,255,0.12); border-color:#4d9cff; color:#4d9cff; }
-.filter-btn.fb-nopost.active { background:rgba(255,77,106,0.12); border-color:#ff4d6a; color:#ff4d6a; }
+.filter-btn.fb-posted.active[data-filter="posted"] { background:rgba(0,232,143,0.12); border-color:#00e88f; color:#00e88f; }
+.filter-btn.fb-posted.active[data-filter="nopost"] { background:rgba(255,77,106,0.12); border-color:#ff4d6a; color:#ff4d6a; }
 
 .kpi-label { font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; }
 .kpi-value { font-size: 28px; font-weight: 700; line-height: 1.1; }
@@ -413,14 +414,14 @@ table td { font-size: 13px; color: #d0d0e0; padding: 10px 12px; }
         <button class="filter-btn active" data-filter="all">全部</button>
         <button class="filter-btn fb-ambassador" data-filter="AMBASSADOR">Ambassador</button>
         <button class="filter-btn fb-partner" data-filter="PARTNER">Partner</button>
-        <button class="filter-btn fb-nopost" data-filter="nopost">❌ 未發文</button>
+        <button class="filter-btn fb-posted" data-filter="posted">✅ 有發文</button>
     </div>
     <div class="sort-group" id="sortGroup">
-        <button class="sort-btn active" data-sort="roas">ROAS↓</button>
-        <button class="sort-btn" data-sort="amount">銷售額↓</button>
-        <button class="sort-btn" data-sort="followers">粉絲數↓</button>
-        <button class="sort-btn" data-sort="efficiency">效率↓</button>
-        <button class="sort-btn" data-sort="growth">成長率↓</button>
+        <button class="sort-btn active" data-sort="roas" data-dir="desc">ROAS↓</button>
+        <button class="sort-btn" data-sort="amount" data-dir="desc">銷售額↓</button>
+        <button class="sort-btn" data-sort="followers" data-dir="desc">粉絲數↓</button>
+        <button class="sort-btn" data-sort="efficiency" data-dir="desc">效率↓</button>
+        <button class="sort-btn" data-sort="growth" data-dir="desc">成長率↓</button>
     </div>
     <div class="table-wrap">
         <table id="detailTable">
@@ -608,6 +609,7 @@ var PERIODS = [];
 var PREV_MONTH_MAP = {};
 var currentPeriod = '';
 var currentSort = 'roas';
+var currentSortDir = 'desc';
 var currentView = 'overview';
 var currentClassFilter = 'all';
 var chartInstances = {};
@@ -844,6 +846,7 @@ function renderDetailTable() {
     var data = getMonthData(currentPeriod);
     if (currentClassFilter === 'AMBASSADOR') data = data.filter(function(r) { return r.classification === 'AMBASSADOR'; });
     else if (currentClassFilter === 'PARTNER') data = data.filter(function(r) { return r.classification === 'PARTNER'; });
+    else if (currentClassFilter === 'posted') data = data.filter(function(r) { return r.igPosted === true; });
     else if (currentClassFilter === 'nopost') data = data.filter(function(r) { return r.igPosted === false || r.igPosted === null; });
     var sortFns = {
         roas: function(a,b) { return b.roas - a.roas; },
@@ -852,7 +855,10 @@ function renderDetailTable() {
         efficiency: function(a,b) { var ea=a.totalCost>0?a.amount/a.totalCost:(a.amount>0?999:0); var eb=b.totalCost>0?b.amount/b.totalCost:(b.amount>0?999:0); return eb-ea; },
         growth: function(a,b) { var pa=getMoM(a.name,currentPeriod).pct||0; var pb=getMoM(b.name,currentPeriod).pct||0; return pb-pa; }
     };
-    data.sort(sortFns[currentSort] || sortFns.roas);
+    var sortFn = sortFns[currentSort] || sortFns.roas;
+    data.sort(function(a, b) {
+        return currentSortDir === 'desc' ? sortFn(a, b) : sortFn(b, a);
+    });
     var tbody = document.getElementById('detailBody');
     tbody.innerHTML = data.map(function(r, i) {
         var tier = getTier(r);
@@ -1093,14 +1099,65 @@ function initEventHandlers() {
     });
     document.querySelectorAll('#sortGroup .sort-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
-            document.querySelectorAll('#sortGroup .sort-btn').forEach(function(b){b.classList.remove('active');}); this.classList.add('active');
-            currentSort=this.dataset.sort; renderDetailTable();
+            var clickedSort = this.dataset.sort;
+            if (currentSort === clickedSort) {
+                // 同一個按鈕：切換升降序
+                currentSortDir = currentSortDir === 'desc' ? 'asc' : 'desc';
+                this.dataset.dir = currentSortDir;
+                var label = this.textContent.replace(/[↓↑]/g, '');
+                this.textContent = label + (currentSortDir === 'desc' ? '↓' : '↑');
+            } else {
+                // 不同按鈕：切換到新排序，預設降序
+                document.querySelectorAll('#sortGroup .sort-btn').forEach(function(b) {
+                    b.classList.remove('active');
+                    var bl = b.textContent.replace(/[↓↑]/g, '');
+                    b.textContent = bl + '↓';
+                    b.dataset.dir = 'desc';
+                });
+                this.classList.add('active');
+                currentSort = clickedSort;
+                currentSortDir = 'desc';
+                this.textContent = this.textContent.replace(/[↓↑]/g, '') + '↓';
+            }
+            renderDetailTable();
         });
     });
     document.querySelectorAll('#classFilterGroup .filter-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
-            document.querySelectorAll('#classFilterGroup .filter-btn').forEach(function(b){b.classList.remove('active');}); this.classList.add('active');
-            currentClassFilter=this.dataset.filter; renderDetailTable();
+            var clickedFilter = this.dataset.filter;
+            // 發文按鈕切換邏輯
+            if (this.classList.contains('fb-posted')) {
+                if (!this.classList.contains('active')) {
+                    // 從其他按鈕切過來 → 有發文
+                    document.querySelectorAll('#classFilterGroup .filter-btn').forEach(function(b) { b.classList.remove('active'); });
+                    this.classList.add('active');
+                    this.dataset.filter = 'posted';
+                    this.textContent = '✅ 有發文';
+                    currentClassFilter = 'posted';
+                } else if (this.dataset.filter === 'posted') {
+                    // 已是有發文 → 切換成未發文
+                    this.dataset.filter = 'nopost';
+                    this.textContent = '❌ 未發文';
+                    currentClassFilter = 'nopost';
+                } else {
+                    // 已是未發文 → 切換成有發文
+                    this.dataset.filter = 'posted';
+                    this.textContent = '✅ 有發文';
+                    currentClassFilter = 'posted';
+                }
+            } else {
+                document.querySelectorAll('#classFilterGroup .filter-btn').forEach(function(b) {
+                    b.classList.remove('active');
+                    // 重置發文按鈕狀態
+                    if (b.classList.contains('fb-posted')) {
+                        b.dataset.filter = 'posted';
+                        b.textContent = '✅ 有發文';
+                    }
+                });
+                this.classList.add('active');
+                currentClassFilter = clickedFilter;
+            }
+            renderDetailTable();
         });
     });
     var zone=document.getElementById('dropZone');
