@@ -113,10 +113,10 @@
     border: 2px solid var(--bg-primary);
 }
 .bell-panel {
-    display: none; position: absolute; top: 52px; right: 0;
-    width: 340px; max-height: 460px; overflow-y: auto;
+    display: none; position: fixed; top: 68px; right: 20px;
+    width: 340px; max-height: 480px; overflow-y: auto;
     background: var(--bg-card); border: 1px solid var(--border);
-    border-radius: 14px; box-shadow: var(--shadow); z-index: 999;
+    border-radius: 14px; box-shadow: 0 8px 40px rgba(0,0,0,0.5); z-index: 99999;
 }
 .bell-panel.open { display: block; }
 .bell-panel-header {
@@ -2293,11 +2293,11 @@ function sendAiMessageWithText(text) {
     var loadingId = appendAiLoading();
     aiHistory.push({ role: 'user', parts: [{ text: text }] });
 
-    // 呼叫 Apps Script 後端（POST 避免 URL 長度限制）
+    // 呼叫 Apps Script 後端（text/plain 避免 CORS preflight）
     var context = buildDashboardContext();
     fetch(API_URL + '?action=askAI&pw=notag', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({ messages: aiHistory, context: context })
     })
     .then(function(r) { return r.json(); })
