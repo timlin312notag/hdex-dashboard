@@ -1708,13 +1708,32 @@ function submitCsvUpload() {
 // =====================================================================
 function toggleBell() {
     var panel = document.getElementById('bellPanel');
-    panel.classList.toggle('open');
-    document.addEventListener('click', closeBellOutside, { once: true });
+    var isOpen = panel.classList.contains('open');
+    if (isOpen) {
+        panel.classList.remove('open');
+        return;
+    }
+    // 動態定位：把 panel 移到 body 直接子元素，避免被 header 截斷
+    if (panel.parentElement !== document.body) {
+        document.body.appendChild(panel);
+    }
+    // 定位到鈴鐺按鈕右下方
+    var btn = document.getElementById('bellBtn');
+    var rect = btn.getBoundingClientRect();
+    panel.style.position = 'fixed';
+    panel.style.top = (rect.bottom + 8) + 'px';
+    panel.style.right = (window.innerWidth - rect.right) + 'px';
+    panel.style.left = 'auto';
+    panel.classList.add('open');
+    setTimeout(function() {
+        document.addEventListener('click', closeBellOutside, { once: true });
+    }, 0);
 }
 function closeBellOutside(e) {
-    var wrap = document.querySelector('.bell-wrap');
-    if (wrap && !wrap.contains(e.target)) {
-        document.getElementById('bellPanel').classList.remove('open');
+    var panel = document.getElementById('bellPanel');
+    var btn = document.getElementById('bellBtn');
+    if (panel && !panel.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+        panel.classList.remove('open');
     }
 }
 
