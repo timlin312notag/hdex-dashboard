@@ -2505,11 +2505,15 @@ function speakText(text, btn) {
         return;
     }
 
-    // 如果正在說，先停止
+    // 如果按的是正在播放的同一個按鈕，停止
+    if (aiCurrentSpeakBtn === btn) {
+        stopSpeaking();
+        return;
+    }
+
+    // 如果有其他在播放，先停止
     if (window.speechSynthesis.speaking || aiCurrentUtterance) {
         stopSpeaking();
-        // 如果是同一個按鈕，停止就好
-        if (aiCurrentSpeakBtn === btn) return;
     }
 
     // 清理文字（移除 emoji 和特殊符號避免奇怪發音）
@@ -2528,26 +2532,34 @@ function speakText(text, btn) {
     });
     if (zhVoice) utterance.voice = zhVoice;
 
+    var wasCancelled = false;
     utterance.onstart = function() {
+        wasCancelled = false;
         if (btn) { btn.classList.add('speaking'); btn.textContent = '⏹ 停止'; }
         aiCurrentSpeakBtn = btn;
     };
     utterance.onend = function() {
-        if (btn) { btn.classList.remove('speaking'); btn.textContent = '🔊 朗讀'; }
-        aiCurrentUtterance = null;
-        aiCurrentSpeakBtn = null;
+        if (!wasCancelled) {
+            if (btn) { btn.classList.remove('speaking'); btn.textContent = '🔊 朗讀'; }
+            aiCurrentUtterance = null;
+            aiCurrentSpeakBtn = null;
+        }
     };
     utterance.onerror = function() {
         if (btn) { btn.classList.remove('speaking'); btn.textContent = '🔊 朗讀'; }
         aiCurrentUtterance = null;
         aiCurrentSpeakBtn = null;
     };
+    utterance._cancelMe = function() { wasCancelled = true; };
 
     aiCurrentUtterance = utterance;
     window.speechSynthesis.speak(utterance);
 }
 
 function stopSpeaking() {
+    if (aiCurrentUtterance && aiCurrentUtterance._cancelMe) {
+        aiCurrentUtterance._cancelMe();
+    }
     if (window.speechSynthesis) {
         window.speechSynthesis.cancel();
     }
@@ -2557,7 +2569,6 @@ function stopSpeaking() {
     }
     aiCurrentUtterance = null;
     aiCurrentSpeakBtn = null;
-    // 重置所有朗讀按鈕狀態
     document.querySelectorAll('.ai-speak-btn').forEach(function(b) {
         b.classList.remove('speaking');
         b.textContent = '🔊 朗讀';
