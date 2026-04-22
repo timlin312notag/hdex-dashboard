@@ -2437,30 +2437,52 @@ function startVoiceInput() {
     var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     aiRecognition = new SpeechRecognition();
     aiRecognition.lang = 'zh-TW';
-    aiRecognition.continuous = false;
-    aiRecognition.interimResults = true;
+    aiRecognition.continuous = true;      // 持續聆聽，不因停頓而中斷
+    aiRecognition.interimResults = true;  // 即時顯示辨識中的文字
+
+    var silenceTimer = null;
+    var finalTranscript = '';
+
+    function resetSilenceTimer() {
+        if (silenceTimer) clearTimeout(silenceTimer);
+        silenceTimer = setTimeout(function() {
+            // 3秒沒有新的語音輸入，停止聆聽並送出
+            if (aiIsRecording) {
+                aiRecognition.stop();
+            }
+        }, 3000);
+    }
 
     aiRecognition.onstart = function() {
         aiIsRecording = true;
+        finalTranscript = '';
         var btn = document.getElementById('aiMicBtn');
         btn.classList.add('recording');
         btn.textContent = '⏹';
         btn.title = '點擊停止';
-        document.getElementById('aiInput').placeholder = '聆聽中...';
-        // 確保面板是開的
+        document.getElementById('aiInput').placeholder = '聆聽中（停頓3秒自動送出）...';
         if (!document.getElementById('aiPanel').classList.contains('open')) toggleAiPanel();
+        resetSilenceTimer();
     };
 
     aiRecognition.onresult = function(e) {
-        var transcript = '';
+        var interim = '';
         for (var i = e.resultIndex; i < e.results.length; i++) {
-            transcript += e.results[i][0].transcript;
+            if (e.results[i].isFinal) {
+                finalTranscript += e.results[i][0].transcript;
+            } else {
+                interim += e.results[i][0].transcript;
+            }
         }
-        document.getElementById('aiInput').value = transcript;
+        // 顯示已確認+正在辨識的文字
+        document.getElementById('aiInput').value = finalTranscript + interim;
         aiInputResize(document.getElementById('aiInput'));
+        // 有新語音輸入，重置計時器
+        resetSilenceTimer();
     };
 
     aiRecognition.onend = function() {
+        if (silenceTimer) clearTimeout(silenceTimer);
         aiIsRecording = false;
         var btn = document.getElementById('aiMicBtn');
         btn.classList.remove('recording');
@@ -2468,7 +2490,6 @@ function startVoiceInput() {
         btn.title = '語音輸入';
         document.getElementById('aiInput').placeholder = '輸入問題，或點🎤說話...';
 
-        // 如果有辨識到文字就自動送出
         var text = document.getElementById('aiInput').value.trim();
         if (text) {
             setTimeout(function() { sendAiMessage(); }, 300);
@@ -2476,6 +2497,7 @@ function startVoiceInput() {
     };
 
     aiRecognition.onerror = function(e) {
+        if (silenceTimer) clearTimeout(silenceTimer);
         aiIsRecording = false;
         var btn = document.getElementById('aiMicBtn');
         btn.classList.remove('recording');
