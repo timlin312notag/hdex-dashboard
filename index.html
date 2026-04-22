@@ -2506,7 +2506,7 @@ function speakText(text, btn) {
     }
 
     // 如果正在說，先停止
-    if (aiCurrentUtterance) {
+    if (window.speechSynthesis.speaking || aiCurrentUtterance) {
         stopSpeaking();
         // 如果是同一個按鈕，停止就好
         if (aiCurrentSpeakBtn === btn) return;
@@ -2548,13 +2548,20 @@ function speakText(text, btn) {
 }
 
 function stopSpeaking() {
-    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+    }
     if (aiCurrentSpeakBtn) {
         aiCurrentSpeakBtn.classList.remove('speaking');
         aiCurrentSpeakBtn.textContent = '🔊 朗讀';
     }
     aiCurrentUtterance = null;
     aiCurrentSpeakBtn = null;
+    // 重置所有朗讀按鈕狀態
+    document.querySelectorAll('.ai-speak-btn').forEach(function(b) {
+        b.classList.remove('speaking');
+        b.textContent = '🔊 朗讀';
+    });
 }
 
 // 預載語音列表（部分瀏覽器需要）
