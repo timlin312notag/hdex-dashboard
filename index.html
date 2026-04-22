@@ -1604,7 +1604,7 @@ function renderBellAlerts() {
                     '<div class="bell-item-sub">' + a.sub + '</div>' +
                     '</div>' +
                     '<label style="display:flex;align-items:center;gap:5px;cursor:pointer;white-space:nowrap;margin-top:2px;user-select:none;">' +
-                    '<input type="checkbox" ' + (a.done?'checked':'') + ' onchange="toggleBellDone('' + a.type + '','' + encodeURIComponent(a.name) + '',this.checked)" style="width:15px;height:15px;accent-color:var(--accent-green);cursor:pointer;">' +
+                    '<input type="checkbox" ' + (a.done?'checked':'') + ' data-type="' + a.type + '" data-name="' + encodeURIComponent(a.name) + '" onchange="toggleBellDone(this.dataset.type,this.dataset.name,this.checked)" style="width:15px;height:15px;accent-color:var(--accent-green);cursor:pointer;">' +
                     '<span style="font-size:11px;color:var(--text-secondary);">' + (a.done ? '已處理' : '標為完成') + '</span>' +
                     '</label>' +
                     '</div>';
@@ -1689,7 +1689,7 @@ function renderEventsTab() {
                 (ev.kols.length ? '<div class="event-kols">' + kolTags + '</div>' : '<div style="color:var(--text-muted);font-size:12px;">尚無 KOL 報名</div>') +
                 (ev.note ? '<div class="event-note">備註：' + ev.note + '</div>' : '') +
                 '<div style="margin-top:12px;">' +
-                  '<button class="sort-btn" style="font-size:11px;" onclick="openEditEventModal('' + encodeURIComponent(JSON.stringify(ev)) + '')">✏️ 編輯</button>' +
+                  '<button class="sort-btn" style="font-size:11px;" data-ev="' + encodeURIComponent(JSON.stringify(ev)) + '" onclick="openEditEventModal(this.dataset.ev)">✏️ 編輯</button>' +
                 '</div>' +
                 '</div>';
         }).join('');
@@ -1783,9 +1783,9 @@ function openEventModal(ev) {
         '</div>' +
         '<div id="evResult" style="margin-top:12px;"></div>' +
         '<div class="modal-actions">' +
-        '<button class="modal-btn modal-btn-cancel" onclick="document.getElementById('eventModal').remove()">取消</button>' +
-        (isEdit ? '<button class="modal-btn" style="background:var(--accent-red-dim);color:var(--accent-red);border-color:var(--accent-red);" onclick="deleteEvent('' + encodeURIComponent(ev.name) + '')">刪除</button>' : '') +
-        '<button class="modal-btn modal-btn-submit" onclick="saveEvent(' + (isEdit?'''+encodeURIComponent(ev.name)+''':'null') + ')">儲存</button>' +
+        '<button class="modal-btn modal-btn-cancel" onclick="document.getElementById(&quot;eventModal&quot;).remove()">取消</button>' +
+        (isEdit ? '<button class="modal-btn" style="background:var(--accent-red-dim);color:var(--accent-red);border-color:var(--accent-red);" data-evname="' + encodeURIComponent(ev.name) + '" onclick="deleteEvent(this.dataset.evname)">刪除</button>' : '') +
+        '<button class="modal-btn modal-btn-submit" data-oldname="' + (isEdit ? encodeURIComponent(ev.name) : '') + '" data-isedit="' + (isEdit?'1':'') + '" onclick="saveEvent(this.dataset.isedit?this.dataset.oldname:null)">儲存</button>' +
         '</div>' +
         '</div></div>';
     document.body.insertAdjacentHTML('beforeend', html);
@@ -1867,7 +1867,7 @@ function renderContractBlock(kolName) {
     var html = '<div class="card full-width fade-up" style="margin-bottom:16px;">' +
         '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">' +
         '<div class="card-title" style="margin-bottom:0;">📋 合約資訊</div>' +
-        '<button class="sort-btn" style="font-size:11px;" onclick="openContractModal('' + encodeURIComponent(kolName) + '')">✏️ ' + (contract?'編輯':'新增') + '合約</button>' +
+        '<button class="sort-btn" style="font-size:11px;" data-kol="' + encodeURIComponent(kolName) + '" onclick="openContractModal(this.dataset.kol)">✏️ ' + (contract?'編輯':'新增') + '合約</button>' +
         '</div>';
 
     if (!contract) {
@@ -1948,8 +1948,8 @@ function openContractModal(kolNameEncoded) {
         '</div>' +
         '<div id="ctResult" style="margin-top:12px;"></div>' +
         '<div class="modal-actions">' +
-        '<button class="modal-btn modal-btn-cancel" onclick="document.getElementById('contractModal').remove()">取消</button>' +
-        '<button class="modal-btn modal-btn-submit" onclick="saveContract('' + encodeURIComponent(kolName) + '')">儲存</button>' +
+        '<button class="modal-btn modal-btn-cancel" onclick="document.getElementById(&quot;contractModal&quot;).remove()">取消</button>' +
+        '<button class="modal-btn modal-btn-submit" data-kol="' + encodeURIComponent(kolName) + '" onclick="saveContract(this.dataset.kol)">儲存</button>' +
         '</div></div></div>';
     document.body.insertAdjacentHTML('beforeend', html);
 }
