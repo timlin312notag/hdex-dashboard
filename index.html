@@ -2358,16 +2358,35 @@ function appendAiMsg(role, text) {
     if (role === 'assistant') {
         var actions = document.createElement('div');
         actions.className = 'ai-msg-actions';
+        // 朗讀按鈕
         var speakBtn = document.createElement('button');
         speakBtn.className = 'ai-speak-btn';
         speakBtn.textContent = '🔊 朗讀';
-        speakBtn.onclick = function() { speakText(text, speakBtn); };
+        speakBtn.onclick = function() { speakText(text, speakBtn, pauseBtn, stopBtn); };
         actions.appendChild(speakBtn);
+
+        // 暫停按鈕
+        var pauseBtn = document.createElement('button');
+        pauseBtn.className = 'ai-speak-btn';
+        pauseBtn.textContent = '⏸ 暫停';
+        pauseBtn.style.display = 'none';
+        pauseBtn.onclick = function() { pauseOrResumeSpeaking(pauseBtn); };
+        actions.appendChild(pauseBtn);
+
+        // 停止按鈕
+        var stopBtn = document.createElement('button');
+        stopBtn.className = 'ai-speak-btn';
+        stopBtn.textContent = '⏹ 停止';
+        stopBtn.style.display = 'none';
+        stopBtn.style.color = 'var(--accent-red)';
+        stopBtn.style.borderColor = 'var(--accent-red)';
+        stopBtn.onclick = function() { stopSpeaking(); };
+        actions.appendChild(stopBtn);
         wrapper.appendChild(actions);
 
         // 自動朗讀
         if (aiAutoSpeak) {
-            setTimeout(function() { speakText(text, speakBtn); }, 200);
+            setTimeout(function() { speakText(text, speakBtn, pauseBtn, stopBtn); }, 200);
         }
     }
 
@@ -2483,6 +2502,8 @@ function stopVoiceInput() {
 var aiAutoSpeak = false;
 var aiCurrentUtterance = null;
 var aiCurrentSpeakBtn = null;
+var aiIsSpeaking = false;
+var aiIsPaused = false;
 
 function toggleAutoSpeak() {
     aiAutoSpeak = !aiAutoSpeak;
@@ -2490,7 +2511,6 @@ function toggleAutoSpeak() {
     if (aiAutoSpeak) {
         btn.classList.add('on');
         btn.textContent = '🔊 自動 ON';
-        // 預載語音列表
         window.speechSynthesis && window.speechSynthesis.getVoices();
     } else {
         btn.classList.remove('on');
@@ -2499,20 +2519,14 @@ function toggleAutoSpeak() {
     }
 }
 
-function speakText(text, btn) {
+function speakText(text, playBtn, pauseBtn, stopBtn) {
     if (!window.speechSynthesis) {
         appendAiMsg('assistant', '⚠️ 你的瀏覽器不支援語音朗讀，請使用 Chrome 或 Edge。');
         return;
     }
 
-    // 如果按的是正在播放的同一個按鈕，停止
-    if (aiCurrentSpeakBtn === btn) {
-        stopSpeaking();
-        return;
-    }
-
-    // 如果有其他在播放，先停止
-    if (window.speechSynthesis.speaking || aiCurrentUtterance) {
+    // 停止其他正在播放的
+    if (aiIsSpeaking) {
         stopSpeaking();
     }
 
@@ -2532,47 +2546,68 @@ function speakText(text, btn) {
     });
     if (zhVoice) utterance.voice = zhVoice;
 
-    var wasCancelled = false;
     utterance.onstart = function() {
-        wasCancelled = false;
-        if (btn) { btn.classList.add('speaking'); btn.textContent = '⏹ 停止'; }
-        aiCurrentSpeakBtn = btn;
+        aiIsSpeaking = true;
+        aiIsPaused = false;
+        if (playBtn) { playBtn.style.display = 'none'; }
+        if (pauseBtn) { pauseBtn.style.display = ''; pauseBtn.textContent = '⏸ 暫停'; }
+        if (stopBtn) { stopBtn.style.display = ''; }
+        aiCurrentSpeakBtn = playBtn;
     };
     utterance.onend = function() {
-        if (!wasCancelled) {
-            if (btn) { btn.classList.remove('speaking'); btn.textContent = '🔊 朗讀'; }
-            aiCurrentUtterance = null;
-            aiCurrentSpeakBtn = null;
-        }
-    };
-    utterance.onerror = function() {
-        if (btn) { btn.classList.remove('speaking'); btn.textContent = '🔊 朗讀'; }
+        aiIsSpeaking = false;
+        aiIsPaused = false;
+        if (playBtn) { playBtn.style.display = ''; }
+        if (pauseBtn) { pauseBtn.style.display = 'none'; }
+        if (stopBtn) { stopBtn.style.display = 'none'; }
         aiCurrentUtterance = null;
         aiCurrentSpeakBtn = null;
     };
-    utterance._cancelMe = function() { wasCancelled = true; };
+    utterance.onerror = function() {
+        aiIsSpeaking = false;
+        aiIsPaused = false;
+        if (playBtn) { playBtn.style.display = ''; }
+        if (pauseBtn) { pauseBtn.style.display = 'none'; }
+        if (stopBtn) { stopBtn.style.display = 'none'; }
+        aiCurrentUtterance = null;
+        aiCurrentSpeakBtn = null;
+    };
 
     aiCurrentUtterance = utterance;
     window.speechSynthesis.speak(utterance);
 }
 
-function stopSpeaking() {
-    if (aiCurrentUtterance && aiCurrentUtterance._cancelMe) {
-        aiCurrentUtterance._cancelMe();
+function pauseOrResumeSpeaking(pauseBtn) {
+    if (!window.speechSynthesis) return;
+    if (aiIsPaused) {
+        window.speechSynthesis.resume();
+        aiIsPaused = false;
+        if (pauseBtn) pauseBtn.textContent = '⏸ 暫停';
+    } else {
+        window.speechSynthesis.pause();
+        aiIsPaused = true;
+        if (pauseBtn) pauseBtn.textContent = '▶ 繼續';
     }
+}
+
+function stopSpeaking() {
+    aiIsSpeaking = false;
+    aiIsPaused = false;
     if (window.speechSynthesis) {
         window.speechSynthesis.cancel();
     }
-    if (aiCurrentSpeakBtn) {
-        aiCurrentSpeakBtn.classList.remove('speaking');
-        aiCurrentSpeakBtn.textContent = '🔊 朗讀';
-    }
+    // 重置所有朗讀按鈕組
+    document.querySelectorAll('.ai-msg-actions').forEach(function(actions) {
+        var btns = actions.querySelectorAll('.ai-speak-btn');
+        if (btns.length >= 3) {
+            btns[0].style.display = '';  // 朗讀
+            btns[1].style.display = 'none';  // 暫停
+            btns[2].style.display = 'none';  // 停止
+            btns[1].textContent = '⏸ 暫停';
+        }
+    });
     aiCurrentUtterance = null;
     aiCurrentSpeakBtn = null;
-    document.querySelectorAll('.ai-speak-btn').forEach(function(b) {
-        b.classList.remove('speaking');
-        b.textContent = '🔊 朗讀';
-    });
 }
 
 // 預載語音列表（部分瀏覽器需要）
