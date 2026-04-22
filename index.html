@@ -217,6 +217,27 @@
     0%, 100% { box-shadow: 0 0 0 0 rgba(255,77,106,0.4); }
     50% { box-shadow: 0 0 0 6px rgba(255,77,106,0); }
 }
+/* ── 語音回答 ──────────────────────────────────────── */
+.ai-tts-toggle {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11px; color: var(--text-muted); cursor: pointer;
+    padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border);
+    background: none; transition: all 0.15s; white-space: nowrap;
+}
+.ai-tts-toggle:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+.ai-tts-toggle.on { border-color: var(--accent-green); color: var(--accent-green); background: var(--accent-green-dim); }
+.ai-msg-actions {
+    display: flex; align-items: center; gap: 6px; margin-top: 6px;
+}
+.ai-speak-btn {
+    font-size: 11px; color: var(--text-muted); cursor: pointer;
+    padding: 3px 8px; border-radius: 6px; border: 1px solid var(--border);
+    background: none; transition: all 0.15s;
+}
+.ai-speak-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+.ai-speak-btn.speaking { border-color: var(--accent-green); color: var(--accent-green); animation: micPulse 1s infinite; }
+.ai-panel-header-btns { display: flex; gap: 6px; align-items: center; }
+
 
 
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -2115,6 +2136,7 @@ var GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini
 var aiHistory = [];
 var aiIsOpen = false;
 var aiIsLoading = false;
+var aiAutoSpeak = false;
 
 function toggleAiPanel() {
     aiIsOpen = !aiIsOpen;
@@ -2260,10 +2282,34 @@ function sendAiMessageWithText(text) {
 
 function appendAiMsg(role, text) {
     var msgs = document.getElementById('aiMessages');
+    var wrapper = document.createElement('div');
+    wrapper.style.display = 'flex';
+    wrapper.style.flexDirection = 'column';
+    wrapper.style.alignItems = role === 'user' ? 'flex-end' : 'flex-start';
+
     var div = document.createElement('div');
     div.className = 'ai-msg ' + role;
     div.textContent = text;
-    msgs.appendChild(div);
+    wrapper.appendChild(div);
+
+    // 助手訊息加朗讀按鈕
+    if (role === 'assistant') {
+        var actions = document.createElement('div');
+        actions.className = 'ai-msg-actions';
+        var speakBtn = document.createElement('button');
+        speakBtn.className = 'ai-speak-btn';
+        speakBtn.textContent = '🔊 朗讀';
+        speakBtn.onclick = function() { speakText(text, speakBtn); };
+        actions.appendChild(speakBtn);
+        wrapper.appendChild(actions);
+
+        // 自動朗讀
+        if (aiAutoSpeak) {
+            setTimeout(function() { speakText(text, speakBtn); }, 200);
+        }
+    }
+
+    msgs.appendChild(wrapper);
     msgs.scrollTop = msgs.scrollHeight;
     return div;
 }
@@ -2369,6 +2415,93 @@ function stopVoiceInput() {
         aiRecognition.stop();
     }
 }
+// =====================================================================
+// 語音合成（TTS）
+// =====================================================================
+var aiAutoSpeak = false;
+var aiCurrentUtterance = null;
+var aiCurrentSpeakBtn = null;
+
+function toggleAutoSpeak() {
+    aiAutoSpeak = !aiAutoSpeak;
+    var btn = document.getElementById('aiAutoSpeakBtn');
+    if (aiAutoSpeak) {
+        btn.classList.add('on');
+        btn.textContent = '🔊 自動 ON';
+        // 預載語音列表
+        window.speechSynthesis && window.speechSynthesis.getVoices();
+    } else {
+        btn.classList.remove('on');
+        btn.textContent = '🔊 自動';
+        stopSpeaking();
+    }
+}
+
+function speakText(text, btn) {
+    if (!window.speechSynthesis) {
+        appendAiMsg('assistant', '⚠️ 你的瀏覽器不支援語音朗讀，請使用 Chrome 或 Edge。');
+        return;
+    }
+
+    // 如果正在說，先停止
+    if (aiCurrentUtterance) {
+        stopSpeaking();
+        // 如果是同一個按鈕，停止就好
+        if (aiCurrentSpeakBtn === btn) return;
+    }
+
+    // 清理文字（移除 emoji 和特殊符號避免奇怪發音）
+    var cleanText = text.replace(/[^一-鿿　-〿＀-￯a-zA-Z0-9\s，。！？、：；「」『』（）\-\.]/g, ' ').trim();
+
+    var utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.lang = 'zh-TW';
+    utterance.rate = 1.05;
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
+
+    // 嘗試找中文語音
+    var voices = window.speechSynthesis.getVoices();
+    var zhVoice = voices.find(function(v) {
+        return v.lang === 'zh-TW' || v.lang === 'zh-HK' || v.lang.startsWith('zh');
+    });
+    if (zhVoice) utterance.voice = zhVoice;
+
+    utterance.onstart = function() {
+        if (btn) { btn.classList.add('speaking'); btn.textContent = '⏹ 停止'; }
+        aiCurrentSpeakBtn = btn;
+    };
+    utterance.onend = function() {
+        if (btn) { btn.classList.remove('speaking'); btn.textContent = '🔊 朗讀'; }
+        aiCurrentUtterance = null;
+        aiCurrentSpeakBtn = null;
+    };
+    utterance.onerror = function() {
+        if (btn) { btn.classList.remove('speaking'); btn.textContent = '🔊 朗讀'; }
+        aiCurrentUtterance = null;
+        aiCurrentSpeakBtn = null;
+    };
+
+    aiCurrentUtterance = utterance;
+    window.speechSynthesis.speak(utterance);
+}
+
+function stopSpeaking() {
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    if (aiCurrentSpeakBtn) {
+        aiCurrentSpeakBtn.classList.remove('speaking');
+        aiCurrentSpeakBtn.textContent = '🔊 朗讀';
+    }
+    aiCurrentUtterance = null;
+    aiCurrentSpeakBtn = null;
+}
+
+// 預載語音列表（部分瀏覽器需要）
+if (window.speechSynthesis) {
+    window.speechSynthesis.onvoiceschanged = function() {
+        window.speechSynthesis.getVoices();
+    };
+}
+
 
 
 
@@ -2379,11 +2512,14 @@ function stopVoiceInput() {
 
 <div class="ai-panel" id="aiPanel">
     <div class="ai-panel-header">
-        <div>
+        <div style="flex:1;">
             <div class="ai-panel-title">✨ AI 數據助手</div>
             <div class="ai-panel-sub">用中文問我任何關於 KOL 數據的問題</div>
         </div>
-        <button class="ai-clear-btn" onclick="clearAiChat()">清空對話</button>
+        <div class="ai-panel-header-btns">
+            <button class="ai-tts-toggle" id="aiAutoSpeakBtn" onclick="toggleAutoSpeak()" title="自動朗讀模式">🔊 自動</button>
+            <button class="ai-clear-btn" onclick="clearAiChat()">清空</button>
+        </div>
     </div>
     <div class="ai-messages" id="aiMessages">
         <div class="ai-msg assistant">你好！我是你的 KOL 數據助手 👋
