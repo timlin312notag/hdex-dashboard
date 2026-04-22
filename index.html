@@ -93,6 +93,132 @@
     transition: all 0.2s;
 }
 .theme-toggle:hover { background: var(--bg-card-hover); color: var(--text-primary); }
+/* ── AI 助手對話框 ──────────────────────────────────── */
+.ai-fab {
+    position: fixed; bottom: 28px; right: 28px; z-index: 9000;
+    width: 56px; height: 56px; border-radius: 50%;
+    background: linear-gradient(135deg, #00e88f, #4d9cff);
+    border: none; cursor: pointer; box-shadow: 0 4px 20px rgba(0,232,143,0.4);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; transition: transform 0.2s, box-shadow 0.2s;
+}
+.ai-fab:hover { transform: scale(1.1); box-shadow: 0 6px 28px rgba(0,232,143,0.5); }
+.ai-fab.open { transform: scale(1.1); }
+
+.ai-panel {
+    position: fixed; bottom: 96px; right: 28px; z-index: 9000;
+    width: 380px; height: 520px;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 20px; box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+    display: none; flex-direction: column; overflow: hidden;
+    animation: aiPanelIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+.ai-panel.open { display: flex; }
+@keyframes aiPanelIn {
+    from { opacity:0; transform: translateY(20px) scale(0.95); }
+    to   { opacity:1; transform: translateY(0) scale(1); }
+}
+.ai-panel-header {
+    padding: 16px 18px 12px;
+    background: linear-gradient(135deg, rgba(0,232,143,0.1), rgba(77,156,255,0.1));
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+}
+.ai-panel-title { font-size: 15px; font-weight: 700; color: var(--text-primary); flex: 1; }
+.ai-panel-sub { font-size: 11px; color: var(--text-secondary); }
+.ai-clear-btn {
+    font-size: 11px; color: var(--text-muted); background: none;
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 3px 8px; cursor: pointer; transition: all 0.15s;
+}
+.ai-clear-btn:hover { color: var(--text-primary); border-color: var(--text-muted); }
+
+.ai-messages {
+    flex: 1; overflow-y: auto; padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 10px;
+    scroll-behavior: smooth;
+}
+.ai-messages::-webkit-scrollbar { width: 4px; }
+.ai-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.ai-msg {
+    max-width: 88%; padding: 10px 14px; border-radius: 14px;
+    font-size: 13px; line-height: 1.6; white-space: pre-wrap;
+}
+.ai-msg.user {
+    align-self: flex-end;
+    background: linear-gradient(135deg, #00e88f, #00c97a);
+    color: #0a0a0f; border-bottom-right-radius: 4px;
+}
+.ai-msg.assistant {
+    align-self: flex-start;
+    background: var(--bg-primary); color: var(--text-primary);
+    border: 1px solid var(--border); border-bottom-left-radius: 4px;
+}
+.ai-msg.thinking {
+    align-self: flex-start;
+    background: var(--bg-primary); border: 1px solid var(--border);
+    color: var(--text-muted); font-style: italic; border-bottom-left-radius: 4px;
+}
+.ai-typing { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
+.ai-typing span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--text-muted); animation: aiDot 1.2s infinite;
+}
+.ai-typing span:nth-child(2) { animation-delay: 0.2s; }
+.ai-typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes aiDot { 0%,80%,100%{opacity:0.2;transform:scale(0.8);} 40%{opacity:1;transform:scale(1);} }
+
+.ai-suggestions {
+    padding: 0 16px 10px; display: flex; flex-wrap: wrap; gap: 6px;
+}
+.ai-suggestion {
+    font-size: 11px; padding: 5px 10px; border-radius: 20px;
+    background: var(--bg-primary); border: 1px solid var(--border);
+    color: var(--text-secondary); cursor: pointer; transition: all 0.15s;
+    white-space: nowrap;
+}
+.ai-suggestion:hover { border-color: var(--accent-green); color: var(--accent-green); }
+
+.ai-input-row {
+    padding: 12px 14px; border-top: 1px solid var(--border);
+    display: flex; gap: 8px; align-items: flex-end;
+}
+.ai-input {
+    flex: 1; padding: 9px 12px; background: var(--bg-primary);
+    border: 1px solid var(--border); border-radius: 10px;
+    color: var(--text-primary); font-family: 'Outfit', sans-serif;
+    font-size: 13px; outline: none; resize: none; max-height: 80px;
+    min-height: 36px; line-height: 1.4; transition: border-color 0.2s;
+}
+.ai-input:focus { border-color: var(--accent-green); }
+.ai-send-btn {
+    width: 36px; height: 36px; border-radius: 10px; border: none;
+    background: var(--accent-green); color: #0a0a0f;
+    font-size: 16px; cursor: pointer; transition: opacity 0.2s;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.ai-send-btn:hover { opacity: 0.85; }
+.ai-send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+/* ── 語音輸入 ──────────────────────────────────────── */
+.ai-mic-btn {
+    width: 36px; height: 36px; border-radius: 10px; border: none;
+    background: var(--bg-primary); color: var(--text-secondary);
+    font-size: 16px; cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    border: 1px solid var(--border);
+}
+.ai-mic-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+.ai-mic-btn.recording {
+    background: var(--accent-red-dim); border-color: var(--accent-red);
+    color: var(--accent-red); animation: micPulse 1s infinite;
+}
+@keyframes micPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255,77,106,0.4); }
+    50% { box-shadow: 0 0 0 6px rgba(255,77,106,0); }
+}
+
+
 * { margin:0; padding:0; box-sizing:border-box; }
 body {
     background: var(--bg-primary);
@@ -1980,7 +2106,308 @@ function saveContract(kolNameEncoded) {
             document.getElementById('ctResult').innerHTML = '<div style="color:var(--accent-red);font-size:13px;">網路錯誤，請重試</div>';
         });
 }
+// =====================================================================
+// AI 數據助手
+// =====================================================================
+var GEMINI_API_KEY = 'AIzaSyDESrFPDxj2OlkseFyCbDVS0qclsVIE4z8';
+var GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + GEMINI_API_KEY;
+
+var aiHistory = [];
+var aiIsOpen = false;
+var aiIsLoading = false;
+
+function toggleAiPanel() {
+    aiIsOpen = !aiIsOpen;
+    var panel = document.getElementById('aiPanel');
+    var fab = document.getElementById('aiFab');
+    if (aiIsOpen) {
+        panel.classList.add('open');
+        fab.classList.add('open');
+        fab.textContent = '\u2715';
+        document.getElementById('aiInput').focus();
+    } else {
+        panel.classList.remove('open');
+        fab.classList.remove('open');
+        fab.textContent = '\uD83E\uDD16';
+    }
+}
+
+function clearAiChat() {
+    aiHistory = [];
+    var msgs = document.getElementById('aiMessages');
+    msgs.innerHTML = '<div class="ai-msg assistant">\u5c0d\u8a71\u5df2\u6e05\u7a7a\uff0c\u6709\u4ec0\u9ebc\u60f3\u554f\u7684\u55ce\uff1f\uD83D\uDE0A</div>';
+    document.getElementById('aiSuggestions').style.display = 'flex';
+}
+
+function sendAiSuggestion(btn) {
+    var text = btn.textContent;
+    document.getElementById('aiSuggestions').style.display = 'none';
+    sendAiMessageWithText(text);
+}
+
+function aiInputKeydown(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendAiMessage();
+    }
+}
+
+function aiInputResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 80) + 'px';
+}
+
+function sendAiMessage() {
+    var input = document.getElementById('aiInput');
+    var text = input.value.trim();
+    if (!text || aiIsLoading) return;
+    input.value = '';
+    input.style.height = 'auto';
+    document.getElementById('aiSuggestions').style.display = 'none';
+    sendAiMessageWithText(text);
+}
+
+function buildDashboardContext() {
+    var today = new Date().toISOString().split('T')[0];
+    var ctx = '\u4eca\u5929\u65e5\u671f\uff1a' + today + '\n';
+    ctx += '\u76ee\u524d\u67e5\u770b\u6708\u4efd\uff1a' + currentPeriod + '\n';
+    ctx += '\u6240\u6709\u53ef\u7528\u6708\u4efd\uff1a' + PERIODS.join('\u3001') + '\n\n';
+
+    ctx += '=== KOL \u92b7\u552e\u8cc7\u6599 ===\n';
+    PERIODS.forEach(function(period) {
+        var data = getMonthData(period);
+        ctx += '\n\u300a' + period + '\u300b\n';
+        data.forEach(function(r) {
+            var igStatus = r.igPosted === true ? '\u6709\u767c\u6587' : (r.igPosted === false ? '\u672a\u767c\u6587' : '\u7121IG\u8cc7\u6599');
+            ctx += r.name + '\uff5c' + r.classification +
+                '\uff5c\u8a02\u55ae:' + r.orders +
+                '\uff5c\u92b7\u552e:NT$' + Math.round(r.amount) +
+                '\uff5cROAS:' + r.roas.toFixed(2) +
+                '\uff5c\u5e95\u85aa:NT$' + Math.round(r.sponsorship) +
+                '\uff5cCredit:NT$' + Math.round(r.credit) +
+                '\uff5c' + igStatus + '\n';
+        });
+    });
+
+    if (CONTRACTS.length > 0) {
+        ctx += '\n=== KOL \u5408\u7d04\u8cc7\u6599 ===\n';
+        CONTRACTS.forEach(function(c) {
+            ctx += c.name + '\uff5c\u985e\u578b:' + c.type + '\uff5c\u958b\u59cb:' + c.startDate + '\uff5c\u5230\u671f:' + c.endDate;
+            if (c.note) ctx += '\uff5c\u5099\u8a3b:' + c.note;
+            ctx += '\n';
+        });
+    }
+
+    if (EVENTS.length > 0) {
+        ctx += '\n=== \u5e74\u5ea6\u8cfd\u4e8b ===\n';
+        EVENTS.forEach(function(ev) {
+            ctx += ev.name + '\uff5c\u65e5\u671f:' + ev.date + '\uff5c\u5730\u9ede:' + ev.location +
+                '\uff5c\u53c3\u8cfdKOL:' + (ev.kols.join('\u3001') || '\u672a\u5b9a');
+            if (ev.note) ctx += '\uff5c\u5099\u8a3b:' + ev.note;
+            ctx += '\n';
+        });
+    }
+
+    return ctx;
+}
+
+function sendAiMessageWithText(text) {
+    if (aiIsLoading) return;
+    aiIsLoading = true;
+
+    appendAiMsg('user', text);
+    var loadingId = appendAiLoading();
+    aiHistory.push({ role: 'user', parts: [{ text: text }] });
+
+    var systemPrompt = '\u4f60\u662f HDEX \u54c1\u724c\u7684 KOL \u7ba1\u7406 AI \u52a9\u624b\uff0c\u5354\u52a9\u5206\u6790 KOL \u696d\u7e3e\u3001\u5408\u7d04\u8207\u8cfd\u4e8b\u8cc7\u8a0a\u3002\n\u8acb\u7528\u7e41\u9ad4\u4e2d\u6587\u56de\u7b54\uff0c\u8a9e\u6c23\u89aa\u5207\u5c08\u696d\u3002\n\u56de\u7b54\u8981\u5177\u9ad4\uff0c\u6578\u5b57\u8981\u7cbe\u78ba\u3002\n\u5982\u679c\u554f\u984c\u6a21\u7cca\uff08\u4f8b\u5982\u6c92\u8aaa\u662f\u54ea\u500b\u6708\u4efd\u3001\u54ea\u500b\u5206\u985e\uff09\uff0c\u8981\u5148\u4e3b\u52d5\u8a62\u554f\u91d0\u6e05\u689d\u4ef6\uff0c\u518d\u63d0\u4f9b\u7b54\u6848\u3002\n\u4e0d\u8981\u5047\u8a2d\u7528\u6236\u7684\u610f\u5716\uff0c\u78ba\u8a8d\u5f8c\u518d\u56de\u7b54\u3002\n\n\u4ee5\u4e0b\u662f\u76ee\u524d\u7684\u5b8c\u6574\u5100\u8868\u677f\u8cc7\u6599\uff1a\n' + buildDashboardContext();
+
+    var messages = [
+        { role: 'user', parts: [{ text: systemPrompt }] },
+        { role: 'model', parts: [{ text: '\u597d\u7684\uff0c\u6211\u5df2\u4e86\u89e3\u6240\u6709 KOL \u6578\u64da\u8cc7\u6599\uff0c\u8acb\u554f\u6709\u4ec0\u9ebc\u9700\u8981\u5e6b\u5fd9\u5206\u6790\u7684\uff1f' }] }
+    ];
+    aiHistory.forEach(function(h) { messages.push(h); });
+
+    fetch(GEMINI_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            contents: messages,
+            generationConfig: { temperature: 0.7, maxOutputTokens: 1024 }
+        })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        removeAiLoading(loadingId);
+        aiIsLoading = false;
+        var reply = '';
+        if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+            reply = data.candidates[0].content.parts[0].text;
+        } else if (data.error) {
+            reply = '\u26a0\ufe0f \u767c\u751f\u932f\u8aa4\uff1a' + data.error.message;
+        } else {
+            reply = '\u26a0\ufe0f \u7121\u6cd5\u53d6\u5f97\u56de\u61c9\uff0c\u8acb\u7a0d\u5f8c\u518d\u8a66';
+        }
+        aiHistory.push({ role: 'model', parts: [{ text: reply }] });
+        appendAiMsg('assistant', reply);
+    })
+    .catch(function() {
+        removeAiLoading(loadingId);
+        aiIsLoading = false;
+        appendAiMsg('assistant', '\u26a0\ufe0f \u7db2\u8def\u932f\u8aa4\uff0c\u8acb\u91cd\u8a66');
+        aiHistory.pop();
+    });
+}
+
+function appendAiMsg(role, text) {
+    var msgs = document.getElementById('aiMessages');
+    var div = document.createElement('div');
+    div.className = 'ai-msg ' + role;
+    div.textContent = text;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+    return div;
+}
+
+function appendAiLoading() {
+    var msgs = document.getElementById('aiMessages');
+    var div = document.createElement('div');
+    var id = 'aiLoading_' + Date.now();
+    div.id = id;
+    div.className = 'ai-msg thinking';
+    div.innerHTML = '<div class="ai-typing"><span></span><span></span><span></span></div>';
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+    document.getElementById('aiSendBtn').disabled = true;
+    return id;
+}
+
+function removeAiLoading(id) {
+    var el = document.getElementById(id);
+    if (el) el.remove();
+    document.getElementById('aiSendBtn').disabled = false;
+}
+// =====================================================================
+// 語音輸入
+// =====================================================================
+var aiRecognition = null;
+var aiIsRecording = false;
+
+function toggleVoiceInput() {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        appendAiMsg('assistant', '⚠️ 你的瀏覽器不支援語音輸入，請使用 Chrome 或 Edge。');
+        if (!document.getElementById('aiPanel').classList.contains('open')) toggleAiPanel();
+        return;
+    }
+
+    if (aiIsRecording) {
+        stopVoiceInput();
+    } else {
+        startVoiceInput();
+    }
+}
+
+function startVoiceInput() {
+    var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    aiRecognition = new SpeechRecognition();
+    aiRecognition.lang = 'zh-TW';
+    aiRecognition.continuous = false;
+    aiRecognition.interimResults = true;
+
+    aiRecognition.onstart = function() {
+        aiIsRecording = true;
+        var btn = document.getElementById('aiMicBtn');
+        btn.classList.add('recording');
+        btn.textContent = '⏹';
+        btn.title = '點擊停止';
+        document.getElementById('aiInput').placeholder = '聆聽中...';
+        // 確保面板是開的
+        if (!document.getElementById('aiPanel').classList.contains('open')) toggleAiPanel();
+    };
+
+    aiRecognition.onresult = function(e) {
+        var transcript = '';
+        for (var i = e.resultIndex; i < e.results.length; i++) {
+            transcript += e.results[i][0].transcript;
+        }
+        document.getElementById('aiInput').value = transcript;
+        aiInputResize(document.getElementById('aiInput'));
+    };
+
+    aiRecognition.onend = function() {
+        aiIsRecording = false;
+        var btn = document.getElementById('aiMicBtn');
+        btn.classList.remove('recording');
+        btn.textContent = '🎤';
+        btn.title = '語音輸入';
+        document.getElementById('aiInput').placeholder = '輸入問題，或點🎤說話...';
+
+        // 如果有辨識到文字就自動送出
+        var text = document.getElementById('aiInput').value.trim();
+        if (text) {
+            setTimeout(function() { sendAiMessage(); }, 300);
+        }
+    };
+
+    aiRecognition.onerror = function(e) {
+        aiIsRecording = false;
+        var btn = document.getElementById('aiMicBtn');
+        btn.classList.remove('recording');
+        btn.textContent = '🎤';
+        document.getElementById('aiInput').placeholder = '輸入問題，或點🎤說話...';
+        if (e.error === 'not-allowed') {
+            appendAiMsg('assistant', '⚠️ 請允許瀏覽器使用麥克風權限，再試一次。');
+        } else if (e.error !== 'no-speech') {
+            appendAiMsg('assistant', '⚠️ 語音辨識失敗（' + e.error + '），請重試。');
+        }
+    };
+
+    aiRecognition.start();
+}
+
+function stopVoiceInput() {
+    if (aiRecognition) {
+        aiRecognition.stop();
+    }
+}
+
+
 
 </script>
+
+<!-- ── AI 助手 ─────────────────────────────────────── -->
+<button class="ai-fab" id="aiFab" onclick="toggleAiPanel()" title="AI 數據助手">🤖</button>
+
+<div class="ai-panel" id="aiPanel">
+    <div class="ai-panel-header">
+        <div>
+            <div class="ai-panel-title">✨ AI 數據助手</div>
+            <div class="ai-panel-sub">用中文問我任何關於 KOL 數據的問題</div>
+        </div>
+        <button class="ai-clear-btn" onclick="clearAiChat()">清空對話</button>
+    </div>
+    <div class="ai-messages" id="aiMessages">
+        <div class="ai-msg assistant">你好！我是你的 KOL 數據助手 👋
+
+你可以問我像是：
+• 4月業績最好的前3名是誰？
+• 合約在8月底前到期的有哪些人？
+• 哪些 Ambassador 本月沒有發文？
+
+有什麼想知道的嗎？</div>
+    </div>
+    <div class="ai-suggestions" id="aiSuggestions">
+        <button class="ai-suggestion" onclick="sendAiSuggestion(this)">本月業績前3名</button>
+        <button class="ai-suggestion" onclick="sendAiSuggestion(this)">合約快到期的人</button>
+        <button class="ai-suggestion" onclick="sendAiSuggestion(this)">本月未發文的KOL</button>
+        <button class="ai-suggestion" onclick="sendAiSuggestion(this)">近期賽事</button>
+    </div>
+    <div class="ai-input-row">
+        <button class="ai-mic-btn" id="aiMicBtn" onclick="toggleVoiceInput()" title="語音輸入">🎤</button>
+        <textarea class="ai-input" id="aiInput" placeholder="輸入問題，或點🎤說話..." rows="1"
+            onkeydown="aiInputKeydown(event)" oninput="aiInputResize(this)"></textarea>
+        <button class="ai-send-btn" id="aiSendBtn" onclick="sendAiMessage()">➤</button>
+    </div>
+</div>
+
 </body>
 </html>
