@@ -288,6 +288,42 @@
 }
 .ai-speak-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
 .ai-speak-btn.speaking { border-color: var(--accent-green); color: var(--accent-green); animation: micPulse 1s infinite; }
+/* ── 賽事複選 KOL ──────────────────────────────────── */
+.kol-multiselect-wrap { position: relative; }
+.kol-multiselect-display {
+    width: 100%; padding: 8px 12px; background: var(--bg-primary);
+    border: 1px solid var(--border); border-radius: 8px;
+    color: var(--text-primary); font-family: 'Outfit',sans-serif;
+    font-size: 13px; cursor: pointer; text-align: left;
+    display: flex; align-items: center; justify-content: space-between;
+    min-height: 36px; flex-wrap: wrap; gap: 4px;
+}
+.kol-selected-tag {
+    background: var(--accent-green-dim); color: var(--accent-green);
+    border-radius: 4px; padding: 2px 6px; font-size: 11px; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 4px;
+}
+.kol-dropdown {
+    position: absolute; top: 100%; left: 0; right: 0; z-index: 99999;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 10px; box-shadow: var(--shadow);
+    max-height: 220px; overflow-y: auto; margin-top: 4px; display: none;
+}
+.kol-dropdown.open { display: block; }
+.kol-dropdown-search { padding: 8px 12px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg-card); }
+.kol-dropdown-search input { width: 100%; padding: 5px 8px; background: var(--bg-primary); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); font-size: 12px; outline: none; }
+.kol-dropdown-item { padding: 8px 14px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.1s; color: var(--text-primary); }
+.kol-dropdown-item:hover { background: var(--bg-card-hover); }
+.kol-dropdown-item.selected { color: var(--accent-green); font-weight: 600; }
+.kol-dropdown-item input[type=checkbox] { accent-color: var(--accent-green); cursor: pointer; }
+.event-date-range { font-family: 'JetBrains Mono',monospace; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 8px; white-space: nowrap; background: var(--accent-blue-dim); color: var(--accent-blue); }
+.event-date-range.past { background: var(--accent-red-dim); color: var(--accent-red); }
+.event-date-range.soon { background: var(--accent-yellow-dim); color: var(--accent-yellow); }
+.event-date-range.ongoing { background: var(--accent-green-dim); color: var(--accent-green); }
+.kol-filter-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.kol-filter-tag { font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px; cursor: pointer; border: 1px solid var(--border); background: var(--bg-primary); color: var(--text-secondary); transition: all 0.15s; }
+.kol-filter-tag.selected { background: var(--accent-blue-dim); color: var(--accent-blue); border-color: var(--accent-blue); }
+
 .ai-panel-header-btns { display: flex; gap: 6px; align-items: center; }
 
 
@@ -1779,15 +1815,19 @@ function renderBellAlerts() {
 
     // 賽事：30 天內
     EVENTS.forEach(function(ev) {
-        if (!ev.date) return;
-        var evDate = new Date(ev.date); evDate.setHours(0,0,0,0);
+        var dateToCheck = ev.startDate || ev.date;
+        if (!dateToCheck) return;
+        var evDate = new Date(dateToCheck); evDate.setHours(0,0,0,0);
         if (evDate >= today && evDate <= in30) {
-            var diff2 = daysDiff(ev.date);
+            var diff2 = daysDiff(dateToCheck);
+            var dateLabel = ev.startDate && ev.endDate && ev.startDate !== ev.endDate
+                ? ev.startDate + ' ～ ' + ev.endDate
+                : (ev.startDate || ev.date);
             allAlerts.push({
                 type: 'event',
                 id: 'event:' + ev.name,
                 name: ev.name,
-                sub: ev.date + '（剩 ' + diff2 + ' 天）' + (ev.kols && ev.kols.length ? ' · ' + ev.kols.join(', ') : ''),
+                sub: dateLabel + '（剩 ' + diff2 + ' 天）' + (ev.kols && ev.kols.length ? ' · ' + ev.kols.join(', ') : ''),
                 urgent: diff2 <= 7,
                 done: isBellDone('event', ev.name)
             });
@@ -1869,111 +1909,149 @@ function switchEventView(view, btn) {
     renderEventsTab();
 }
 
+// 取得日期區間狀態
+function getEventDateStatus(ev) {
+    var today = new Date(); today.setHours(0,0,0,0);
+    var in30 = new Date(today); in30.setDate(in30.getDate()+30);
+    var start = ev.startDate ? new Date(ev.startDate) : null;
+    var end   = ev.endDate   ? new Date(ev.endDate)   : (start ? new Date(ev.startDate) : null);
+    if (start) start.setHours(0,0,0,0);
+    if (end)   end.setHours(0,0,0,0);
+
+    var label = '';
+    if (ev.startDate && ev.endDate && ev.startDate !== ev.endDate) {
+        label = ev.startDate + ' ～ ' + ev.endDate;
+    } else if (ev.startDate) {
+        label = ev.startDate;
+    } else {
+        label = '日期未定';
+    }
+
+    var cls = 'event-date-range';
+    var countdown = '';
+    if (!start) return { label: label, cls: cls, countdown: '' };
+
+    if (end < today) {
+        cls += ' past';
+        countdown = '已結束';
+    } else if (start <= today && end >= today) {
+        cls += ' ongoing';
+        countdown = '🟢 進行中';
+    } else if (start <= in30) {
+        cls += ' soon';
+        var diff = Math.round((start - today) / 86400000);
+        countdown = '倒數 ' + diff + ' 天 ⚡';
+    } else {
+        var diff2 = Math.round((start - today) / 86400000);
+        countdown = '倒數 ' + diff2 + ' 天';
+    }
+    return { label: label, cls: cls, countdown: countdown };
+}
+
 function renderEventsTab() {
     var query = (document.getElementById('eventSearchInput') ? document.getElementById('eventSearchInput').value : '').toLowerCase();
-    var today = new Date(); today.setHours(0,0,0,0);
-    var in30 = new Date(today); in30.setDate(in30.getDate() + 30);
 
-    // 以賽事看
     if (currentEventView === 'byEvent') {
         var filtered = EVENTS.filter(function(ev) {
-            return !query || ev.name.toLowerCase().includes(query) || ev.kols.join(',').toLowerCase().includes(query);
+            return !query || ev.name.toLowerCase().includes(query) ||
+                (ev.kols && ev.kols.join(',').toLowerCase().includes(query));
         });
-        // 排序：未來在前、過去在後
-        filtered.sort(function(a,b){ return new Date(a.date) - new Date(b.date); });
+        filtered.sort(function(a,b){
+            var da = a.startDate || '9999';
+            var db = b.startDate || '9999';
+            return da < db ? -1 : da > db ? 1 : 0;
+        });
 
         if (filtered.length === 0) {
-            document.getElementById('eventsByEvent').innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:40px;">沒有符合的賽事</div>';
-            return;
-        }
-
-        var html = filtered.map(function(ev) {
-            var evDate = ev.date ? new Date(ev.date) : null;
-            var diff = ev.date ? daysDiff(ev.date) : null;
-            var badgeCls = 'event-date-badge';
-            var countdownHtml = '';
-            if (evDate && evDate < today) { badgeCls += ' past'; countdownHtml = '<span class="event-countdown" style="color:var(--text-muted);">已結束</span>'; }
-            else if (evDate && evDate <= in30) { badgeCls += ' soon'; countdownHtml = '<span class="event-countdown">倒數 ' + diff + ' 天 ⚡</span>'; }
-            else if (diff !== null) { countdownHtml = '<span class="event-countdown" style="color:var(--text-secondary);">倒數 ' + diff + ' 天</span>'; }
-
-            var kolTags = ev.kols.map(function(k){ return '<span class="event-kol-tag">' + k + '</span>'; }).join('');
-
-            return '<div class="event-card">' +
-                '<div class="event-card-header">' +
-                  '<span class="' + badgeCls + '">' + (ev.date || '日期未定') + '</span>' +
-                  '<div><div class="event-name">' + ev.name + '</div>' +
-                  (ev.location ? '<div class="event-location">📍 ' + ev.location + '</div>' : '') +
-                  '</div>' + countdownHtml +
-                '</div>' +
-                (ev.kols.length ? '<div class="event-kols">' + kolTags + '</div>' : '<div style="color:var(--text-muted);font-size:12px;">尚無 KOL 報名</div>') +
-                (ev.note ? '<div class="event-note">備註：' + ev.note + '</div>' : '') +
-                '<div style="margin-top:12px;">' +
-                  '<button class="sort-btn" style="font-size:11px;" data-ev="' + encodeURIComponent(JSON.stringify(ev)) + '" onclick="openEditEventModal(this.dataset.ev)">✏️ 編輯</button>' +
-                '</div>' +
+            document.getElementById('eventsByEvent').innerHTML =
+                '<div style="color:var(--text-muted);text-align:center;padding:40px;">沒有符合的賽事<br><br>' +
+                '<button class="action-btn upload-btn" onclick="openAddEventModal()">＋ 新增第一個賽事</button></div>';
+        } else {
+            var html = filtered.map(function(ev) {
+                var ds = getEventDateStatus(ev);
+                var kolTags = (ev.kols||[]).map(function(k){ return '<span class="event-kol-tag">'+k+'</span>'; }).join('');
+                return '<div class="event-card">' +
+                    '<div class="event-card-header">' +
+                      '<span class="'+ds.cls+'">'+ds.label+'</span>' +
+                      '<div style="flex:1;margin-left:10px;">' +
+                        '<div class="event-name">'+ev.name+'</div>' +
+                        (ev.location ? '<div class="event-location">📍 '+ev.location+'</div>' : '') +
+                      '</div>' +
+                      (ds.countdown ? '<span class="event-countdown">'+ds.countdown+'</span>' : '') +
+                    '</div>' +
+                    (ev.kols&&ev.kols.length ? '<div class="event-kols">'+kolTags+'</div>' : '<div style="color:var(--text-muted);font-size:12px;margin-top:8px;">尚無 KOL 報名</div>') +
+                    (ev.note ? '<div class="event-note">備註：'+ev.note+'</div>' : '') +
+                    '<div style="margin-top:12px;display:flex;gap:8px;">' +
+                      '<button class="sort-btn" style="font-size:11px;" data-ev="'+encodeURIComponent(JSON.stringify(ev))+'" onclick="openEditEventModal(this.dataset.ev)">✏️ 編輯</button>' +
+                    '</div>' +
                 '</div>';
-        }).join('');
-
-        html += '<div style="margin-top:16px;"><button class="action-btn upload-btn" onclick="openAddEventModal()">＋ 新增賽事</button></div>';
-        document.getElementById('eventsByEvent').innerHTML = html;
+            }).join('');
+            html += '<div style="margin-top:16px;"><button class="action-btn upload-btn" onclick="openAddEventModal()">＋ 新增賽事</button></div>';
+            document.getElementById('eventsByEvent').innerHTML = html;
+        }
         return;
     }
 
-    // 以 KOL 看
-    var kolMap = {};
-    EVENTS.forEach(function(ev) {
-        ev.kols.forEach(function(k) {
-            if (!kolMap[k]) kolMap[k] = [];
-            kolMap[k].push(ev);
+    // 以 KOL 看 — 複選並排
+    var allKolsInEvents = [];
+    EVENTS.forEach(function(ev){
+        (ev.kols||[]).forEach(function(k){
+            if (allKolsInEvents.indexOf(k)===-1) allKolsInEvents.push(k);
         });
     });
+    allKolsInEvents.sort();
 
-    var kolNames = Object.keys(kolMap).sort();
-    if (query) {
-        kolNames = kolNames.filter(function(k){ return k.toLowerCase().includes(query); });
-    }
-    if (kolNames.length === 0) {
-        document.getElementById('eventsByKol').innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:40px;">沒有符合的 KOL</div>';
+    if (!window._selectedEventKols) window._selectedEventKols = [];
+
+    var filterHtml = '<div class="kol-filter-wrap">' +
+        allKolsInEvents.map(function(k){
+            var sel = window._selectedEventKols.indexOf(k)!==-1;
+            return '<button class="kol-filter-tag'+(sel?' selected':'')+'" data-kname="'+encodeURIComponent(k)+'" onclick="toggleEventKolFilter(this.dataset.kname)">'+k+'</button>';
+        }).join('') + '</div>';
+
+    var selectedKols = window._selectedEventKols.length ? window._selectedEventKols : allKolsInEvents;
+    var filtered2 = selectedKols.filter(function(k){ return !query || k.toLowerCase().includes(query); });
+
+    if (filtered2.length === 0) {
+        document.getElementById('eventsByKol').innerHTML = filterHtml + '<div style="color:var(--text-muted);text-align:center;padding:20px;">沒有符合的 KOL</div>';
         return;
     }
 
-    var html2 = kolNames.map(function(k) {
-        var evs = kolMap[k].sort(function(a,b){ return new Date(a.date)-new Date(b.date); });
-        var rows = evs.map(function(ev) {
-            var diff = ev.date ? daysDiff(ev.date) : null;
-            var evDate = ev.date ? new Date(ev.date) : null;
-            var evDate2 = evDate; evDate2 && evDate2.setHours(0,0,0,0);
-            var today2 = new Date(); today2.setHours(0,0,0,0);
-            var statusHtml = '';
-            if (!evDate) statusHtml = '<span style="color:var(--text-muted);">日期未定</span>';
-            else if (evDate2 < today2) statusHtml = '<span style="color:var(--text-muted);">已結束</span>';
-            else if (diff <= 7) statusHtml = '<span style="color:var(--accent-yellow);">🔥 ' + diff + ' 天後</span>';
-            else if (diff <= 30) statusHtml = '<span style="color:var(--accent-blue);">⚡ ' + diff + ' 天後</span>';
-            else statusHtml = '<span style="color:var(--text-secondary);">' + diff + ' 天後</span>';
-
+    var kolRows = filtered2.map(function(k){
+        var evs = EVENTS.filter(function(ev){ return (ev.kols||[]).indexOf(k)!==-1; });
+        evs.sort(function(a,b){ return (a.startDate||'9999') < (b.startDate||'9999') ? -1 : 1; });
+        var rows = evs.map(function(ev){
+            var ds = getEventDateStatus(ev);
             return '<div class="kol-event-row">' +
-                '<span style="color:var(--text-muted);font-family:JetBrains Mono,monospace;font-size:12px;min-width:90px;">' + (ev.date||'?') + '</span>' +
-                '<span style="flex:1;font-weight:600;">' + ev.name + '</span>' +
-                statusHtml +
+                '<span class="'+ds.cls+'" style="font-size:11px;min-width:auto;padding:2px 8px;">'+ds.label+'</span>' +
+                '<span style="flex:1;font-weight:600;">'+ev.name+'</span>' +
+                (ev.location ? '<span style="font-size:11px;color:var(--text-secondary);">📍 '+ev.location+'</span>' : '') +
+                (ds.countdown ? '<span style="font-size:11px;color:var(--accent-yellow);">'+ds.countdown+'</span>' : '') +
                 '</div>';
         }).join('');
 
-        var classification = (function(){
-            for(var i=0;i<RAW_DATA.length;i++){ if(RAW_DATA[i].name===k) return RAW_DATA[i].classification; } return null;
-        })();
-        var clsBadge = classification==='AMBASSADOR' ? '<span class="badge-ambassador" style="font-size:10px;">AMB</span>' : (classification==='PARTNER' ? '<span class="badge-partner" style="font-size:10px;">PAR</span>' : '');
+        var cls2 = (function(){ for(var i=0;i<RAW_DATA.length;i++){ if(RAW_DATA[i].name===k) return RAW_DATA[i].classification; } return null; })();
+        var badge = cls2==='AMBASSADOR' ? '<span class="badge-ambassador" style="font-size:10px;">AMB</span>' : (cls2==='PARTNER' ? '<span class="badge-partner" style="font-size:10px;">PAR</span>' : '');
 
         return '<div class="kol-event-card">' +
-            '<div class="kol-event-header">' + clsBadge + '<span class="kol-event-name">' + k + '</span><span style="color:var(--text-muted);font-size:12px;margin-left:auto;">' + evs.length + ' 場賽事</span></div>' +
-            '<div class="kol-event-rows">' + rows + '</div>' +
+            '<div class="kol-event-header">'+badge+'<span class="kol-event-name">'+k+'</span><span style="color:var(--text-muted);font-size:12px;margin-left:auto;">'+evs.length+' 場賽事</span></div>' +
+            '<div class="kol-event-rows">'+(rows||'<div style="color:var(--text-muted);font-size:13px;padding:8px 0;">尚無賽事</div>')+'</div>' +
             '</div>';
     }).join('');
 
-    document.getElementById('eventsByKol').innerHTML = html2;
+    document.getElementById('eventsByKol').innerHTML = filterHtml + kolRows;
 }
 
-// =====================================================================
-// 新增 / 編輯 賽事 Modal（含寫回 Sheet）
-// =====================================================================
+function toggleEventKolFilter(nameEncoded) {
+    var name = decodeURIComponent(nameEncoded);
+    if (!window._selectedEventKols) window._selectedEventKols = [];
+    var idx = window._selectedEventKols.indexOf(name);
+    if (idx===-1) window._selectedEventKols.push(name);
+    else window._selectedEventKols.splice(idx, 1);
+    renderEventsTab();
+}
+
+
 function openAddEventModal() {
     openEventModal(null);
 }
@@ -1983,63 +2061,142 @@ function openEditEventModal(encoded) {
 
 function openEventModal(ev) {
     var isEdit = !!ev;
+    var existingModal = document.getElementById('eventModal');
+    if (existingModal) existingModal.remove();
+
+    // 取得所有 KOL 名單
+    var allKols = [];
+    RAW_DATA.forEach(function(r){ if(allKols.indexOf(r.name)===-1) allKols.push(r.name); });
+    allKols.sort();
+    var selectedKols = ev ? (ev.kols || []) : [];
+
     var html = '<div class="modal-overlay" id="eventModal" style="display:flex;">' +
-        '<div class="modal-box" style="max-width:480px;width:100%;">' +
-        '<div class="modal-title">' + (isEdit ? '✏️ 編輯賽事' : '＋ 新增賽事') + '</div>' +
-        '<div style="display:flex;flex-direction:column;gap:12px;margin-top:16px;">' +
+        '<div class="modal-box" style="max-width:520px;width:100%;max-height:90vh;overflow-y:auto;">' +
+        '<div class="modal-title">'+(isEdit?'✏️ 編輯賽事':'＋ 新增賽事')+'</div>' +
+        '<div style="display:flex;flex-direction:column;gap:14px;margin-top:16px;">' +
+
+        // 賽事名稱
         '<div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">賽事名稱 *</div>' +
-        '<input id="evName" style="width:100%;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:Outfit,sans-serif;font-size:13px;outline:none;" value="' + (ev?ev.name:'') + '"></div>' +
+        '<input id="evName" style="width:100%;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:Outfit,sans-serif;font-size:13px;outline:none;" value="'+(ev?ev.name:'')+'"></div>' +
+
+        // 日期區間
         '<div style="display:flex;gap:12px;">' +
-        '<div style="flex:1;"><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">賽事日期</div>' +
-        '<input id="evDate" type="date" style="width:100%;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:Outfit,sans-serif;font-size:13px;outline:none;" value="' + (ev?ev.date:'') + '"></div>' +
-        '<div style="flex:1;"><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">地點</div>' +
-        '<input id="evLocation" style="width:100%;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:Outfit,sans-serif;font-size:13px;outline:none;" value="' + (ev?ev.location:'') + '"></div>' +
+        '<div style="flex:1;"><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">開始日期</div>' +
+        '<input id="evStartDate" type="date" style="width:100%;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:Outfit,sans-serif;font-size:13px;outline:none;" value="'+(ev?ev.startDate:'')+'"></div>' +
+        '<div style="flex:1;"><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">結束日期</div>' +
+        '<input id="evEndDate" type="date" style="width:100%;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:Outfit,sans-serif;font-size:13px;outline:none;" value="'+(ev?ev.endDate:'')+'"></div>' +
         '</div>' +
-        '<div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;">參賽 KOL（點選）</div>' +
-        '<div id="evKolPicker" style="display:flex;flex-wrap:wrap;gap:6px;">' + buildKolPicker(ev?ev.kols:[]) + '</div></div>' +
+
+        // 地點
+        '<div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">地點</div>' +
+        '<input id="evLocation" style="width:100%;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:Outfit,sans-serif;font-size:13px;outline:none;" value="'+(ev?ev.location:'')+'"></div>' +
+
+        // 參賽 KOL 複選
+        '<div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;">參賽 KOL（可複選）</div>' +
+        '<div class="kol-multiselect-wrap" id="evKolWrap">' +
+        '<div class="kol-multiselect-display" id="evKolDisplay" onclick="toggleKolDropdown()">' +
+        '<span id="evKolTags" style="display:flex;flex-wrap:wrap;gap:4px;flex:1;"></span>' +
+        '<span style="color:var(--text-muted);font-size:12px;">▾</span>' +
+        '</div>' +
+        '<div class="kol-dropdown" id="evKolDropdown">' +
+        '<div class="kol-dropdown-search"><input type="text" placeholder="搜尋 KOL..." oninput="filterKolDropdown(this.value)"></div>' +
+        '<div id="evKolList">' +
+        allKols.map(function(k){
+            var sel = selectedKols.indexOf(k)!==-1;
+            return '<div class="kol-dropdown-item'+(sel?' selected':'')+'" data-kol="'+k+'" onclick="toggleKolSelection(this)">' +
+                '<input type="checkbox"'+(sel?' checked':'')+' onclick="event.stopPropagation()"> '+k+'</div>';
+        }).join('') +
+        '</div></div></div></div>' +
+
+        // 備註
         '<div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">備註</div>' +
-        '<input id="evNote" style="width:100%;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:Outfit,sans-serif;font-size:13px;outline:none;" value="' + (ev?ev.note:'') + '"></div>' +
+        '<input id="evNote" style="width:100%;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:Outfit,sans-serif;font-size:13px;outline:none;" value="'+(ev?ev.note:'')+'"></div>' +
+
         '</div>' +
         '<div id="evResult" style="margin-top:12px;"></div>' +
         '<div class="modal-actions">' +
         '<button class="modal-btn modal-btn-cancel" onclick="document.getElementById(&quot;eventModal&quot;).remove()">取消</button>' +
-        (isEdit ? '<button class="modal-btn" style="background:var(--accent-red-dim);color:var(--accent-red);border-color:var(--accent-red);" data-evname="' + encodeURIComponent(ev.name) + '" onclick="deleteEvent(this.dataset.evname)">刪除</button>' : '') +
-        '<button class="modal-btn modal-btn-submit" data-oldname="' + (isEdit ? encodeURIComponent(ev.name) : '') + '" data-isedit="' + (isEdit?'1':'') + '" onclick="saveEvent(this.dataset.isedit?this.dataset.oldname:null)">儲存</button>' +
-        '</div>' +
-        '</div></div>';
+        (isEdit ? '<button class="modal-btn" style="background:var(--accent-red-dim);color:var(--accent-red);border-color:var(--accent-red);" data-evname="'+encodeURIComponent(ev.name)+'" onclick="deleteEvent(this.dataset.evname)">刪除</button>' : '') +
+        '<button class="modal-btn modal-btn-submit" data-oldname="'+(isEdit?encodeURIComponent(ev.name):'')+'" data-isedit="'+(isEdit?'1':'')+'" onclick="saveEvent(this.dataset.isedit?this.dataset.oldname:null)">儲存</button>' +
+        '</div></div></div>';
+
     document.body.insertAdjacentHTML('beforeend', html);
+
+    // 初始化已選 KOL 標籤
+    updateKolTags();
+
+    // 點外面關閉下拉
+    setTimeout(function(){
+        document.addEventListener('click', function closeDropdown(e) {
+            var wrap = document.getElementById('evKolWrap');
+            if (wrap && !wrap.contains(e.target)) {
+                var dd = document.getElementById('evKolDropdown');
+                if (dd) dd.classList.remove('open');
+                document.removeEventListener('click', closeDropdown);
+            }
+        });
+    }, 0);
 }
 
-function buildKolPicker(selected) {
-    var kolNames = [];
-    RAW_DATA.forEach(function(r){ if(kolNames.indexOf(r.name)===-1) kolNames.push(r.name); });
-    kolNames.sort();
-    return kolNames.map(function(n){
-        var isSel = selected && selected.indexOf(n) !== -1;
-        return '<button class="event-kol-tag" style="cursor:pointer;opacity:' + (isSel?'1':'0.4') + ';border:1px solid ' + (isSel?'var(--accent-green)':'transparent') + ';" data-kol="' + n + '" onclick="toggleKolPick(this)">' + n + '</button>';
-    }).join('');
+function toggleKolDropdown() {
+    var dd = document.getElementById('evKolDropdown');
+    if (dd) dd.classList.toggle('open');
 }
 
-function toggleKolPick(btn) {
-    var active = btn.style.opacity === '1';
-    btn.style.opacity = active ? '0.4' : '1';
-    btn.style.border = active ? '1px solid transparent' : '1px solid var(--accent-green)';
+function filterKolDropdown(q) {
+    var items = document.querySelectorAll('#evKolList .kol-dropdown-item');
+    items.forEach(function(item){
+        item.style.display = item.dataset.kol.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+    });
 }
 
-function getPickedKols() {
-    return Array.from(document.querySelectorAll('#evKolPicker [data-kol]'))
-        .filter(function(b){ return b.style.opacity === '1'; })
-        .map(function(b){ return b.dataset.kol; });
+function toggleKolSelection(item) {
+    item.classList.toggle('selected');
+    var cb = item.querySelector('input[type=checkbox]');
+    if (cb) cb.checked = !cb.checked;
+    updateKolTags();
 }
+
+function updateKolTags() {
+    var selected = Array.from(document.querySelectorAll('#evKolList .kol-dropdown-item.selected')).map(function(i){ return i.dataset.kol; });
+    var tagsEl = document.getElementById('evKolTags');
+    if (!tagsEl) return;
+    if (selected.length === 0) {
+        tagsEl.innerHTML = '<span style="color:var(--text-muted);font-size:12px;">點擊選擇 KOL...</span>';
+    } else {
+        tagsEl.innerHTML = selected.map(function(k){
+            return '<span class="kol-selected-tag">'+k+' <span data-kn="'+encodeURIComponent(k)+'" onclick="removeKolTag(this.dataset.kn,event)">×</span></span>';
+        }).join('');
+    }
+}
+
+function removeKolTag(nameEncoded, e) {
+    e.stopPropagation();
+    var name = decodeURIComponent(nameEncoded);
+    var item = document.querySelector('#evKolList .kol-dropdown-item[data-kol="'+name+'"]');
+    if (item) {
+        item.classList.remove('selected');
+        var cb = item.querySelector('input[type=checkbox]');
+        if (cb) cb.checked = false;
+    }
+    updateKolTags();
+}
+
+function getSelectedKolsFromModal() {
+    return Array.from(document.querySelectorAll('#evKolList .kol-dropdown-item.selected')).map(function(i){ return i.dataset.kol; });
+}
+
+
 
 function saveEvent(oldNameEncoded) {
     var name = document.getElementById('evName').value.trim();
     if (!name) { document.getElementById('evResult').innerHTML = '<div style="color:var(--accent-red);font-size:13px;">請填寫賽事名稱</div>'; return; }
     var evObj = {
         name: name,
-        date: document.getElementById('evDate').value,
+        startDate: document.getElementById('evStartDate').value,
+        endDate:   document.getElementById('evEndDate').value,
         location: document.getElementById('evLocation').value.trim(),
-        kols: getPickedKols(),
+        kols: getSelectedKolsFromModal(),
         note: document.getElementById('evNote').value.trim(),
         oldName: oldNameEncoded ? decodeURIComponent(oldNameEncoded) : null
     };
@@ -2049,10 +2206,12 @@ function saveEvent(oldNameEncoded) {
             if(r.success){
                 document.getElementById('eventModal').remove();
                 // 更新本地 EVENTS
+                var updEvObj = { name: evObj.name, startDate: evObj.startDate, endDate: evObj.endDate, location: evObj.location, kols: evObj.kols, note: evObj.note };
                 if (evObj.oldName) {
                     var idx = -1; for(var _j=0;_j<EVENTS.length;_j++){ if(EVENTS[_j].name===evObj.oldName){ idx=_j; break; } }
-                    if(idx!==-1){ EVENTS[idx]=evObj; } else { EVENTS.push(evObj); }
-                } else { EVENTS.push(evObj); }
+                    if(idx!==-1){ EVENTS[idx]=updEvObj; } else { EVENTS.push(updEvObj); }
+                } else { EVENTS.push(updEvObj); }
+                window._selectedEventKols = [];
                 renderEventsTab(); renderBellAlerts();
             } else {
                 document.getElementById('evResult').innerHTML = '<div style="color:var(--accent-red);font-size:13px;">儲存失敗：' + r.message + '</div>';
@@ -2127,11 +2286,13 @@ function renderContractBlock(kolName) {
             else if (evD < today2) badge = '<span style="color:var(--text-muted);">已結束</span>';
             else if (d <= 30) badge = '<span style="color:var(--accent-yellow);font-weight:700;">倒數 ' + d + ' 天 ⚡</span>';
             else badge = '<span style="color:var(--text-secondary);">倒數 ' + d + ' 天</span>';
+            var ds2 = getEventDateStatus(ev);
             return '<div class="contract-kol-event-item">' +
-                '<span style="font-family:JetBrains Mono,monospace;font-size:12px;color:var(--text-muted);min-width:90px;">' + (ev.date||'?') + '</span>' +
-                '<span style="flex:1;font-weight:600;">' + ev.name + '</span>' +
+                '<span class="'+ds2.cls+'" style="font-size:11px;padding:2px 8px;">' + ds2.label + '</span>' +
+                '<span style="flex:1;font-weight:600;margin-left:8px;">' + ev.name + '</span>' +
                 (ev.location ? '<span style="font-size:12px;color:var(--text-secondary);">📍 ' + ev.location + '</span>' : '') +
-                badge + '</div>';
+                (ds2.countdown ? '<span style="font-size:11px;color:var(--accent-yellow);">' + ds2.countdown + '</span>' : '') +
+                '</div>';
         }).join('');
         html += '</div>';
     }
