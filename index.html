@@ -674,25 +674,25 @@ table td { font-size: 13px; color: #d0d0e0; padding: 10px 12px; }
 <div class="card full-width fade-up delay-5">
     <div class="card-title">📊 KOL Details <small style="font-size:11px;color:var(--text-muted);">詳細數據</small></div>
     <div class="filter-row" id="classFilterGroup">
-        <button class="filter-btn active" data-filter="all">全部</button>
+        <button class="filter-btn active" data-filter="all">All 全部</button>
         <button class="filter-btn fb-ambassador" data-filter="AMBASSADOR">Ambassador</button>
         <button class="filter-btn fb-partner" data-filter="PARTNER">Partner</button>
-        <button class="filter-btn fb-posted" data-filter="posted">✅ 有發文</button>
+        <button class="filter-btn fb-posted" data-filter="posted">✅ Uploaded</button>
     </div>
     <div class="sort-group" id="sortGroup">
         <button class="sort-btn active" data-sort="roas" data-dir="desc">ROAS↓</button>
-        <button class="sort-btn" data-sort="amount" data-dir="desc">銷售額↓</button>
-        <button class="sort-btn" data-sort="followers" data-dir="desc">粉絲數↓</button>
-        <button class="sort-btn" data-sort="efficiency" data-dir="desc">效率↓</button>
-        <button class="sort-btn" data-sort="growth" data-dir="desc">成長率↓</button>
+        <button class="sort-btn" data-sort="amount" data-dir="desc">Sales ↓</button>
+        <button class="sort-btn" data-sort="followers" data-dir="desc">Followers ↓</button>
+        <button class="sort-btn" data-sort="efficiency" data-dir="desc">ROI ↓</button>
+        <button class="sort-btn" data-sort="growth" data-dir="desc">Growth ↓</button>
     </div>
     <div class="table-wrap">
         <table id="detailTable">
             <thead>
                 <tr>
-                    <th>#</th><th>分類</th><th>KOL</th><th>粉絲數</th><th>訂單</th>
-                    <th>銷售額</th><th>客單價</th><th>底薪</th><th>Credit</th>
-                    <th>分潤</th><th>總成本</th><th>ROAS</th><th>MoM 銷售</th><th>等級</th><th>IG發文</th>
+                    <th>#</th><th>Type<br><small style="font-weight:400;color:var(--text-muted);">分類</small></th><th>KOL</th><th>Followers<br><small style="font-weight:400;color:var(--text-muted);">粉絲數</small></th><th>Orders<br><small style="font-weight:400;color:var(--text-muted);">訂單</small></th>
+                    <th>Sales<br><small style="font-weight:400;color:var(--text-muted);">銷售額</small></th><th>AOV<br><small style="font-weight:400;color:var(--text-muted);">客單價</small></th><th>Base Pay<br><small style="font-weight:400;color:var(--text-muted);">底薪</small></th><th>Credit</th>
+                    <th>Commission<br><small style="font-weight:400;color:var(--text-muted);">分潤</small></th><th>Total Cost<br><small style="font-weight:400;color:var(--text-muted);">總成本</small></th><th>ROAS</th><th>MoM Sales<br><small style="font-weight:400;color:var(--text-muted);">MoM銷售</small></th><th>Tier<br><small style="font-weight:400;color:var(--text-muted);">等級</small></th><th>IG Posts<br><small style="font-weight:400;color:var(--text-muted);">IG發文</small></th>
                 </tr>
             </thead>
             <tbody id="detailBody"></tbody>
@@ -729,7 +729,7 @@ table td { font-size: 13px; color: #d0d0e0; padding: 10px 12px; }
     <div class="table-wrap">
         <table class="budget-table" id="budgetTable">
             <thead>
-                <tr><th>KOL</th><th>本月銷售額</th><th>本月 ROAS</th><th>成長趨勢</th><th>等級</th><th>建議</th><th>建議預算調整</th></tr>
+                <tr><th>KOL</th><th>Sales<br><small style="font-weight:400;color:var(--text-muted);">銷售額</small></th><th>ROAS</th><th>Trend<br><small style="font-weight:400;color:var(--text-muted);">趨勢</small></th><th>Tier<br><small style="font-weight:400;color:var(--text-muted);">等級</small></th><th>Action<br><small style="font-weight:400;color:var(--text-muted);">建議</small></th><th>Budget Adj.<br><small style="font-weight:400;color:var(--text-muted);">預算調整</small></th></tr>
             </thead>
             <tbody id="budgetBody"></tbody>
         </table>
@@ -1152,18 +1152,30 @@ function renderKPI() {
     var ytdLabel = isNaN(currentMonthNum) ? '' : ('Jan – ' + ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][currentMonthNum-1]);
 
     var kpis = [
-        { label:'Total Sales <small style="font-size:10px;font-weight:400;">總銷售額</small>', value: fmt(totalSales), mom: momBadge(totalSales, prevTotalSales) },
-        { label:'Total Cost <small style="font-size:10px;font-weight:400;">總支出含Credit</small>', value: fmt(totalCost), mom: momBadge(totalCost, prevTotalCost) },
-        { label:'Overall ROAS <small style="font-size:10px;font-weight:400;">整體ROAS</small>', value: fmtDec(overallRoas) + 'x', mom: momBadge(overallRoas, prevOverallRoas) },
-        { label:'Total Orders <small style="font-size:10px;font-weight:400;">總訂單數</small>', value: fmtNum(totalOrders), mom: momBadge(totalOrders, prevTotalOrders) },
-        { label:'Active KOLs <small style="font-size:10px;font-weight:400;">有產出KOL</small>', value: activeKols + ' / ' + data.length, mom: momBadge(activeKols, prevActiveKols) },
-        { label:'✨ Ambassador Posts <small style="font-size:10px;font-weight:400;">發文</small>', value: ambassadorPosted + ' / ' + ambassadorTotal, mom: '<span style="color:#ffc542;font-size:12px;">Post/Reels</span>' },
-        { label:'👥 Partner Posts <small style="font-size:10px;font-weight:400;">發文</small>', value: partnerPosted + ' / ' + partnerTotal, mom: '<span style="color:#4d9cff;font-size:12px;">Story/Post/Reels</span>' },
+        { label:'Total Sales 總銷售額', value: fmt(totalSales), mom: momBadge(totalSales, prevTotalSales) },
+        { label:'Total Cost 總支出含Credit', value: fmt(totalCost), mom: momBadge(totalCost, prevTotalCost) },
+        { label:'Overall ROAS 整體ROAS', value: fmtDec(overallRoas) + 'x', mom: momBadge(overallRoas, prevOverallRoas) },
+        { label:'Total Orders 總訂單數', value: fmtNum(totalOrders), mom: momBadge(totalOrders, prevTotalOrders) },
+        { label:'Active KOLs 有產出KOL', value: activeKols + ' / ' + data.length, mom: momBadge(activeKols, prevActiveKols) },
+        { label:'✨ Ambassador Posts 發文', value: ambassadorPosted + ' / ' + ambassadorTotal, mom: '<span style="color:#ffc542;font-size:12px;">Post/Reels</span>' },
+        { label:'👥 Partner Posts 發文', value: partnerPosted + ' / ' + partnerTotal, mom: '<span style="color:#4d9cff;font-size:12px;">Story/Post/Reels</span>' },
     ];
     var row = document.getElementById('kpiRow');
     row.innerHTML = kpis.map(function(k,i) {
+        var parts = k.label.split(' ');
+        // 把最後一個中文詞分離出來顯示成小字
+        var enPart = k.label;
+        var zhPart = '';
+        var zhMatch = k.label.match(/[一-鿿＀-￯（）]+.*$/);
+        if (zhMatch) {
+            zhPart = zhMatch[0];
+            enPart = k.label.slice(0, zhMatch.index).trim();
+        }
+        var labelHtml = enPart
+            ? enPart + (zhPart ? ' <small style="font-size:10px;font-weight:400;color:var(--text-muted);">' + zhPart + '</small>' : '')
+            : k.label;
         return '<div class="card kpi-card fade-up delay-' + (i+2) + '">' +
-            '<div class="kpi-label">' + k.label + '</div>' +
+            '<div class="kpi-label">' + labelHtml + '</div>' +
             '<div class="kpi-value mono">' + k.value + '</div>' +
             k.mom + '</div>';
     }).join('');
@@ -1197,8 +1209,8 @@ function renderSalesVsCost() {
     chartInstances['chartSalesVsCost'] = new Chart(ctx, {
         type: 'bar',
         data: { labels: data.map(function(r) { return r.name; }), datasets: [
-            { label:'銷售額', data: data.map(function(r) { return Math.round(r.amount); }), backgroundColor:'rgba(0,232,143,0.7)', borderRadius:4 },
-            { label:'總支出', data: data.map(function(r) { return Math.round(r.totalCost); }), backgroundColor:'rgba(255,77,106,0.7)', borderRadius:4 },
+            { label:'Sales 銷售額', data: data.map(function(r) { return Math.round(r.amount); }), backgroundColor:'rgba(0,232,143,0.7)', borderRadius:4 },
+            { label:'Total Cost 總支出', data: data.map(function(r) { return Math.round(r.totalCost); }), backgroundColor:'rgba(255,77,106,0.7)', borderRadius:4 },
         ]},
         options: { responsive:true, plugins:{ legend:{labels:{color:'#7a7a8e',font:{family:'Outfit'}}}, tooltip:{callbacks:{label:function(ctx){return ctx.dataset.label+': NT$ '+ctx.parsed.y.toLocaleString();}}} }, scales:{ x:{ticks:{color:'#7a7a8e',font:{family:'Outfit',size:11},maxRotation:45},grid:{color:'rgba(30,30,46,0.5)'}}, y:{ticks:{color:'#7a7a8e',font:{family:'JetBrains Mono',size:11},callback:function(v){return 'NT$ '+v.toLocaleString();}},grid:{color:'rgba(30,30,46,0.5)'}} } }
     });
@@ -1311,7 +1323,7 @@ function renderGrowthChart() {
     var ctx = document.getElementById('chartGrowth').getContext('2d');
     chartInstances['chartGrowth'] = new Chart(ctx, {
         type:'bar',
-        data:{labels:growthData.map(function(d){return d.name;}),datasets:[{label:'MoM 變化 %',data:growthData.map(function(d){return Math.round(d.change);}),backgroundColor:growthData.map(function(d){return d.change>=0?'rgba(0,232,143,0.7)':'rgba(255,77,106,0.7)';}),borderRadius:4}]},
+        data:{labels:growthData.map(function(d){return d.name;}),datasets:[{label:'MoM Change %',data:growthData.map(function(d){return Math.round(d.change);}),backgroundColor:growthData.map(function(d){return d.change>=0?'rgba(0,232,143,0.7)':'rgba(255,77,106,0.7)';}),borderRadius:4}]},
         options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ctx.parsed.x+'%';}}}},scales:{x:{ticks:{color:'#7a7a8e',font:{family:'JetBrains Mono',size:11},callback:function(v){return v+'%';}},grid:{color:'rgba(30,30,46,0.5)'}},y:{ticks:{color:'#7a7a8e',font:{family:'Outfit',size:11}},grid:{display:false}}}}
     });
 }
@@ -1323,7 +1335,7 @@ function renderEfficiencyChart() {
     var ctx = document.getElementById('chartEfficiency').getContext('2d');
     chartInstances['chartEfficiency'] = new Chart(ctx, {
         type:'bar',
-        data:{labels:data.map(function(r){return r.name;}),datasets:[{label:'每 NT$1 帶回銷售額',data:data.map(function(r){return parseFloat((r.amount/r.totalCost).toFixed(2));}),backgroundColor:data.map(function(r){var e=r.amount/r.totalCost;return e>=3?'rgba(0,232,143,0.7)':(e>=1?'rgba(77,156,255,0.7)':'rgba(255,77,106,0.7)');}),borderRadius:4}]},
+        data:{labels:data.map(function(r){return r.name;}),datasets:[{label:'Sales per NT$1 Cost',data:data.map(function(r){return parseFloat((r.amount/r.totalCost).toFixed(2));}),backgroundColor:data.map(function(r){var e=r.amount/r.totalCost;return e>=3?'rgba(0,232,143,0.7)':(e>=1?'rgba(77,156,255,0.7)':'rgba(255,77,106,0.7)');}),borderRadius:4}]},
         options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return 'NT$ '+ctx.parsed.x.toFixed(2);}}}},scales:{x:{ticks:{color:'#7a7a8e',font:{family:'JetBrains Mono',size:11}},grid:{color:'rgba(30,30,46,0.5)'}},y:{ticks:{color:'#7a7a8e',font:{family:'Outfit',size:11}},grid:{display:false}}}}
     });
 }
@@ -1334,7 +1346,7 @@ function renderAOVChart() {
     var ctx = document.getElementById('chartAOV').getContext('2d');
     chartInstances['chartAOV'] = new Chart(ctx, {
         type:'bar',
-        data:{labels:data.map(function(r){return r.name;}),datasets:[{label:'客單價',data:data.map(function(r){return Math.round(r.aov);}),backgroundColor:'rgba(168,85,247,0.7)',borderRadius:4}]},
+        data:{labels:data.map(function(r){return r.name;}),datasets:[{label:'AOV',data:data.map(function(r){return Math.round(r.aov);}),backgroundColor:'rgba(168,85,247,0.7)',borderRadius:4}]},
         options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return 'NT$ '+ctx.parsed.y.toLocaleString();}}}},scales:{x:{ticks:{color:'#7a7a8e',font:{family:'Outfit',size:11},maxRotation:45},grid:{color:'rgba(30,30,46,0.5)'}},y:{ticks:{color:'#7a7a8e',font:{family:'JetBrains Mono',size:11},callback:function(v){return 'NT$ '+v.toLocaleString();}},grid:{color:'rgba(30,30,46,0.5)'}}}}
     });
 }
@@ -1377,10 +1389,10 @@ function renderTrendChart() {
     chartInstances['chartTrend'] = new Chart(ctx, {
         type:'line',
         data:{labels:monthlyAgg.map(function(d){return d.month;}),datasets:[
-            {label:'Total Sales <small style="font-size:10px;font-weight:400;">總銷售額</small>',data:monthlyAgg.map(function(d){return Math.round(d.sales);}),borderColor:'#00e88f',backgroundColor:'rgba(0,232,143,0.1)',fill:true,tension:0.4,pointRadius:6,pointBackgroundColor:'#00e88f',yAxisID:'y'},
-            {label:'總支出',data:monthlyAgg.map(function(d){return Math.round(d.cost);}),borderColor:'#ff4d6a',backgroundColor:'rgba(255,77,106,0.1)',fill:true,tension:0.4,pointRadius:6,pointBackgroundColor:'#ff4d6a',yAxisID:'y1'}
+            {label:'Total Sales 總銷售額',data:monthlyAgg.map(function(d){return Math.round(d.sales);}),borderColor:'#4ade80',backgroundColor:'rgba(74,222,128,0.1)',fill:true,tension:0.4,pointRadius:6,pointBackgroundColor:'#4ade80',yAxisID:'y'},
+            {label:'Total Cost 總支出',data:monthlyAgg.map(function(d){return Math.round(d.cost);}),borderColor:'#f87171',backgroundColor:'rgba(248,113,113,0.1)',fill:true,tension:0.4,pointRadius:6,pointBackgroundColor:'#f87171',yAxisID:'y1'}
         ]},
-        options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#7a7a8e',font:{family:'Outfit'}}},tooltip:{callbacks:{label:function(ctx){return ctx.dataset.label+': NT$ '+ctx.parsed.y.toLocaleString();}}}},scales:{x:{ticks:{color:'#7a7a8e',font:{family:'Outfit'}},grid:{color:'rgba(30,30,46,0.5)'}},y:{type:'linear',position:'left',ticks:{color:'#00e88f',font:{family:'JetBrains Mono',size:11},callback:function(v){return 'NT$ '+(v/1000).toFixed(0)+'K';}},grid:{color:'rgba(30,30,46,0.3)'}},y1:{type:'linear',position:'right',ticks:{color:'#ff4d6a',font:{family:'JetBrains Mono',size:11},callback:function(v){return 'NT$ '+(v/1000).toFixed(0)+'K';}},grid:{drawOnChartArea:false}}}}
+        options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#7a7a8e',font:{family:'Outfit'}}},tooltip:{callbacks:{label:function(ctx){return ctx.dataset.label+': NT$ '+ctx.parsed.y.toLocaleString();}}}},scales:{x:{ticks:{color:'#7a7a8e',font:{family:'Outfit'}},grid:{color:'rgba(30,30,46,0.5)'}},y:{type:'linear',position:'left',ticks:{color:'#4ade80',font:{family:'JetBrains Mono',size:11},callback:function(v){return 'NT$ '+(v/1000).toFixed(0)+'K';}},grid:{color:'rgba(30,30,46,0.3)'}},y1:{type:'linear',position:'right',ticks:{color:'#ff4d6a',font:{family:'JetBrains Mono',size:11},callback:function(v){return 'NT$ '+(v/1000).toFixed(0)+'K';}},grid:{drawOnChartArea:false}}}}
     });
 }
 
@@ -1627,7 +1639,7 @@ function renderIndividual() {
         return '<div class="compare-section">' +
             '<div class="compare-section-title">' + name + '</div>' +
             '<div class="table-wrap"><table class="compare-table">' +
-            '<thead><tr><th>月份</th><th>訂單</th><th>銷售額</th><th>底薪</th><th>Credit</th><th>分潤額</th></tr></thead>' +
+            '<thead><tr><th>Month 月份</th><th>Orders 訂單</th><th>Sales 銷售額</th><th>Base Pay 底薪</th><th>Credit</th><th>Commission 分潤</th></tr></thead>' +
             '<tbody>' + rows + '</tbody></table></div></div>';
     }).join('');
     document.getElementById('tableByPerson').innerHTML = tableAHtml;
@@ -1649,7 +1661,7 @@ function renderIndividual() {
         return '<div class="compare-section">' +
             '<div class="compare-section-title">' + m + '</div>' +
             '<div class="table-wrap"><table class="compare-table">' +
-            '<thead><tr><th>KOL</th><th>訂單</th><th>銷售額</th><th>底薪</th><th>Credit</th><th>分潤額</th></tr></thead>' +
+            '<thead><tr><th>KOL</th><th>Orders 訂單</th><th>Sales 銷售額</th><th>Base Pay 底薪</th><th>Credit</th><th>Commission 分潤</th></tr></thead>' +
             '<tbody>' + rows + '</tbody></table></div></div>';
     }).join('');
     document.getElementById('tableByMonth').innerHTML = tableBHtml;
@@ -1722,7 +1734,7 @@ function initEventHandlers() {
                     document.querySelectorAll('#classFilterGroup .filter-btn').forEach(function(b) { b.classList.remove('active'); });
                     this.classList.add('active');
                     this.dataset.filter = 'posted';
-                    this.textContent = '✅ 有發文';
+                    this.textContent = '✅ Uploaded';
                     currentClassFilter = 'posted';
                 } else if (this.dataset.filter === 'posted') {
                     // 已是有發文 → 切換成未發文
@@ -1732,7 +1744,7 @@ function initEventHandlers() {
                 } else {
                     // 已是未發文 → 切換成有發文
                     this.dataset.filter = 'posted';
-                    this.textContent = '✅ 有發文';
+                    this.textContent = '✅ Uploaded';
                     currentClassFilter = 'posted';
                 }
             } else {
@@ -1741,7 +1753,7 @@ function initEventHandlers() {
                     // 重置發文按鈕狀態
                     if (b.classList.contains('fb-posted')) {
                         b.dataset.filter = 'posted';
-                        b.textContent = '✅ 有發文';
+                        b.textContent = '✅ Uploaded';
                     }
                 });
                 this.classList.add('active');
