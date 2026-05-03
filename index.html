@@ -1,2847 +1,734 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HDEX KOL Performance Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<style>
-:root {
-    --bg-primary: #0a0a0f;
-    --bg-card: #12121a;
-    --bg-card-hover: #1a1a26;
-    --border: #1e1e2e;
-    --text-primary: #e8e8ef;
-    --text-secondary: #7a7a8e;
-    --text-muted: #4a4a5e;
-    --accent-green: #00e88f;
-    --accent-green-dim: rgba(0,232,143,0.15);
-    --accent-red: #ff4d6a;
-    --accent-red-dim: rgba(255,77,106,0.15);
-    --accent-yellow: #ffc542;
-    --accent-yellow-dim: rgba(255,197,66,0.15);
-    --accent-blue: #4d9cff;
-    --accent-blue-dim: rgba(77,156,255,0.15);
-    --accent-purple: #a855f7;
-    --accent-purple-dim: rgba(168,85,247,0.15);
-    --radius: 14px;
-    --shadow: 0 4px 24px rgba(0,0,0,0.4);
-}
-[data-theme="light"] {
-    --bg-primary: #f0f2f5;
-    --bg-card: #ffffff;
-    --bg-card-hover: #f5f5fa;
-    --border: #d8dae0;
-    --text-primary: #1a1a2e;
-    --text-secondary: #5a5a72;
-    --text-muted: #8a8a9e;
-    --accent-green: #00b870;
-    --accent-green-dim: rgba(0,184,112,0.12);
-    --accent-red: #e63956;
-    --accent-red-dim: rgba(230,57,86,0.12);
-    --accent-yellow: #e6a800;
-    --accent-yellow-dim: rgba(230,168,0,0.12);
-    --accent-blue: #2b7de9;
-    --accent-blue-dim: rgba(43,125,233,0.12);
-    --accent-purple: #8b3fd6;
-    --accent-purple-dim: rgba(139,63,214,0.12);
-    --shadow: 0 4px 24px rgba(0,0,0,0.08);
-}
-
-/* Password Gate */
-#loginGate {
-    position: fixed; top:0; left:0; width:100%; height:100%;
-    background: #0a0a0f;
-    display: flex; align-items: center; justify-content: center;
-    z-index: 99999;
-}
-[data-theme="light"] #loginGate { background: #f0f2f5; }
-.login-box {
-    background: #12121a; border: 1px solid #1e1e2e; border-radius: 16px;
-    padding: 48px 40px; text-align: center; width: 360px;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
-}
-[data-theme="light"] .login-box { background:#fff; border-color:#d8dae0; box-shadow:0 8px 40px rgba(0,0,0,0.1); }
-.login-box h2 {
-    font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 700;
-    color: #e8e8ef; margin-bottom: 8px;
-}
-[data-theme="light"] .login-box h2 { color:#1a1a2e; }
-.login-box p { font-size: 13px; color: #7a7a8e; margin-bottom: 28px; }
-.login-input {
-    width: 100%; padding: 12px 16px; font-family: 'JetBrains Mono', monospace;
-    font-size: 16px; text-align: center; letter-spacing: 0.15em;
-    background: #0a0a0f; color: #e8e8ef; border: 1px solid #2a2a3e;
-    border-radius: 10px; outline: none; transition: border-color 0.2s;
-}
-[data-theme="light"] .login-input { background:#f0f2f5; color:#1a1a2e; border-color:#d0d0dd; }
-.login-input:focus { border-color: #00e88f; }
-.login-btn {
-    width: 100%; margin-top: 16px; padding: 12px; font-family: 'Outfit', sans-serif;
-    font-size: 15px; font-weight: 600; border: none; border-radius: 10px;
-    background: #00e88f; color: #0a0a0f; cursor: pointer; transition: opacity 0.2s;
-}
-.login-btn:hover { opacity: 0.85; }
-.login-error { margin-top: 12px; font-size: 13px; color: #ff4d6a; display: none; }
-
-/* Theme Toggle */
-.theme-toggle {
-    width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--border);
-    background: var(--bg-card); color: var(--text-secondary); font-size: 18px;
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
-    transition: all 0.2s;
-}
-.theme-toggle:hover { background: var(--bg-card-hover); color: var(--text-primary); }
-/* ── 鈴鐺警示 ─────────────────────────────────────── */
-.bell-wrap { position: relative; }
-.bell-btn {
-    position: relative;
-    width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--border);
-    background: var(--bg-card); color: var(--text-secondary); font-size: 18px;
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
-    transition: all 0.2s;
-}
-.bell-btn:hover { background: var(--bg-card-hover); color: var(--text-primary); }
-.bell-badge {
-    position: absolute; top: -6px; right: -6px;
-    background: #ff4d6a; color: #fff;
-    font-size: 10px; font-weight: 700; border-radius: 9px;
-    min-width: 18px; height: 18px; padding: 0 4px;
-    display: inline-flex; align-items: center; justify-content: center;
-    font-family: 'JetBrains Mono', monospace; pointer-events: none;
-    border: 2px solid var(--bg-primary);
-}
-.bell-panel {
-    display: none; position: fixed; top: 68px; right: 20px;
-    width: 340px; max-height: 480px; overflow-y: auto;
-    background: var(--bg-card); border: 1px solid var(--border);
-    border-radius: 14px; box-shadow: 0 8px 40px rgba(0,0,0,0.5); z-index: 99999;
-}
-.bell-panel.open { display: block; }
-.bell-panel-header {
-    padding: 14px 18px 10px; font-size: 13px; font-weight: 700;
-    color: var(--text-primary); border-bottom: 1px solid var(--border);
-    position: sticky; top: 0; background: var(--bg-card);
-}
-.bell-section-label {
-    font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
-    text-transform: uppercase; padding: 10px 18px 6px;
-    color: var(--text-muted);
-}
-.bell-item {
-    padding: 10px 18px; border-bottom: 1px solid rgba(30,30,46,0.4);
-    transition: background 0.15s;
-}
-.bell-item:hover { background: var(--bg-card-hover); }
-.bell-item:last-child { border-bottom: none; }
-.bell-item-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
-.bell-item-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
-.bell-item-tag {
-    font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 6px;
-    display: inline-block; margin-right: 6px;
-}
-.bell-tag-contract { background: var(--accent-yellow-dim); color: var(--accent-yellow); }
-.bell-tag-event { background: var(--accent-blue-dim); color: var(--accent-blue); }
-.bell-empty { padding: 20px 18px; color: var(--text-muted); font-size: 13px; text-align: center; }
-
-/* ── AI 助手對話框 ──────────────────────────────────── */
-.ai-fab {
-    position: fixed; bottom: 28px; right: 28px; z-index: 9000;
-    width: 56px; height: 56px; border-radius: 50%;
-    background: linear-gradient(135deg, #00e88f, #4d9cff);
-    border: none; cursor: pointer; box-shadow: 0 4px 20px rgba(0,232,143,0.4);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 24px; transition: transform 0.2s, box-shadow 0.2s;
-}
-.ai-fab:hover { transform: scale(1.1); box-shadow: 0 6px 28px rgba(0,232,143,0.5); }
-.ai-fab.open { transform: scale(1.1); }
-
-.ai-panel {
-    position: fixed; bottom: 96px; right: 28px; z-index: 9000;
-    width: 380px; height: 520px;
-    background: var(--bg-card); border: 1px solid var(--border);
-    border-radius: 20px; box-shadow: 0 8px 40px rgba(0,0,0,0.4);
-    display: none; flex-direction: column; overflow: hidden;
-    animation: aiPanelIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
-}
-.ai-panel.open { display: flex; }
-@keyframes aiPanelIn {
-    from { opacity:0; transform: translateY(20px) scale(0.95); }
-    to   { opacity:1; transform: translateY(0) scale(1); }
-}
-.ai-panel-header {
-    padding: 16px 18px 12px;
-    background: linear-gradient(135deg, rgba(0,232,143,0.1), rgba(77,156,255,0.1));
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; gap: 10px;
-}
-.ai-panel-title { font-size: 15px; font-weight: 700; color: var(--text-primary); flex: 1; }
-.ai-panel-sub { font-size: 11px; color: var(--text-secondary); }
-.ai-clear-btn {
-    font-size: 11px; color: var(--text-muted); background: none;
-    border: 1px solid var(--border); border-radius: 6px;
-    padding: 3px 8px; cursor: pointer; transition: all 0.15s;
-}
-.ai-clear-btn:hover { color: var(--text-primary); border-color: var(--text-muted); }
-
-.ai-messages {
-    flex: 1; overflow-y: auto; padding: 14px 16px;
-    display: flex; flex-direction: column; gap: 10px;
-    scroll-behavior: smooth;
-}
-.ai-messages::-webkit-scrollbar { width: 4px; }
-.ai-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-.ai-msg {
-    max-width: 88%; padding: 10px 14px; border-radius: 14px;
-    font-size: 13px; line-height: 1.6; white-space: pre-wrap;
-}
-.ai-msg.user {
-    align-self: flex-end;
-    background: linear-gradient(135deg, #00e88f, #00c97a);
-    color: #0a0a0f; border-bottom-right-radius: 4px;
-}
-.ai-msg.assistant {
-    align-self: flex-start;
-    background: var(--bg-primary); color: var(--text-primary);
-    border: 1px solid var(--border); border-bottom-left-radius: 4px;
-}
-.ai-msg.thinking {
-    align-self: flex-start;
-    background: var(--bg-primary); border: 1px solid var(--border);
-    color: var(--text-muted); font-style: italic; border-bottom-left-radius: 4px;
-}
-.ai-typing { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
-.ai-typing span {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--text-muted); animation: aiDot 1.2s infinite;
-}
-.ai-typing span:nth-child(2) { animation-delay: 0.2s; }
-.ai-typing span:nth-child(3) { animation-delay: 0.4s; }
-@keyframes aiDot { 0%,80%,100%{opacity:0.2;transform:scale(0.8);} 40%{opacity:1;transform:scale(1);} }
-
-.ai-suggestions {
-    padding: 0 16px 10px; display: flex; flex-wrap: wrap; gap: 6px;
-}
-.ai-suggestion {
-    font-size: 11px; padding: 5px 10px; border-radius: 20px;
-    background: var(--bg-primary); border: 1px solid var(--border);
-    color: var(--text-secondary); cursor: pointer; transition: all 0.15s;
-    white-space: nowrap;
-}
-.ai-suggestion:hover { border-color: var(--accent-green); color: var(--accent-green); }
-
-.ai-input-row {
-    padding: 12px 14px; border-top: 1px solid var(--border);
-    display: flex; gap: 8px; align-items: flex-end;
-}
-.ai-input {
-    flex: 1; padding: 9px 12px; background: var(--bg-primary);
-    border: 1px solid var(--border); border-radius: 10px;
-    color: var(--text-primary); font-family: 'Outfit', sans-serif;
-    font-size: 13px; outline: none; resize: none; max-height: 80px;
-    min-height: 36px; line-height: 1.4; transition: border-color 0.2s;
-}
-.ai-input:focus { border-color: var(--accent-green); }
-.ai-send-btn {
-    width: 36px; height: 36px; border-radius: 10px; border: none;
-    background: var(--accent-green); color: #0a0a0f;
-    font-size: 16px; cursor: pointer; transition: opacity 0.2s;
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-}
-.ai-send-btn:hover { opacity: 0.85; }
-.ai-send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-/* ── 語音輸入 ──────────────────────────────────────── */
-.ai-mic-btn {
-    width: 36px; height: 36px; border-radius: 10px; border: none;
-    background: var(--bg-primary); color: var(--text-secondary);
-    font-size: 16px; cursor: pointer; transition: all 0.2s;
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-    border: 1px solid var(--border);
-}
-.ai-mic-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
-.ai-mic-btn.recording {
-    background: var(--accent-red-dim); border-color: var(--accent-red);
-    color: var(--accent-red); animation: micPulse 1s infinite;
-}
-@keyframes micPulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(255,77,106,0.4); }
-    50% { box-shadow: 0 0 0 6px rgba(255,77,106,0); }
-}
-/* ── 語音回答 ──────────────────────────────────────── */
-.ai-tts-toggle {
-    display: flex; align-items: center; gap: 6px;
-    font-size: 11px; color: var(--text-muted); cursor: pointer;
-    padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border);
-    background: none; transition: all 0.15s; white-space: nowrap;
-}
-.ai-tts-toggle:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
-.ai-tts-toggle.on { border-color: var(--accent-green); color: var(--accent-green); background: var(--accent-green-dim); }
-.ai-msg-actions {
-    display: flex; align-items: center; gap: 6px; margin-top: 6px;
-}
-.ai-speak-btn {
-    font-size: 11px; color: var(--text-muted); cursor: pointer;
-    padding: 3px 8px; border-radius: 6px; border: 1px solid var(--border);
-    background: none; transition: all 0.15s;
-}
-.ai-speak-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
-.ai-speak-btn.speaking { border-color: var(--accent-green); color: var(--accent-green); animation: micPulse 1s infinite; }
-/* ── 賽事複選 KOL ──────────────────────────────────── */
-.kol-multiselect-wrap { position: relative; }
-.kol-multiselect-display {
-    width: 100%; padding: 8px 12px; background: var(--bg-primary);
-    border: 1px solid var(--border); border-radius: 8px;
-    color: var(--text-primary); font-family: 'Outfit',sans-serif;
-    font-size: 13px; cursor: pointer; text-align: left;
-    display: flex; align-items: center; justify-content: space-between;
-    min-height: 36px; flex-wrap: wrap; gap: 4px;
-}
-.kol-selected-tag {
-    background: var(--accent-green-dim); color: var(--accent-green);
-    border-radius: 4px; padding: 2px 6px; font-size: 11px; font-weight: 600;
-    display: inline-flex; align-items: center; gap: 4px;
-}
-.kol-dropdown {
-    position: absolute; top: 100%; left: 0; right: 0; z-index: 99999;
-    background: var(--bg-card); border: 1px solid var(--border);
-    border-radius: 10px; box-shadow: var(--shadow);
-    max-height: 220px; overflow-y: auto; margin-top: 4px; display: none;
-}
-.kol-dropdown.open { display: block; }
-.kol-dropdown-search { padding: 8px 12px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg-card); }
-.kol-dropdown-search input { width: 100%; padding: 5px 8px; background: var(--bg-primary); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); font-size: 12px; outline: none; }
-.kol-dropdown-item { padding: 8px 14px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.1s; color: var(--text-primary); }
-.kol-dropdown-item:hover { background: var(--bg-card-hover); }
-.kol-dropdown-item.selected { color: var(--accent-green); font-weight: 600; }
-.kol-dropdown-item input[type=checkbox] { accent-color: var(--accent-green); cursor: pointer; }
-.event-date-range { font-family: 'JetBrains Mono',monospace; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 8px; white-space: nowrap; background: var(--accent-blue-dim); color: var(--accent-blue); }
-.event-date-range.past { background: var(--accent-red-dim); color: var(--accent-red); }
-.event-date-range.soon { background: var(--accent-yellow-dim); color: var(--accent-yellow); }
-.event-date-range.ongoing { background: var(--accent-green-dim); color: var(--accent-green); }
-.kol-filter-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
-.kol-filter-tag { font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px; cursor: pointer; border: 1px solid var(--border); background: var(--bg-primary); color: var(--text-secondary); transition: all 0.15s; }
-.kol-filter-tag.selected { background: var(--accent-blue-dim); color: var(--accent-blue); border-color: var(--accent-blue); }
-
-.ai-panel-header-btns { display: flex; gap: 6px; align-items: center; }
-
-
-
-* { margin:0; padding:0; box-sizing:border-box; }
-body {
-    background: var(--bg-primary);
-    color: var(--text-primary);
-    font-family: 'Outfit', sans-serif;
-    line-height: 1.6;
-    min-height: 100vh;
-}
-.mono { font-family: 'JetBrains Mono', monospace; }
-.container { max-width: 1440px; margin: 0 auto; padding: 24px 32px; }
-@media(max-width:768px){ .container { padding: 16px; } }
-
-#loading {
-    display: flex; flex-direction: column; align-items: center;
-    justify-content: center; min-height: 60vh; gap: 20px;
-}
-.spinner {
-    width: 48px; height: 48px; border: 4px solid var(--border);
-    border-top-color: var(--accent-green); border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.loading-text { font-size: 16px; color: var(--text-secondary); }
-
-@keyframes fadeUp {
-    from { opacity:0; transform:translateY(24px); }
-    to { opacity:1; transform:translateY(0); }
-}
-.fade-up { opacity:0; animation: fadeUp 0.6s ease forwards; }
-.delay-1 { animation-delay: 0.05s; } .delay-2 { animation-delay: 0.1s; }
-.delay-3 { animation-delay: 0.15s; } .delay-4 { animation-delay: 0.2s; }
-.delay-5 { animation-delay: 0.25s; } .delay-6 { animation-delay: 0.3s; }
-.delay-7 { animation-delay: 0.35s; } .delay-8 { animation-delay: 0.4s; }
-.delay-9 { animation-delay: 0.45s; } .delay-10 { animation-delay: 0.5s; }
-
-.card {
-    background: var(--bg-card); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow);
-    transition: background 0.3s, border-color 0.3s;
-}
-.card:hover { background: var(--bg-card-hover); border-color: #2a2a3e; }
-.card-title { font-size: 16px; font-weight: 600; color: var(--text-secondary); margin-bottom: 16px; }
-.card-subtitle { font-size: 13px; color: var(--text-muted); margin-top: -10px; margin-bottom: 16px; }
-
-.header {
-    display: flex; flex-wrap: wrap; align-items: center;
-    justify-content: space-between; margin-bottom: 28px; gap: 16px;
-}
-.header-left h1 {
-    font-size: 28px; font-weight: 700;
-    background: linear-gradient(135deg, #ffffff, var(--accent-green));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-}
-[data-theme="light"] .header-left h1 {
-    background: linear-gradient(135deg, #1a1a2e, var(--accent-green));
-    -webkit-background-clip: text; background-clip: text;
-}
-.header-left p { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
-.header-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.tab-group {
-    display: flex; background: var(--bg-card); border: 1px solid var(--border);
-    border-radius: 10px; overflow: hidden;
-}
-.tab-btn {
-    padding: 8px 20px; font-family: 'Outfit', sans-serif; font-size: 14px;
-    font-weight: 500; border: none; background: transparent; color: var(--text-secondary);
-    cursor: pointer; transition: all 0.3s;
-}
-.tab-btn.active { background: var(--accent-green); color: #0a0a0f; font-weight: 600; }
-.tab-btn:hover:not(.active) { background: var(--bg-card-hover); color: var(--text-primary); }
-
-.kpi-row {
-    display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px;
-}
-@media(max-width:1024px) { .kpi-row { grid-template-columns: repeat(3,1fr); } }
-@media(max-width:600px) { .kpi-row { grid-template-columns: repeat(2,1fr); } }
-.kpi-card { text-align: center; padding: 20px 16px; }
-.kpi-card .kpi-label { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; }
-.kpi-card .kpi-value { font-family: 'JetBrains Mono', monospace; font-size: 26px; font-weight: 700; color: var(--text-primary); }
-.kpi-card .kpi-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
-.mom-badge {
-    display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 12px;
-    font-weight: 600; padding: 2px 8px; border-radius: 6px; margin-top: 6px;
-}
-.mom-up { background: var(--accent-green-dim); color: var(--accent-green); }
-.mom-down { background: var(--accent-red-dim); color: var(--accent-red); }
-.mom-flat { background: rgba(122,122,142,0.15); color: var(--text-secondary); }
-
-.grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
-.grid-1-1 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-@media(max-width:900px) { .grid-2-1, .grid-1-1 { grid-template-columns: 1fr; } }
-.full-width { margin-bottom: 24px; }
-
-.table-wrap { overflow-x: auto; border-radius: 10px; }
-.table-wrap::-webkit-scrollbar { height: 6px; }
-.table-wrap::-webkit-scrollbar-track { background: var(--bg-primary); border-radius: 3px; }
-.table-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-.table-wrap::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 1100px; }
-table th {
-    text-align: left; padding: 12px 10px; font-weight: 600; color: var(--text-secondary);
-    border-bottom: 1px solid var(--border); white-space: nowrap; font-size: 12px;
-}
-table td {
-    padding: 10px 10px; border-bottom: 1px solid rgba(30,30,46,0.5); white-space: nowrap;
-    font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-primary);
-}
-table td.text-col { font-family: 'Outfit', sans-serif; font-size: 13px; }
-table tr:hover td { background: rgba(26,26,38,0.5); }
-
-.badge { display: inline-block; padding: 2px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
-.badge-s { background: var(--accent-green-dim); color: var(--accent-green); }
-.badge-a { background: var(--accent-blue-dim); color: var(--accent-blue); }
-.badge-b { background: var(--accent-yellow-dim); color: var(--accent-yellow); }
-.badge-c { background: var(--accent-red-dim); color: var(--accent-red); }
-.badge-d { background: rgba(74,74,94,0.25); color: var(--text-muted); }
-
-.sort-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-.sort-btn {
-    padding: 5px 14px; font-family: 'Outfit', sans-serif; font-size: 12px; font-weight: 500;
-    border: 1px solid var(--border); border-radius: 8px; background: transparent;
-    color: var(--text-secondary); cursor: pointer; transition: all 0.2s;
-}
-.sort-btn.active { border-color: var(--accent-green); color: var(--accent-green); background: var(--accent-green-dim); }
-.sort-btn:hover:not(.active) { border-color: var(--text-muted); color: var(--text-primary); }
-
-.tier-section { display: flex; flex-direction: column; gap: 14px; }
-.tier-row {
-    display: flex; align-items: flex-start; gap: 16px; padding: 14px 18px;
-    border-radius: 10px; border: 1px solid var(--border); background: var(--bg-primary);
-}
-.tier-label { min-width: 50px; text-align: center; font-weight: 700; font-size: 16px; padding: 4px 0; }
-.tier-kols { display: flex; flex-wrap: wrap; gap: 8px; flex: 1; }
-.tier-kol-chip {
-    display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px;
-    border-radius: 8px; font-size: 12px; border: 1px solid var(--border); background: var(--bg-card);
-}
-.tier-kol-chip .chip-name { font-weight: 600; font-family: 'Outfit', sans-serif; }
-.tier-kol-chip .chip-stat { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-secondary); }
-.rec-tag { font-size: 10px; padding: 1px 6px; border-radius: 4px; font-weight: 600; }
-.rec-boost { background: var(--accent-green-dim); color: var(--accent-green); }
-.rec-keep { background: var(--accent-blue-dim); color: var(--accent-blue); }
-.rec-watch { background: var(--accent-yellow-dim); color: var(--accent-yellow); }
-.rec-reduce { background: var(--accent-red-dim); color: var(--accent-red); }
-.rec-stop { background: rgba(74,74,94,0.25); color: var(--text-muted); }
-
-.insight-list { list-style: none; }
-.insight-list li {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 10px 0; border-bottom: 1px solid rgba(30,30,46,0.5); font-size: 13px;
-}
-.insight-list li:last-child { border-bottom: none; }
-.insight-rank { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted); min-width: 24px; }
-.insight-name { flex: 1; font-weight: 500; margin-left: 8px; }
-.insight-val { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; }
-
-.budget-table { min-width: 900px; }
-.budget-table td.text-col { white-space: normal; max-width: 280px; font-size: 12px; line-height: 1.5; }
-
-.individual-section { display: none; }
-.individual-section.visible { display: block; }
-.overview-section.hidden { display: none; }
-.kol-tag {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 500;
-    border: 1px solid var(--border); background: var(--bg-primary);
-    color: var(--text-secondary); cursor: pointer; transition: all 0.18s;
-    font-family: 'Outfit', sans-serif;
-}
-.kol-tag:hover { border-color: var(--text-secondary); color: var(--text-primary); }
-.kol-tag.selected { background: var(--accent-green-dim); border-color: var(--accent-green); color: var(--accent-green); }
-.month-tag {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 500;
-    border: 1px solid var(--border); background: var(--bg-primary);
-    color: var(--text-secondary); cursor: pointer; transition: all 0.18s;
-    font-family: 'JetBrains Mono', monospace;
-}
-.month-tag:hover { border-color: var(--text-secondary); color: var(--text-primary); }
-.month-tag.selected { background: var(--accent-blue-dim); border-color: var(--accent-blue); color: var(--accent-blue); }
-.compare-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 600px; }
-.compare-table th { text-align: left; padding: 10px 12px; font-weight: 600; color: var(--text-secondary); border-bottom: 1px solid var(--border); font-size: 12px; white-space: nowrap; }
-.compare-table td { padding: 10px 12px; border-bottom: 1px solid rgba(30,30,46,0.5); font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-primary); white-space: nowrap; }
-.compare-table tr:hover td { background: rgba(26,26,38,0.5); }
-.compare-section { margin-bottom: 24px; }
-.compare-section-title { font-size: 14px; font-weight: 600; color: var(--accent-green); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
-.no-data-msg { color: var(--text-muted); font-size: 13px; padding: 20px 0; text-align: center; }
-.personal-kpi-row {
-    display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 20px;
-}
-@media(max-width:768px){ .personal-kpi-row { grid-template-columns: repeat(2,1fr); } }
-.personal-kpi { text-align: center; padding: 16px; }
-
-.chart-container { position: relative; width: 100%; }
-.chart-container canvas { width: 100% !important; }
-
-.legend-text { font-size: 11px; color: var(--text-muted); margin-top: 12px; line-height: 1.8; }
-
-.hidden { display: none !important; }
-
-.quick-actions { display: flex; gap: 8px; align-items: center; }
-.action-btn {
-    padding: 8px 16px; border-radius: 8px; font-family: 'Outfit', sans-serif;
-    font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid var(--border);
-    background: var(--bg-card); color: var(--text-primary); transition: all 0.2s ease; white-space: nowrap;
-}
-.action-btn:hover { background: var(--bg-card-hover); border-color: var(--text-secondary); }
-.action-btn.upload-btn { background: var(--accent-green-dim); border-color: var(--accent-green); color: var(--accent-green); }
-.action-btn.upload-btn:hover { background: var(--accent-green); color: #000; }
-
-.modal-overlay {
-    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.75); z-index: 1000;
-    display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px);
-}
-.modal-box {
-    background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
-    padding: 32px; width: 480px; max-width: 90vw; box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-}
-.modal-title { font-size: 20px; font-weight: 600; margin-bottom: 6px; color: var(--text-primary); }
-.modal-subtitle { font-size: 13px; color: var(--text-secondary); margin-bottom: 24px; line-height: 1.6; }
-.modal-step { background: var(--bg-primary); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 16px; }
-.modal-step-label { font-size: 12px; font-weight: 600; color: var(--accent-green); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
-.file-drop-zone {
-    border: 2px dashed var(--border); border-radius: 8px; padding: 24px;
-    text-align: center; cursor: pointer; transition: all 0.2s; color: var(--text-secondary); font-size: 14px;
-}
-.file-drop-zone:hover, .file-drop-zone.dragover { border-color: var(--accent-green); color: var(--accent-green); background: var(--accent-green-dim); }
-.file-drop-zone input[type="file"] { display: none; }
-.file-selected-name { font-size: 13px; color: var(--accent-green); margin-top: 10px; font-family: 'JetBrains Mono', monospace; }
-.modal-actions { display: flex; gap: 10px; margin-top: 24px; justify-content: flex-end; }
-.modal-btn { padding: 10px 22px; border-radius: 8px; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); transition: all 0.2s; }
-.modal-btn-cancel { background: transparent; color: var(--text-secondary); }
-.modal-btn-cancel:hover { background: var(--bg-card-hover); color: var(--text-primary); }
-.modal-btn-submit { background: var(--accent-green); color: #000; border-color: var(--accent-green); font-weight: 600; }
-.modal-btn-submit:hover { opacity: 0.85; }
-.modal-btn-submit:disabled { opacity: 0.4; cursor: not-allowed; }
-.modal-result { margin-top: 16px; padding: 14px 16px; border-radius: 8px; font-size: 14px; line-height: 1.8; white-space: pre-line; }
-.modal-result.success { background: var(--accent-green-dim); border: 1px solid var(--accent-green); color: var(--accent-green); }
-.modal-result.error { background: var(--accent-red-dim); border: 1px solid var(--accent-red); color: var(--accent-red); }
-
-.badge-ambassador { background: rgba(255,197,66,0.15); color: #ffc542; border: 1px solid rgba(255,197,66,0.35); padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; letter-spacing: 0.03em; white-space: nowrap; }
-.badge-partner { background: rgba(77,156,255,0.15); color: #4d9cff; border: 1px solid rgba(77,156,255,0.35); padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; letter-spacing: 0.03em; white-space: nowrap; }
-.ig-yes { color: #00e88f; font-size: 15px; }
-.ig-no  { color: #ff4d6a; font-size: 15px; }
-.ig-na  { color: #4a4a5e; font-size: 13px; }
-
-.filter-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
-.filter-btn { padding:5px 14px; border-radius:6px; font-family:'Outfit',sans-serif; font-size:12px; font-weight:500; cursor:pointer; border:1px solid var(--border); background:var(--bg-primary); color:var(--text-secondary); transition:all 0.18s; }
-.filter-btn:hover { border-color:var(--text-secondary); color:var(--text-primary); }
-.filter-btn.active { background:var(--bg-card-hover); border-color:var(--text-primary); color:var(--text-primary); }
-.filter-btn.fb-ambassador.active { background:rgba(255,197,66,0.12); border-color:#ffc542; color:#ffc542; }
-.filter-btn.fb-partner.active { background:rgba(77,156,255,0.12); border-color:#4d9cff; color:#4d9cff; }
-.filter-btn.fb-posted.active[data-filter="posted"] { background:rgba(0,232,143,0.12); border-color:#00e88f; color:#00e88f; }
-.filter-btn.fb-posted.active[data-filter="nopost"] { background:rgba(255,77,106,0.12); border-color:#ff4d6a; color:#ff4d6a; }
-
-.kpi-label { font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; }
-.kpi-value { font-size: 28px; font-weight: 700; line-height: 1.1; }
-table th { font-size: 12px; color: #a0a0b8; font-weight: 600; letter-spacing: 0.04em; padding: 10px 12px; }
-table td { font-size: 13px; color: #d0d0e0; padding: 10px 12px; }
-.card-title { font-size: 15px; font-weight: 600; color: #e0e0ee; margin-bottom: 4px; }
-.card-subtitle { font-size: 12px; color: #7a7a8e; }
-.insight-name { font-size: 13px; color: #d0d0e0; }
-.insight-val  { font-size: 13px; }
-.legend-text { font-size: 12px; color: #7a7a8e; margin-top: 14px; line-height: 2; }
-[data-theme="light"] table th { color: #5a5a72; }
-[data-theme="light"] table td { color: #2a2a42; }
-[data-theme="light"] .card-title { color: #1a1a2e; }
-[data-theme="light"] .card-subtitle { color: #5a5a72; }
-[data-theme="light"] .insight-name { color: #2a2a42; }
-[data-theme="light"] .legend-text { color: #5a5a72; }
-[data-theme="light"] .tab-btn.active { color: #fff; }
-[data-theme="light"] .kpi-card { border-color: var(--border); }
-</style>
-</head>
-<body>
-
-<!-- PASSWORD GATE -->
-<div id="loginGate">
-    <div class="login-box">
-        <h2>HDEX KOL Dashboard</h2>
-        <p>請輸入存取密碼</p>
-        <input type="password" class="login-input" id="loginPassword" placeholder="Password" autocomplete="off">
-        <button class="login-btn" id="loginBtn" onclick="checkPassword()">進入</button>
-        <div class="login-error" id="loginError">密碼錯誤，請重新輸入</div>
-    </div>
-</div>
-
-<div class="container" id="app" style="display:none;">
-
-<div id="loading">
-    <div class="spinner"></div>
-    <div class="loading-text">正在載入儀表板資料...</div>
-</div>
-
-<div id="dashboard" style="display:none;">
-
-<div class="header fade-up delay-1">
-    <div class="header-left">
-        <h1>HDEX KOL Performance</h1>
-        <p>KOL 合作成效儀表板 — 銷售額 · ROAS · 投資報酬 · 成長分析</p>
-    </div>
-    <div class="header-right">
-        <div class="tab-group" id="monthTabs"></div>
-        <div class="tab-group" id="viewTabs">
-            <button class="tab-btn active" data-view="overview">總覽</button>
-            <button class="tab-btn" data-view="individual">個人分析</button>
-            <button class="tab-btn" data-view="events">🏆 賽事</button>
-        </div>
-        <div class="bell-wrap">
-            <button class="bell-btn" id="bellBtn" onclick="toggleBell()" title="提醒事項">
-                🔔<span class="bell-badge" id="bellBadge" style="display:none;">0</span>
-            </button>
-            <div class="bell-panel" id="bellPanel">
-                <div class="bell-panel-header">🔔 近期提醒</div>
-                <div id="bellContent"><div class="bell-empty">載入中...</div></div>
-            </div>
-        </div>
-        <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="切換深色/淺色模式">🌙</button>
-        <div class="quick-actions">
-            <button class="action-btn" onclick="openSettings()">⚙️ 前往月設定</button>
-            <button class="action-btn upload-btn" onclick="showUploadModal()">📤 上傳本月資料</button>
-        </div>
-    </div>
-</div>
-
-<div id="overviewSection" class="overview-section">
-<div class="kpi-row" id="kpiRow"></div>
-<div class="grid-2-1 fade-up delay-3">
-    <div class="card">
-        <div class="card-title">各 KOL 銷售額 vs 總支出</div>
-        <div class="chart-container"><canvas id="chartSalesVsCost"></canvas></div>
-    </div>
-    <div class="card">
-        <div class="card-title">ROAS 分佈</div>
-        <div class="chart-container"><canvas id="chartRoasDist"></canvas></div>
-    </div>
-</div>
-<div class="card full-width fade-up delay-4" id="tierCard">
-    <div class="card-title">🏅 KOL 分級制度</div>
-    <div class="card-subtitle">依 ROAS 與銷售額自動分級，作為續約決策依據</div>
-    <div class="tier-section" id="tierSection"></div>
-</div>
-<div class="card full-width fade-up delay-5">
-    <div class="card-title">📊 KOL 詳細數據</div>
-    <div class="filter-row" id="classFilterGroup">
-        <button class="filter-btn active" data-filter="all">全部</button>
-        <button class="filter-btn fb-ambassador" data-filter="AMBASSADOR">Ambassador</button>
-        <button class="filter-btn fb-partner" data-filter="PARTNER">Partner</button>
-        <button class="filter-btn fb-posted" data-filter="posted">✅ 有發文</button>
-    </div>
-    <div class="sort-group" id="sortGroup">
-        <button class="sort-btn active" data-sort="roas" data-dir="desc">ROAS↓</button>
-        <button class="sort-btn" data-sort="amount" data-dir="desc">銷售額↓</button>
-        <button class="sort-btn" data-sort="followers" data-dir="desc">粉絲數↓</button>
-        <button class="sort-btn" data-sort="efficiency" data-dir="desc">效率↓</button>
-        <button class="sort-btn" data-sort="growth" data-dir="desc">成長率↓</button>
-    </div>
-    <div class="table-wrap">
-        <table id="detailTable">
-            <thead>
-                <tr>
-                    <th>#</th><th>分類</th><th>KOL</th><th>粉絲數</th><th>訂單</th>
-                    <th>銷售額</th><th>客單價</th><th>底薪</th><th>Credit</th>
-                    <th>分潤</th><th>總成本</th><th>ROAS</th><th>MoM 銷售</th><th>等級</th><th>IG發文</th>
-                </tr>
-            </thead>
-            <tbody id="detailBody"></tbody>
-        </table>
-    </div>
-    <div class="legend-text">
-        等級說明：<span class="badge badge-s">S級</span> ROAS≥3 且銷售≥50K &nbsp;
-        <span class="badge badge-a">A級</span> ROAS≥2 或銷售≥30K &nbsp;
-        <span class="badge badge-b">B級</span> ROAS 1~2 &nbsp;
-        <span class="badge badge-c">C級</span> ROAS&lt;1 有成本 &nbsp;
-        <span class="badge badge-d">D級</span> 零產出
-    </div>
-</div>
-<div class="grid-1-1 fade-up delay-6">
-    <div class="card"><div class="card-title">🏆 銷售 Top 5</div><ul class="insight-list" id="topSalesList"></ul></div>
-    <div class="card"><div class="card-title">🚨 需關注：高成本低產出</div><ul class="insight-list" id="alertList"></ul></div>
-</div>
-<div class="card full-width fade-up delay-7">
-    <div class="card-title">📈 KOL 成長追蹤</div>
-    <div class="card-subtitle">月對月銷售額變化，追蹤誰在成長、誰在衰退</div>
-    <div class="chart-container"><canvas id="chartGrowth"></canvas></div>
-</div>
-<div class="grid-2-1 fade-up delay-8">
-    <div class="card">
-        <div class="card-title">💰 投資效率分析</div>
-        <div class="card-subtitle">每花 NT$1 帶回的銷售額</div>
-        <div class="chart-container"><canvas id="chartEfficiency"></canvas></div>
-    </div>
-    <div class="card"><div class="card-title">🎯 客單價分析</div><div class="chart-container"><canvas id="chartAOV"></canvas></div></div>
-</div>
-<div class="card full-width fade-up delay-9">
-    <div class="card-title">💡 下月預算配置建議</div>
-    <div class="card-subtitle">基於本月表現，自動產生續約與預算調整建議</div>
-    <div class="table-wrap">
-        <table class="budget-table" id="budgetTable">
-            <thead>
-                <tr><th>KOL</th><th>本月銷售額</th><th>本月 ROAS</th><th>成長趨勢</th><th>等級</th><th>建議</th><th>建議預算調整</th></tr>
-            </thead>
-            <tbody id="budgetBody"></tbody>
-        </table>
-    </div>
-</div>
-<div class="grid-1-1 fade-up delay-10">
-    <div class="card"><div class="card-title">月度趨勢：總銷售額 vs 總支出</div><div class="chart-container"><canvas id="chartTrend"></canvas></div></div>
-    <div class="card"><div class="card-title">粉絲數 vs 銷售額（散佈圖）</div><div class="chart-container"><canvas id="chartBubble"></canvas></div></div>
-</div>
-</div><!-- end overviewSection -->
-
-<div id="individualSection" class="individual-section">
-
-    <!-- KOL 多選 -->
-    <div class="card fade-up delay-1" style="margin-bottom:16px;">
-        <div class="card-title">👥 選擇 KOL（可多選）</div>
-        <div id="kolCheckboxGroup" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;"></div>
-        <div style="display:flex;gap:8px;">
-            <button class="sort-btn" onclick="selectAllKols()">全選</button>
-            <button class="sort-btn" onclick="clearAllKols()">清除</button>
-        </div>
-    </div>
-
-    <!-- 月份多選 -->
-    <div class="card fade-up delay-2" style="margin-bottom:16px;">
-        <div class="card-title">📅 選擇月份（可多選）</div>
-        <div id="monthCheckboxGroup" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;"></div>
-        <div style="display:flex;gap:8px;">
-            <button class="sort-btn" onclick="selectAllMonths()">全選</button>
-            <button class="sort-btn" onclick="clearAllMonths()">清除</button>
-        </div>
-    </div>
-
-    <!-- 趨勢折線圖 -->
-    <div class="card full-width fade-up delay-3" style="margin-bottom:16px;">
-        <div class="card-title">📈 銷售趨勢比較</div>
-        <div class="card-subtitle">各 KOL 跨月銷售額趨勢</div>
-        <div class="chart-container"><canvas id="chartPersonalTrend"></canvas></div>
-    </div>
-
-    <!-- 表格 A：以人為主 -->
-    <div class="card full-width fade-up delay-4" style="margin-bottom:16px;">
-        <div class="card-title">📋 以人為主 — 各人各月數據</div>
-        <div id="tableByPerson"></div>
-    </div>
-
-    <!-- 表格 B：以月份為主 -->
-    <div class="card full-width fade-up delay-5" style="margin-bottom:16px;">
-        <div class="card-title">📋 以月份為主 — 各月各人並排</div>
-        <div id="tableByMonth"></div>
-    </div>
-
-</div>
-
-<!-- ── 賽事 Section ──────────────────────────────── -->
-<div id="eventsSection" style="display:none;">
-    <div class="card full-width fade-up delay-1" style="margin-bottom:16px;">
-        <div class="card-title">🏆 年度賽事行程</div>
-        <div class="event-filter-row">
-            <input type="text" class="event-search" id="eventSearchInput" placeholder="搜尋賽事名稱..." oninput="renderEventsTab()">
-            <button class="tab-btn active" data-eview="byEvent" onclick="switchEventView('byEvent', this)">以賽事看</button>
-            <button class="tab-btn" data-eview="byKol" onclick="switchEventView('byKol', this)">以 KOL 看</button>
-        </div>
-        <div id="eventsByEvent"></div>
-        <div id="eventsByKol" style="display:none;"></div>
-    </div>
-</div>
-
-</div><!-- end dashboard -->
-</div><!-- end container -->
-
-<div id="uploadModal" class="modal-overlay" style="display:none;">
-    <div class="modal-box">
-        <div class="modal-title">📤 上傳本月 CSV 資料</div>
-        <div class="modal-subtitle">上傳後系統會自動比對 KOL 折扣碼並更新 Google Sheet，儀表板隨即自動刷新。</div>
-        <div class="modal-step">
-            <div class="modal-step-label">選擇 Shopify CSV 檔案</div>
-            <div class="file-drop-zone" id="dropZone" onclick="document.getElementById('csvFileInput').click()">
-                <div>點擊選擇，或直接拖曳 CSV 到這裡</div>
-                <input type="file" id="csvFileInput" accept=".csv" onchange="onFileSelected(this)">
-            </div>
-            <div class="file-selected-name" id="selectedFileName"></div>
-        </div>
-        <div id="modalResult"></div>
-        <div class="modal-actions">
-            <button class="modal-btn modal-btn-cancel" onclick="hideUploadModal()">取消</button>
-            <button class="modal-btn modal-btn-submit" id="uploadSubmitBtn" onclick="submitCsvUpload()" disabled>開始匯入</button>
-        </div>
-    </div>
-</div>
-
-<script>
-// =====================================================================
-// ★ 在這裡填入你的 Apps Script 部署網址（/exec 結尾）
-// =====================================================================
-var API_URL = 'https://script.google.com/macros/s/AKfycbyux5KbUFdQonvSn5EVTsS7pTt5irD0e-WKPsTDN3dlCXsV1BSX2NWvol_zsDxiPgmu/exec';
-
-// =====================================================================
-// API 呼叫封裝（取代所有 google.script.run）
-// =====================================================================
-function apiGet(action) {
-    return fetch(API_URL + '?action=' + action)
-        .then(function(r) { return r.json(); });
-}
-
-function apiPost(action, csvText) {
-    return fetch(API_URL + '?action=' + action, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: csvText
-    }).then(function(r) { return r.json(); });
-}
-
-// =====================================================================
-// PASSWORD GATE
-// =====================================================================
-function checkPassword() {
-    var pw = document.getElementById('loginPassword').value.toLowerCase().trim();
-    var btn = document.getElementById('loginBtn');
-    btn.disabled = true;
-    btn.textContent = '驗證中...';
-
-    apiGet('verifyPassword&pw=' + encodeURIComponent(pw))
-        .then(function(result) {
-            btn.disabled = false;
-            btn.textContent = '進入';
-            if (result.ok) {
-                sessionStorage.setItem('hdex_auth', '1');
-                document.getElementById('loginGate').style.display = 'none';
-                document.getElementById('app').style.display = '';
-                loadDashboard();
-            } else {
-                var errEl = document.getElementById('loginError');
-                errEl.style.display = 'block';
-                document.getElementById('loginPassword').value = '';
-                document.getElementById('loginPassword').focus();
-            }
-        })
-        .catch(function() {
-            btn.disabled = false;
-            btn.textContent = '進入';
-            var errEl = document.getElementById('loginError');
-            errEl.style.display = 'block';
-            errEl.textContent = '驗證失敗，請重試';
-        });
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    var pwInput = document.getElementById('loginPassword');
-    if (pwInput) {
-        pwInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') checkPassword();
-        });
-    }
-    if (sessionStorage.getItem('hdex_auth') === '1') {
-        document.getElementById('loginGate').style.display = 'none';
-        document.getElementById('app').style.display = '';
-        loadDashboard();
-    }
-    var tBtn = document.getElementById('themeToggle');
-    if (tBtn && localStorage.getItem('hdex_theme') === 'light') {
-        tBtn.textContent = '☀️';
-    }
-});
-
-// =====================================================================
-// THEME TOGGLE
-// =====================================================================
-function toggleTheme() {
-    var html = document.documentElement;
-    var current = html.getAttribute('data-theme');
-    if (current === 'light') {
-        html.removeAttribute('data-theme');
-        localStorage.setItem('hdex_theme', 'dark');
-        document.getElementById('themeToggle').textContent = '🌙';
-    } else {
-        html.setAttribute('data-theme', 'light');
-        localStorage.setItem('hdex_theme', 'light');
-        document.getElementById('themeToggle').textContent = '☀️';
-    }
-    if (typeof renderOverview === 'function' && currentPeriod) {
-        try { renderAll(); } catch(e) {}
-    }
-}
-(function() {
-    var saved = localStorage.getItem('hdex_theme');
-    if (saved === 'light') document.documentElement.setAttribute('data-theme', 'light');
-})();
-
-// =====================================================================
-// GLOBALS
-// =====================================================================
-var RAW_DATA = [];
-var PERIODS = [];
-var PREV_MONTH_MAP = {};
-var currentPeriod = '';
-var currentSort = 'roas';
-var currentSortDir = 'desc';
-var currentView = 'overview';
-var currentClassFilter = 'all';
-var chartInstances = {};
-var CONTRACTS = [];
-var EVENTS = [];
-var currentEventView = 'byEvent';
-
-// =====================================================================
-// LOAD DATA（取代 google.script.run.getDashboardData()）
-// =====================================================================
-function loadDashboard() {
-    document.getElementById('loading').style.display = 'flex';
-    document.getElementById('dashboard').style.display = 'none';
-
-    Promise.all([apiGet('getData'), apiGet('getContractsAndEvents')])
-        .then(function(results) {
-            var result = results[0];
-            var ceData = results[1];
-            RAW_DATA = result.data;
-            PERIODS = result.periods;
-            currentPeriod = PERIODS[PERIODS.length - 1];
-            CONTRACTS = ceData.contracts || [];
-            EVENTS = ceData.events || [];
-
-            PREV_MONTH_MAP = {};
-            for (var i = 1; i < PERIODS.length; i++) {
-                PREV_MONTH_MAP[PERIODS[i]] = PERIODS[i - 1];
-            }
-
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('dashboard').style.display = 'block';
-
-            buildMonthTabs();
-            initEventHandlers();
-            initKolSelect();
-            renderAll();
-            renderBellAlerts();
-        })
-        .catch(function(err) {
-            document.getElementById('loading').innerHTML =
-                '<div style="text-align:center;color:var(--accent-red);font-size:16px;">' +
-                '載入失敗: ' + (err.message || err) +
-                '<br><br><button onclick="loadDashboard()" style="padding:8px 24px;border:1px solid var(--accent-red);border-radius:8px;background:transparent;color:var(--accent-red);cursor:pointer;font-family:Outfit,sans-serif;font-size:14px;">重新載入</button>' +
-                '</div>';
-        });
-}
-
-// =====================================================================
-// HELPERS
-// =====================================================================
-function fmt(n) { return 'NT$ ' + Math.round(n).toLocaleString('en-US'); }
-function fmtNum(n) { return Math.round(n).toLocaleString('en-US'); }
-function fmtDec(n, d) { d = d || 2; return n.toFixed(d); }
-function pct(n) {
-    if (n === Infinity || n === -Infinity) return '—';
-    return (n >= 0 ? '+' : '') + n.toFixed(1) + '%';
-}
-
-function buildMonthTabs() {
-    var tabsContainer = document.getElementById('monthTabs');
-    tabsContainer.innerHTML = PERIODS.map(function(p) {
-        var activeClass = (p === currentPeriod) ? ' active' : '';
-        return '<button class="tab-btn' + activeClass + '" data-month="' + p + '">' + p + '</button>';
-    }).join('');
-}
-
-function computeRow(r) {
-    var commission = r.amount * r.rate;
-    var totalPayment = r.sponsorship + commission;
-    var totalCost = totalPayment + r.credit;
-    var roas = totalCost > 0 ? r.amount / totalCost : (r.amount > 0 ? 999 : 0);
-    var aov = r.orders > 0 ? r.amount / r.orders : 0;
-    var costPerOrder = r.orders > 0 ? totalCost / r.orders : 0;
-    var salesPerFollower = r.followers > 0 ? r.amount / r.followers : 0;
-    var result = {};
-    for (var key in r) { result[key] = r[key]; }
-    result.commission = commission;
-    result.totalPayment = totalPayment;
-    result.totalCost = totalCost;
-    result.roas = roas;
-    result.aov = aov;
-    result.costPerOrder = costPerOrder;
-    result.salesPerFollower = salesPerFollower;
-    return result;
-}
-
-function getMonthData(month) {
-    return RAW_DATA.filter(function(r) { return r.period === month; }).map(computeRow);
-}
-
-function getTier(r) {
-    if (r.roas >= 3 && r.amount >= 50000) return 'S';
-    if (r.roas >= 2 || r.amount >= 30000) return 'A';
-    if (r.roas >= 1 && r.roas < 2 && r.totalCost > 0 && r.amount > 0) return 'B';
-    if (r.roas < 1 && r.totalCost > 0) return 'C';
-    if (r.amount === 0 && r.orders === 0) return 'D';
-    if (r.roas >= 3) return 'S';
-    if (r.roas >= 2) return 'A';
-    if (r.roas >= 1) return 'B';
-    return 'C';
-}
-
-function getRecTag(tier) {
-    if (tier === 'S' || tier === 'A') return { text:'加碼', cls:'rec-boost' };
-    if (tier === 'B') return { text:'觀察', cls:'rec-watch' };
-    if (tier === 'C') return { text:'減碼', cls:'rec-reduce' };
-    return { text:'停止', cls:'rec-stop' };
-}
-
-function getMoM(name, month) {
-    var prev = PREV_MONTH_MAP[month];
-    if (!prev) return { type:'none' };
-    var curData = getMonthData(month).find(function(r) { return r.name === name; });
-    var prevData = getMonthData(prev).find(function(r) { return r.name === name; });
-    var cur = curData ? curData.amount : 0;
-    var prv = prevData ? prevData.amount : 0;
-    if (prv === 0 && cur === 0) return { type:'flat', text:'—' };
-    if (prv === 0 && cur > 0) return { type:'new', text:'NEW', pct: 100 };
-    var change = ((cur - prv) / prv) * 100;
-    if (change > 0) return { type:'up', text:'▲ ' + pct(change), pct: change };
-    if (change < 0) return { type:'down', text:'▼ ' + pct(change), pct: change };
-    return { type:'flat', text:'—', pct: 0 };
-}
-
-function getGrowthTrend(name, month) {
-    var mom = getMoM(name, month);
-    if (mom.type === 'up' || mom.type === 'new') return 'growing';
-    if (mom.type === 'down') return 'declining';
-    return 'flat';
-}
-
-function destroyChart(id) {
-    if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; }
-}
-function destroyAllCharts() {
-    Object.keys(chartInstances).forEach(function(id) { chartInstances[id].destroy(); });
-    chartInstances = {};
-}
-
-// =====================================================================
-// RENDER FUNCTIONS（與原版完全相同，不重複說明）
-// =====================================================================
-function renderKPI() {
-    var data = getMonthData(currentPeriod);
-    var prev = PREV_MONTH_MAP[currentPeriod];
-    var prevData = prev ? getMonthData(prev) : null;
-    var totalSales = data.reduce(function(s,r) { return s + r.amount; }, 0);
-    var totalCost = data.reduce(function(s,r) { return s + r.totalCost; }, 0);
-    var overallRoas = totalCost > 0 ? totalSales / totalCost : 0;
-    var totalOrders = data.reduce(function(s,r) { return s + r.orders; }, 0);
-    var activeKols = data.filter(function(r) { return r.amount > 0 || r.orders > 0; }).length;
-    var prevTotalSales=0, prevTotalCost=0, prevOverallRoas=0, prevTotalOrders=0, prevActiveKols=0;
-    if (prevData) {
-        prevTotalSales = prevData.reduce(function(s,r) { return s + r.amount; }, 0);
-        prevTotalCost = prevData.reduce(function(s,r) { return s + r.totalCost; }, 0);
-        prevOverallRoas = prevTotalCost > 0 ? prevTotalSales / prevTotalCost : 0;
-        prevTotalOrders = prevData.reduce(function(s,r) { return s + r.orders; }, 0);
-        prevActiveKols = prevData.filter(function(r) { return r.amount > 0 || r.orders > 0; }).length;
-    }
-    function momBadge(cur, prv) {
-        if (!prev) return '<span class="mom-badge mom-flat">—</span>';
-        if (prv === 0 && cur === 0) return '<span class="mom-badge mom-flat">—</span>';
-        if (prv === 0 && cur > 0) return '<span class="mom-badge mom-up">NEW</span>';
-        var ch = ((cur - prv) / prv) * 100;
-        if (ch > 0) return '<span class="mom-badge mom-up">▲ +' + ch.toFixed(1) + '%</span>';
-        if (ch < 0) return '<span class="mom-badge mom-down">▼ ' + ch.toFixed(1) + '%</span>';
-        return '<span class="mom-badge mom-flat">—</span>';
-    }
-    var ambassadorPosted = data.filter(function(r) { return r.classification === 'AMBASSADOR' && r.igPosted === true; }).length;
-    var ambassadorTotal  = data.filter(function(r) { return r.classification === 'AMBASSADOR'; }).length;
-    var partnerPosted    = data.filter(function(r) { return r.classification === 'PARTNER' && r.igPosted === true; }).length;
-    var partnerTotal     = data.filter(function(r) { return r.classification === 'PARTNER'; }).length;
-    var kpis = [
-        { label:'總銷售額', value: fmt(totalSales), mom: momBadge(totalSales, prevTotalSales) },
-        { label:'總支出（含 Credit）', value: fmt(totalCost), mom: momBadge(totalCost, prevTotalCost) },
-        { label:'整體 ROAS', value: fmtDec(overallRoas) + 'x', mom: momBadge(overallRoas, prevOverallRoas) },
-        { label:'總訂單數', value: fmtNum(totalOrders), mom: momBadge(totalOrders, prevTotalOrders) },
-        { label:'有產出 KOL', value: activeKols + ' / ' + data.length, mom: momBadge(activeKols, prevActiveKols) },
-        { label:'✨ Ambassador 發文', value: ambassadorPosted + ' / ' + ambassadorTotal, mom: '<span style="color:#ffc542;font-size:12px;">Post/Reels</span>' },
-        { label:'👥 Partner 發文', value: partnerPosted + ' / ' + partnerTotal, mom: '<span style="color:#4d9cff;font-size:12px;">Story/Post/Reels</span>' },
-    ];
-    var row = document.getElementById('kpiRow');
-    row.innerHTML = kpis.map(function(k,i) {
-        return '<div class="card kpi-card fade-up delay-' + (i+2) + '">' +
-            '<div class="kpi-label">' + k.label + '</div>' +
-            '<div class="kpi-value mono">' + k.value + '</div>' +
-            k.mom + '</div>';
-    }).join('');
-}
-
-function renderSalesVsCost() {
-    destroyChart('chartSalesVsCost');
-    var data = getMonthData(currentPeriod).filter(function(r) { return r.amount > 0 || r.totalCost > 0; }).sort(function(a,b) { return b.amount - a.amount; });
-    var ctx = document.getElementById('chartSalesVsCost').getContext('2d');
-    chartInstances['chartSalesVsCost'] = new Chart(ctx, {
-        type: 'bar',
-        data: { labels: data.map(function(r) { return r.name; }), datasets: [
-            { label:'銷售額', data: data.map(function(r) { return Math.round(r.amount); }), backgroundColor:'rgba(0,232,143,0.7)', borderRadius:4 },
-            { label:'總支出', data: data.map(function(r) { return Math.round(r.totalCost); }), backgroundColor:'rgba(255,77,106,0.7)', borderRadius:4 },
-        ]},
-        options: { responsive:true, plugins:{ legend:{labels:{color:'#7a7a8e',font:{family:'Outfit'}}}, tooltip:{callbacks:{label:function(ctx){return ctx.dataset.label+': NT$ '+ctx.parsed.y.toLocaleString();}}} }, scales:{ x:{ticks:{color:'#7a7a8e',font:{family:'Outfit',size:11},maxRotation:45},grid:{color:'rgba(30,30,46,0.5)'}}, y:{ticks:{color:'#7a7a8e',font:{family:'JetBrains Mono',size:11},callback:function(v){return 'NT$ '+v.toLocaleString();}},grid:{color:'rgba(30,30,46,0.5)'}} } }
-    });
-}
-
-function renderRoasDist() {
-    destroyChart('chartRoasDist');
-    var data = getMonthData(currentPeriod);
-    var tiers = { S:0, A:0, B:0, C:0, D:0 };
-    data.forEach(function(r) { tiers[getTier(r)]++; });
-    var ctx = document.getElementById('chartRoasDist').getContext('2d');
-    chartInstances['chartRoasDist'] = new Chart(ctx, {
-        type: 'doughnut',
-        data: { labels:['S 級','A 級','B 級','C 級','D 級'], datasets:[{ data:[tiers.S,tiers.A,tiers.B,tiers.C,tiers.D], backgroundColor:['#00e88f','#4d9cff','#ffc542','#ff4d6a','#4a4a5e'], borderColor:'#12121a', borderWidth:3 }] },
-        options: { responsive:true, cutout:'60%', plugins:{ legend:{position:'bottom',labels:{color:'#7a7a8e',font:{family:'Outfit'},padding:12}} } }
-    });
-}
-
-function renderTiers() {
-    var data = getMonthData(currentPeriod);
-    var tiered = { S:[], A:[], B:[], C:[], D:[] };
-    data.forEach(function(r) { tiered[getTier(r)].push(r); });
-    var tierInfo = [
-        { key:'S', label:'S 級', cls:'badge-s' },
-        { key:'A', label:'A 級', cls:'badge-a' },
-        { key:'B', label:'B 級', cls:'badge-b' },
-        { key:'C', label:'C 級', cls:'badge-c' },
-        { key:'D', label:'D 級', cls:'badge-d' },
-    ];
-    var section = document.getElementById('tierSection');
-    section.innerHTML = tierInfo.map(function(t) {
-        var kols = tiered[t.key].sort(function(a,b) { return b.amount - a.amount; });
-        var rec = getRecTag(t.key);
-        var chips = kols.length === 0 ? '<span style="color:var(--text-muted);font-size:12px;">無</span>' :
-            kols.map(function(k) {
-                return '<div class="tier-kol-chip"><span class="chip-name">' + k.name + '</span><span class="chip-stat">' + k.orders + '單 ' + fmt(k.amount) + ' ROAS:' + fmtDec(k.roas) + '</span><span class="rec-tag ' + rec.cls + '">' + rec.text + '</span></div>';
-            }).join('');
-        return '<div class="tier-row"><div class="tier-label"><span class="badge ' + t.cls + '">' + t.label + '</span></div><div class="tier-kols">' + chips + '</div></div>';
-    }).join('');
-}
-
-function renderDetailTable() {
-    var data = getMonthData(currentPeriod);
-    if (currentClassFilter === 'AMBASSADOR') data = data.filter(function(r) { return r.classification === 'AMBASSADOR'; });
-    else if (currentClassFilter === 'PARTNER') data = data.filter(function(r) { return r.classification === 'PARTNER'; });
-    else if (currentClassFilter === 'posted') data = data.filter(function(r) { return r.igPosted === true; });
-    else if (currentClassFilter === 'nopost') data = data.filter(function(r) { return r.igPosted === false || r.igPosted === null; });
-    var sortFns = {
-        roas: function(a,b) { return b.roas - a.roas; },
-        amount: function(a,b) { return b.amount - a.amount; },
-        followers: function(a,b) { return b.followers - a.followers; },
-        efficiency: function(a,b) { var ea=a.totalCost>0?a.amount/a.totalCost:(a.amount>0?999:0); var eb=b.totalCost>0?b.amount/b.totalCost:(b.amount>0?999:0); return eb-ea; },
-        growth: function(a,b) { var pa=getMoM(a.name,currentPeriod).pct||0; var pb=getMoM(b.name,currentPeriod).pct||0; return pb-pa; }
-    };
-    var sortFn = sortFns[currentSort] || sortFns.roas;
-    data.sort(function(a, b) {
-        return currentSortDir === 'desc' ? sortFn(a, b) : sortFn(b, a);
-    });
-    var tbody = document.getElementById('detailBody');
-    tbody.innerHTML = data.map(function(r, i) {
-        var tier = getTier(r);
-        var tierCls = 'badge-' + tier.toLowerCase();
-        var mom = getMoM(r.name, currentPeriod);
-        var momHtml = '';
-        if (mom.type==='up') momHtml='<span style="color:var(--accent-green)">'+mom.text+'</span>';
-        else if (mom.type==='new') momHtml='<span class="badge badge-s">NEW</span>';
-        else if (mom.type==='down') momHtml='<span style="color:var(--accent-red)">'+mom.text+'</span>';
-        else momHtml='<span style="color:var(--text-muted)">—</span>';
-        var clsBadge = r.classification==='AMBASSADOR' ? '<span class="badge-ambassador">AMB</span>' : '<span class="badge-partner">PAR</span>';
-        var igHtml;
-        if (r.igPosted===true) {
-            var details=[];
-            if(r.story>0) details.push('S:'+r.story);
-            if(r.post>0) details.push('P:'+r.post);
-            if(r.reels>0) details.push('R:'+r.reels);
-            igHtml='<span class="ig-yes">✅</span><br><small style="color:#7a7a8e;font-size:10px;">'+details.join(' ')+'</small>';
-        } else if (r.igPosted===false) { igHtml='<span class="ig-no">❌</span>'; }
-        else { igHtml='<span class="ig-na">—</span>'; }
-        return '<tr><td>'+(i+1)+'</td><td>'+clsBadge+'</td><td class="text-col"><strong>'+r.name+'</strong><br><small style="color:var(--text-muted)">'+fmtNum(r.followers)+' 粉絲</small></td><td>'+fmtNum(r.followers)+'</td><td>'+r.orders+'</td><td>'+fmt(r.amount)+'</td><td>'+(r.aov>0?fmt(r.aov):'—')+'</td><td>'+fmt(r.sponsorship)+'</td><td>'+fmt(r.credit)+'</td><td>'+fmt(r.commission)+'</td><td>'+fmt(r.totalCost)+'</td><td><span class="badge '+tierCls+'">'+fmtDec(r.roas)+'x</span></td><td>'+momHtml+'</td><td><span class="badge '+tierCls+'">'+tier+'</span></td><td style="text-align:center;">'+igHtml+'</td></tr>';
-    }).join('');
-}
-
-function renderInsights() {
-    var data = getMonthData(currentPeriod);
-    var top5 = data.slice().sort(function(a,b){return b.amount-a.amount;}).slice(0,5);
-    document.getElementById('topSalesList').innerHTML = top5.map(function(r,i) {
-        return '<li><span class="insight-rank">'+(i+1)+'</span><span class="insight-name">'+r.name+'</span><span class="insight-val" style="color:var(--accent-green)">'+fmt(r.amount)+'</span></li>';
-    }).join('');
-    var alerts = data.filter(function(r){return r.totalCost>0&&r.roas<1;}).sort(function(a,b){return b.totalCost-a.totalCost;});
-    document.getElementById('alertList').innerHTML = alerts.length===0 ?
-        '<li><span style="color:var(--text-muted)">無高成本低產出 KOL</span></li>' :
-        alerts.map(function(r,i){return '<li><span class="insight-rank">'+(i+1)+'</span><span class="insight-name">'+r.name+'</span><span class="insight-val" style="color:var(--accent-red)">ROAS '+fmtDec(r.roas)+'x · 成本 '+fmt(r.totalCost)+'</span></li>';}).join('');
-}
-
-function renderGrowthChart() {
-    destroyChart('chartGrowth');
-    var prev = PREV_MONTH_MAP[currentPeriod];
-    if (!prev) { document.getElementById('chartGrowth').parentElement.innerHTML='<p style="color:var(--text-muted);text-align:center;padding:40px 0;">首月無比較數據</p>'; return; }
-    var curData = getMonthData(currentPeriod);
-    var prevData = getMonthData(prev);
-    var growthData = [];
-    curData.forEach(function(r) {
-        var p = prevData.find(function(x){return x.name===r.name;});
-        var prv = p?p.amount:0;
-        if(r.amount===0&&prv===0) return;
-        var change = prv===0&&r.amount>0?100:(prv>0&&r.amount===0?-100:((r.amount-prv)/prv)*100);
-        growthData.push({name:r.name,change:change});
-    });
-    growthData.sort(function(a,b){return b.change-a.change;});
-    var ctx = document.getElementById('chartGrowth').getContext('2d');
-    chartInstances['chartGrowth'] = new Chart(ctx, {
-        type:'bar',
-        data:{labels:growthData.map(function(d){return d.name;}),datasets:[{label:'MoM 變化 %',data:growthData.map(function(d){return Math.round(d.change);}),backgroundColor:growthData.map(function(d){return d.change>=0?'rgba(0,232,143,0.7)':'rgba(255,77,106,0.7)';}),borderRadius:4}]},
-        options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ctx.parsed.x+'%';}}}},scales:{x:{ticks:{color:'#7a7a8e',font:{family:'JetBrains Mono',size:11},callback:function(v){return v+'%';}},grid:{color:'rgba(30,30,46,0.5)'}},y:{ticks:{color:'#7a7a8e',font:{family:'Outfit',size:11}},grid:{display:false}}}}
-    });
-}
-
-function renderEfficiencyChart() {
-    destroyChart('chartEfficiency');
-    var data = getMonthData(currentPeriod).filter(function(r){return r.totalCost>0&&r.amount>0;});
-    data.sort(function(a,b){return (b.amount/b.totalCost)-(a.amount/a.totalCost);});
-    var ctx = document.getElementById('chartEfficiency').getContext('2d');
-    chartInstances['chartEfficiency'] = new Chart(ctx, {
-        type:'bar',
-        data:{labels:data.map(function(r){return r.name;}),datasets:[{label:'每 NT$1 帶回銷售額',data:data.map(function(r){return parseFloat((r.amount/r.totalCost).toFixed(2));}),backgroundColor:data.map(function(r){var e=r.amount/r.totalCost;return e>=3?'rgba(0,232,143,0.7)':(e>=1?'rgba(77,156,255,0.7)':'rgba(255,77,106,0.7)');}),borderRadius:4}]},
-        options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return 'NT$ '+ctx.parsed.x.toFixed(2);}}}},scales:{x:{ticks:{color:'#7a7a8e',font:{family:'JetBrains Mono',size:11}},grid:{color:'rgba(30,30,46,0.5)'}},y:{ticks:{color:'#7a7a8e',font:{family:'Outfit',size:11}},grid:{display:false}}}}
-    });
-}
-
-function renderAOVChart() {
-    destroyChart('chartAOV');
-    var data = getMonthData(currentPeriod).filter(function(r){return r.orders>0;}).sort(function(a,b){return b.aov-a.aov;});
-    var ctx = document.getElementById('chartAOV').getContext('2d');
-    chartInstances['chartAOV'] = new Chart(ctx, {
-        type:'bar',
-        data:{labels:data.map(function(r){return r.name;}),datasets:[{label:'客單價',data:data.map(function(r){return Math.round(r.aov);}),backgroundColor:'rgba(168,85,247,0.7)',borderRadius:4}]},
-        options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return 'NT$ '+ctx.parsed.y.toLocaleString();}}}},scales:{x:{ticks:{color:'#7a7a8e',font:{family:'Outfit',size:11},maxRotation:45},grid:{color:'rgba(30,30,46,0.5)'}},y:{ticks:{color:'#7a7a8e',font:{family:'JetBrains Mono',size:11},callback:function(v){return 'NT$ '+v.toLocaleString();}},grid:{color:'rgba(30,30,46,0.5)'}}}}
-    });
-}
-
-function renderBudgetRec() {
-    var data = getMonthData(currentPeriod);
-    function zeroMonths(name) {
-        var count=0; var mi=PERIODS.indexOf(currentPeriod);
-        for(var i=mi;i>=0;i--){var md=getMonthData(PERIODS[i]).find(function(r){return r.name===name;});if(md&&md.amount===0&&md.orders===0)count++;else break;}
-        return count;
-    }
-    var rows = data.map(function(r) {
-        var tier=getTier(r); var trend=getGrowthTrend(r.name,currentPeriod); var mom=getMoM(r.name,currentPeriod); var rec='',budget='';
-        if(tier==='S'&&trend==='growing'){rec='🔥 強力加碼 — 提高底薪或 Credit，爭取獨家合作';budget='▲ +30~50%';}
-        else if(tier==='S'){rec='✅ 維持投入 — 持續合作，嘗試新活動類型';budget='維持';}
-        else if(tier==='A'&&trend==='growing'){rec='📈 適度加碼 — 增加 Credit 或提高抽傭比例';budget='▲ +15~30%';}
-        else if(tier==='A'){rec='✅ 維持觀察 — 保持現有投入，關注下月表現';budget='維持';}
-        else if(tier==='B'){rec='⚠️ 觀察期 — 維持最低投入，設定 KPI 目標';budget='維持或 ▼ -10%';}
-        else if(tier==='C'){rec='🔻 考慮減碼 — 降低底薪或 Credit，轉為純分潤';budget='▼ -30~50%';}
-        else if(tier==='D'&&zeroMonths(r.name)>=2){rec='❌ 建議停止 — 連續無產出，建議終止合作';budget='歸零';}
-        else{rec='⏳ 最後觀察 — 給予一個月觀察期';budget='維持最低';}
-        var trendHtml=mom.type==='up'?'<span style="color:var(--accent-green)">▲</span>':(mom.type==='new'?'<span style="color:var(--accent-green)">▲ NEW</span>':(mom.type==='down'?'<span style="color:var(--accent-red)">▼</span>':'<span style="color:var(--text-muted)">—</span>'));
-        var tierCls='badge-'+tier.toLowerCase();
-        return Object.assign({},r,{tier:tier,rec:rec,budget:budget,trendHtml:trendHtml,tierCls:tierCls});
-    });
-    var tierOrder={S:0,A:1,B:2,C:3,D:4};
-    rows.sort(function(a,b){return tierOrder[a.tier]-tierOrder[b.tier]||b.amount-a.amount;});
-    document.getElementById('budgetBody').innerHTML = rows.map(function(r) {
-        return '<tr><td class="text-col"><strong>'+r.name+'</strong></td><td>'+fmt(r.amount)+'</td><td><span class="badge '+r.tierCls+'">'+fmtDec(r.roas)+'x</span></td><td>'+r.trendHtml+'</td><td><span class="badge '+r.tierCls+'">'+r.tier+'</span></td><td class="text-col">'+r.rec+'</td><td class="text-col" style="font-weight:600">'+r.budget+'</td></tr>';
-    }).join('');
-}
-
-function renderTrendChart() {
-    destroyChart('chartTrend');
-    var monthlyAgg = PERIODS.map(function(m) {
-        var d=getMonthData(m);
-        return {month:m,sales:d.reduce(function(s,r){return s+r.amount;},0),cost:d.reduce(function(s,r){return s+r.totalCost;},0)};
-    });
-    var ctx = document.getElementById('chartTrend').getContext('2d');
-    chartInstances['chartTrend'] = new Chart(ctx, {
-        type:'line',
-        data:{labels:monthlyAgg.map(function(d){return d.month;}),datasets:[
-            {label:'總銷售額',data:monthlyAgg.map(function(d){return Math.round(d.sales);}),borderColor:'#00e88f',backgroundColor:'rgba(0,232,143,0.1)',fill:true,tension:0.4,pointRadius:6,pointBackgroundColor:'#00e88f',yAxisID:'y'},
-            {label:'總支出',data:monthlyAgg.map(function(d){return Math.round(d.cost);}),borderColor:'#ff4d6a',backgroundColor:'rgba(255,77,106,0.1)',fill:true,tension:0.4,pointRadius:6,pointBackgroundColor:'#ff4d6a',yAxisID:'y1'}
-        ]},
-        options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#7a7a8e',font:{family:'Outfit'}}},tooltip:{callbacks:{label:function(ctx){return ctx.dataset.label+': NT$ '+ctx.parsed.y.toLocaleString();}}}},scales:{x:{ticks:{color:'#7a7a8e',font:{family:'Outfit'}},grid:{color:'rgba(30,30,46,0.5)'}},y:{type:'linear',position:'left',ticks:{color:'#00e88f',font:{family:'JetBrains Mono',size:11},callback:function(v){return 'NT$ '+(v/1000).toFixed(0)+'K';}},grid:{color:'rgba(30,30,46,0.3)'}},y1:{type:'linear',position:'right',ticks:{color:'#ff4d6a',font:{family:'JetBrains Mono',size:11},callback:function(v){return 'NT$ '+(v/1000).toFixed(0)+'K';}},grid:{drawOnChartArea:false}}}}
-    });
-}
-
-function renderBubbleChart() {
-    destroyChart('chartBubble');
-    var data = getMonthData(currentPeriod).filter(function(r){return r.amount>0;});
-    var ctx = document.getElementById('chartBubble').getContext('2d');
-    chartInstances['chartBubble'] = new Chart(ctx, {
-        type:'bubble',
-        data:{datasets:[{label:'KOL',data:data.map(function(r){return {x:r.followers/1000,y:Math.round(r.amount),r:Math.max(4,Math.min(30,r.orders*1.5)),name:r.name};}),backgroundColor:data.map(function(r){var t=getTier(r);return t==='S'?'rgba(0,232,143,0.6)':(t==='A'?'rgba(77,156,255,0.6)':(t==='B'?'rgba(255,197,66,0.6)':'rgba(255,77,106,0.6))'));})}]},
-        options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){var d=ctx.raw;return d.name+': '+d.x.toFixed(1)+'K 粉絲, NT$ '+d.y.toLocaleString();}}}},scales:{x:{title:{display:true,text:'粉絲數 (K)',color:'#7a7a8e',font:{family:'Outfit'}},ticks:{color:'#7a7a8e',font:{family:'JetBrains Mono',size:11}},grid:{color:'rgba(30,30,46,0.5)'}},y:{title:{display:true,text:'銷售額 (NT$)',color:'#7a7a8e',font:{family:'Outfit'}},ticks:{color:'#7a7a8e',font:{family:'JetBrains Mono',size:11},callback:function(v){return 'NT$ '+v.toLocaleString();}},grid:{color:'rgba(30,30,46,0.5)'}}}}
-    });
-}
-
-// =====================================================================
-// 個人分析：多選 KOL + 多選月份
-// =====================================================================
-var selectedKols = [];
-var selectedMonths = [];
-
-var CHART_COLORS = [
-    '#00e88f','#4d9cff','#ffc542','#ff4d6a','#a855f7',
-    '#ff9f43','#00cec9','#fd79a8','#6c5ce7','#55efc4',
-    '#fdcb6e','#e17055','#74b9ff','#fab1a0','#81ecec'
-];
-
-function initKolSelect() {
-    // 取得所有 KOL 及其分類（以最新月份為準）
-    var kolMap = {};
-    RAW_DATA.forEach(function(r) {
-        if (!kolMap[r.name]) {
-            kolMap[r.name] = r.classification || 'OTHER';
+// ============================================================
+// KOL Dashboard Web App - Standalone Version
+// Hosted under timlin312@notag.com.tw
+// Spreadsheet owner: timhunterrich@gmail.com (shared to timlin312)
+// ============================================================
+
+// ---- Spreadsheet IDs ----
+var SS_ID    = '1Mui2WGqrxfpm_KDUxkTYCNdvvM_xH4qMQsyHHy8wYCE'; // HDEX KOL
+var IG_SHEET_ID = '13lviPbFp2lg-zSeVK1zLH7rtptKYi0q5tbTqA9ZD4BE'; // IG data
+
+function getSpreadsheet_() {
+  return SpreadsheetApp.openById(SS_ID);
+}
+
+// ---- Config ----
+var CONFIG = {
+  MAIN_SHEET: '工作表1',
+  IMPORT_SHEET: 'Raw_Import',
+  SETTINGS_SHEET: 'KOL 每月設定',
+  UNMATCHED_SHEET: 'Unmatched_Codes',
+  KOL_COUNT: 34,
+  CSV_COL_DISCOUNT_NAME: 0,
+  CSV_COL_ORDERS: 5,
+  CSV_COL_TOTAL_SALES: 11,
+  COL_NAME: 3,
+  COL_DISCOUNT: 4,
+  COL_PERIOD: 5,
+  COL_ORDERS: 6,
+  COL_TOTAL_SALES: 7,
+  COL_COMMISSION: 8,
+  COL_COMMISSION_RATE: 9,
+  COL_SPONSORSHIP: 10,
+  COL_TOTAL_PAYMENT: 11,
+  COL_CREDIT: 12,
+  COL_ROAS: 13,
+};
+
+// ---- Web App Entry Point ----
+// 同時支援兩種模式：
+//   1. 無 action 參數 → 回傳 Dashboard HTML（舊版，你原本的 Apps Script 連結繼續可用）
+//   2. action=getData / action=getSettingsUrl / action=importCsv → 回傳 JSON（給 GitHub Pages 版使用）
+function doGet(e) {
+  var action = e && e.parameter && e.parameter.action;
+
+  // ── JSON API 模式 ──────────────────────────────────────────
+  if (action === 'getData') {
+    var result = getDashboardData();
+    return ContentService
+      .createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  if (action === 'verifyPassword') {
+    var inputPw = e && e.parameter && e.parameter.pw ? e.parameter.pw : '';
+    var correct = inputPw === 'notag';
+    return ContentService
+      .createTextOutput(JSON.stringify({ ok: correct }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  if (action === 'getSettingsUrl') {
+    var url = getSettingsSheetUrl();
+    return ContentService
+      .createTextOutput(JSON.stringify({ url: url }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  if (action === 'getContractsAndEvents') {
+    var ceResult = getContractsAndEvents();
+    return ContentService
+      .createTextOutput(JSON.stringify(ceResult))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+
+  // ── HTML 模式（原本的 Apps Script 網頁，維持不動）──────────
+  return HtmlService.createHtmlOutputFromFile('Dashboard')
+    .setTitle('HDEX KOL Dashboard')
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+// importCsv 改用 doPost 接收，避免 CSV 內容過長導致 URL 超限
+function doPost(e) {
+  try {
+    var action = e && e.parameter && e.parameter.action;
+    if (action === 'importCsv') {
+      var rawBody = e.postData && e.postData.contents ? e.postData.contents : '';
+      var csvText = rawBody;
+      var overwritePeriod = '';
+      // 嘗試解析 JSON（覆蓋模式會帶 {csv, overwrite}）
+      if (rawBody.charAt(0) === '{') {
+        try {
+          var parsed = JSON.parse(rawBody);
+          csvText = parsed.csv || '';
+          overwritePeriod = parsed.overwrite || '';
+        } catch(pe) {
+          csvText = rawBody;
         }
-    });
+      }
+      var result = importCsvFromWeb(csvText, overwritePeriod);
+      return ContentService
+        .createTextOutput(JSON.stringify(result))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    if (action === 'saveContract') {
+      var obj = JSON.parse(e.postData.contents);
+      var r = saveContractToSheet(obj);
+      return ContentService.createTextOutput(JSON.stringify(r)).setMimeType(ContentService.MimeType.JSON);
+    }
 
-    var groups = { AMBASSADOR: [], PARTNER: [], OTHER: [] };
-    Object.keys(kolMap).sort().forEach(function(name) {
-        var cls = kolMap[name];
-        if (groups[cls]) groups[cls].push(name);
-        else groups['OTHER'].push(name);
-    });
+    if (action === 'saveEvent') {
+      var obj2 = JSON.parse(e.postData.contents);
+      var r2 = saveEventToSheet(obj2);
+      return ContentService.createTextOutput(JSON.stringify(r2)).setMimeType(ContentService.MimeType.JSON);
+    }
 
-    var groupLabels = {
-        AMBASSADOR: '✨ Ambassador',
-        PARTNER: '👥 Partner',
-        OTHER: '📌 Other'
-    };
-    var groupColors = {
-        AMBASSADOR: 'rgba(255,197,66,0.12)',
-        PARTNER: 'rgba(77,156,255,0.12)',
-        OTHER: 'rgba(122,122,142,0.12)'
-    };
-    var groupBorders = {
-        AMBASSADOR: '#ffc542',
-        PARTNER: '#4d9cff',
-        OTHER: '#7a7a8e'
-    };
+    if (action === 'deleteEvent') {
+      var obj3 = JSON.parse(e.postData.contents);
+      var r3 = deleteEventFromSheet(obj3.name);
+      return ContentService.createTextOutput(JSON.stringify(r3)).setMimeType(ContentService.MimeType.JSON);
+    }
 
-    var kolGroup = document.getElementById('kolCheckboxGroup');
-    kolGroup.innerHTML = ['AMBASSADOR','PARTNER','OTHER'].map(function(cls) {
-        var names = groups[cls];
-        if (names.length === 0) return '';
-        var tags = names.map(function(n) {
-            return '<button class="kol-tag" data-kol="' + n + '" data-cls="' + cls + '" onclick="toggleKol(this)">' + n + '</button>';
-        }).join('');
-        return '<div style="width:100%;margin-bottom:10px;">' +
-            '<div style="font-size:11px;font-weight:600;color:' + groupBorders[cls] + ';letter-spacing:0.05em;margin-bottom:6px;padding:3px 8px;background:' + groupColors[cls] + ';border-radius:6px;display:inline-block;">' + groupLabels[cls] + '</div>' +
-            '<div style="display:flex;flex-wrap:wrap;gap:8px;">' + tags + '</div>' +
-            '</div>';
-    }).join('');
+    if (action === 'askAI') {
+      var pw2 = e && e.parameter && e.parameter.pw ? e.parameter.pw : '';
+      if (pw2 !== 'notag') {
+        return ContentService.createTextOutput(JSON.stringify({ error: '未授權' })).setMimeType(ContentService.MimeType.JSON);
+      }
+      var body = JSON.parse(e.postData.contents);
+      var aiResult = callGeminiAPI_(body.messages || [], body.context || '');
+      return ContentService.createTextOutput(JSON.stringify(aiResult)).setMimeType(ContentService.MimeType.JSON);
+    }
 
-    // Month checkbox tags
-    var monthGroup = document.getElementById('monthCheckboxGroup');
-    monthGroup.innerHTML = PERIODS.map(function(p) {
-        return '<button class="month-tag selected" data-month="' + p + '" onclick="toggleMonth(this)">' + p + '</button>';
-    }).join('');
-
-    // 預設全選月份
-    selectedMonths = PERIODS.slice();
-    selectedKols = [];
+    return ContentService
+      .createTextOutput(JSON.stringify({ success: false, message: 'Unknown action' }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ success: false, message: err.message }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
 }
 
-function toggleKol(btn) {
-    var kol = btn.dataset.kol;
-    btn.classList.toggle('selected');
-    if (btn.classList.contains('selected')) {
-        if (selectedKols.indexOf(kol) === -1) selectedKols.push(kol);
+// ---- Dashboard Data ----
+function getDashboardData() {
+  var ss = getSpreadsheet_();
+  var sheet = ss.getSheetByName('工作表1');
+  var lastRow = sheet.getLastRow();
+
+  if (lastRow < 2) {
+    return { data: [], periods: [] };
+  }
+
+  var range = sheet.getRange(2, 1, lastRow - 1, 13);
+  var values = range.getValues();
+
+  var records = [];
+  var periodOrder = [];
+  var periodSet = {};
+
+  for (var i = 0; i < values.length; i++) {
+    var row = values[i];
+    var name = row[2] != null ? String(row[2]).trim() : '';
+    var discount = row[3] != null ? String(row[3]).trim() : '';
+    if (name === '' && discount === '') continue;
+
+    var periodRaw = row[4] != null ? String(row[4]).trim() : '';
+    var periodLabel = convertPeriodToLabel(periodRaw);
+
+    if (periodLabel !== '' && !periodSet[periodLabel]) {
+      periodSet[periodLabel] = true;
+      periodOrder.push(periodLabel);
+    }
+
+    records.push({
+      name: name,
+      discount: discount,
+      followers: toNumber(row[1]),
+      period: periodLabel,
+      orders: toNumber(row[5]),
+      amount: toNumber(row[6]),
+      rate: toNumber(row[8]),
+      sponsorship: toNumber(row[9]),
+      credit: toNumber(row[11]),
+      classification: getKolClassification(name)
+    });
+  }
+
+  var igDataByPeriod = loadIgDataForPeriods_(periodOrder);
+
+  for (var i = 0; i < records.length; i++) {
+    var rec = records[i];
+    var igMap = igDataByPeriod[rec.period] || {};
+    var igRec = findIgRecord_(rec.name, igMap);
+    if (igRec) {
+      rec.story = igRec.story;
+      rec.post  = igRec.post;
+      rec.reels = igRec.reels;
+      if (rec.classification === 'AMBASSADOR') {
+        rec.igPosted = (igRec.post > 0 || igRec.reels > 0);
+      } else {
+        rec.igPosted = (igRec.story > 0 || igRec.post > 0 || igRec.reels > 0);
+      }
     } else {
-        selectedKols = selectedKols.filter(function(k) { return k !== kol; });
+      rec.story = null;
+      rec.post  = null;
+      rec.reels = null;
+      rec.igPosted = null;
     }
-    renderIndividual();
+  }
+
+  return { data: records, periods: periodOrder };
 }
 
-function toggleMonth(btn) {
-    var month = btn.dataset.month;
-    btn.classList.toggle('selected');
-    if (btn.classList.contains('selected')) {
-        if (selectedMonths.indexOf(month) === -1) selectedMonths.push(month);
+function convertPeriodToLabel(periodStr) {
+  if (!periodStr || periodStr === '') return '';
+  var match = String(periodStr).match(/^(\d+)\//);
+  if (match && match[1]) return match[1] + '月';
+  return periodStr;
+}
+
+function toNumber(val) {
+  if (val === null || val === undefined || val === '') return 0;
+  if (typeof val === 'number') return val;
+  var parsed = parseFloat(val);
+  return isNaN(parsed) ? 0 : parsed;
+}
+
+function getSettingsSheetUrl() {
+  var ss = getSpreadsheet_();
+  var sheet = ss.getSheetByName('KOL 每月設定');
+  if (!sheet) return ss.getUrl();
+  return ss.getUrl() + '?gid=' + sheet.getSheetId() + '#gid=' + sheet.getSheetId();
+}
+
+// ---- CSV Import from Web ----
+function importCsvFromWeb(csvText, overwritePeriod) {
+  try {
+    var ss = getSpreadsheet_();
+    var mainSheet = ss.getSheetByName(CONFIG.MAIN_SHEET);
+
+    if (!mainSheet) {
+      return { success: false, message: '找不到「工作表1」，請確認試算表結構正確。' };
+    }
+
+    var importData = parseCsv_(csvText);
+    if (importData.length < 2) {
+      return { success: false, message: 'CSV 檔案內容不足，請確認格式正確。' };
+    }
+
+    var detection = findTargetBlock_();
+    if (!detection) {
+      return { success: false, message: '找不到任何月份區塊，請確認「工作表1」的資料結構。' };
+    }
+
+    var targetStart, targetEnd, targetPeriod;
+
+    if (detection.isEmpty) {
+      targetStart = detection.block.startRow;
+      targetEnd = detection.block.endRow;
+      targetPeriod = detection.block.period;
+    } else if (overwritePeriod) {
+      // 覆蓋模式：找指定月份的區塊
+      var targetBlock = null;
+      for (var b2 = 0; b2 < detection.allBlocks.length; b2++) {
+        if (detection.allBlocks[b2].period === overwritePeriod) {
+          targetBlock = detection.allBlocks[b2];
+          break;
+        }
+      }
+      if (!targetBlock) {
+        return { success: false, message: '找不到月份「' + overwritePeriod + '」' };
+      }
+      targetStart = targetBlock.startRow;
+      targetEnd = targetBlock.endRow;
+      targetPeriod = targetBlock.period;
     } else {
-        selectedMonths = selectedMonths.filter(function(m) { return m !== month; });
-    }
-    // 保持原本 PERIODS 順序
-    selectedMonths.sort(function(a, b) { return PERIODS.indexOf(a) - PERIODS.indexOf(b); });
-    renderIndividual();
-}
-
-function selectAllKols() {
-    document.querySelectorAll('#kolCheckboxGroup .kol-tag').forEach(function(btn) {
-        btn.classList.add('selected');
-        var kol = btn.dataset.kol;
-        if (selectedKols.indexOf(kol) === -1) selectedKols.push(kol);
-    });
-    renderIndividual();
-}
-
-function clearAllKols() {
-    document.querySelectorAll('#kolCheckboxGroup .kol-tag').forEach(function(btn) {
-        btn.classList.remove('selected');
-    });
-    selectedKols = [];
-    renderIndividual();
-}
-
-function selectAllMonths() {
-    document.querySelectorAll('#monthCheckboxGroup .month-tag').forEach(function(btn) {
-        btn.classList.add('selected');
-        var m = btn.dataset.month;
-        if (selectedMonths.indexOf(m) === -1) selectedMonths.push(m);
-    });
-    selectedMonths.sort(function(a, b) { return PERIODS.indexOf(a) - PERIODS.indexOf(b); });
-    renderIndividual();
-}
-
-function clearAllMonths() {
-    document.querySelectorAll('#monthCheckboxGroup .month-tag').forEach(function(btn) {
-        btn.classList.remove('selected');
-    });
-    selectedMonths = [];
-    renderIndividual();
-}
-
-function renderIndividual() {
-    if (selectedKols.length === 0 || selectedMonths.length === 0) {
-        destroyChart('chartPersonalTrend');
-        document.getElementById('tableByPerson').innerHTML = '<div class="no-data-msg">請選擇至少一位 KOL 和一個月份</div>';
-        document.getElementById('tableByMonth').innerHTML = '<div class="no-data-msg">請選擇至少一位 KOL 和一個月份</div>';
-        return;
+      return {
+        success: false,
+        message: '所有月份都已有資料。請選擇要覆蓋的月份後再匯入。',
+        allBlocks: detection.allBlocks
+      };
     }
 
-    // ── 合約區塊（單選一人時顯示）──────────────────────────────
-    var contractBlockEl = document.getElementById('contractBlock');
-    if (!contractBlockEl) {
-        var cb = document.createElement('div'); cb.id='contractBlock';
-        document.getElementById('individualSection').insertBefore(cb, document.getElementById('individualSection').firstChild);
-        contractBlockEl = cb;
-    }
-    if (selectedKols.length === 1) {
-        contractBlockEl.innerHTML = renderContractBlock(selectedKols[0]);
-    } else {
-        contractBlockEl.innerHTML = '';
-    }
-
-    // ── 趨勢折線圖 ──────────────────────────────────────────────
-    destroyChart('chartPersonalTrend');
-    var ctx = document.getElementById('chartPersonalTrend').getContext('2d');
-    var datasets = selectedKols.map(function(name, i) {
-        var color = CHART_COLORS[i % CHART_COLORS.length];
-        return {
-            label: name,
-            data: selectedMonths.map(function(m) {
-                var d = getMonthData(m).find(function(r) { return r.name === name; });
-                return d ? Math.round(d.amount) : 0;
-            }),
-            borderColor: color,
-            backgroundColor: color.replace(')', ',0.08)').replace('rgb', 'rgba'),
-            tension: 0.4,
-            pointRadius: 6,
-            pointBackgroundColor: color,
-            fill: selectedKols.length === 1
+    var settingsMap = {};
+    var settingsSheet = ss.getSheetByName(CONFIG.SETTINGS_SHEET);
+    if (settingsSheet) {
+      var settingsData = settingsSheet.getRange(3, 1, CONFIG.KOL_COUNT, 5).getValues();
+      for (var s = 0; s < settingsData.length; s++) {
+        var sRow = settingsData[s];
+        var sName = String(sRow[0]).trim();
+        if (!sName) continue;
+        settingsMap[String(sRow[1]).trim().toLowerCase()] = {
+          commissionRate: sRow[2] || 0,
+          sponsorship: sRow[3] || 0,
+          credit: sRow[4] || 0
         };
-    });
-    chartInstances['chartPersonalTrend'] = new Chart(ctx, {
-        type: 'line',
-        data: { labels: selectedMonths, datasets: datasets },
-        options: {
-            responsive: true,
-            interaction: { mode: 'index', intersect: false },
-            plugins: { legend: { labels: { color: '#7a7a8e', font: { family: 'Outfit' } } },
-                tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': NT$ ' + ctx.parsed.y.toLocaleString(); } } }
-            },
-            scales: {
-                x: { ticks: { color: '#7a7a8e', font: { family: 'Outfit' } }, grid: { color: 'rgba(30,30,46,0.5)' } },
-                y: { ticks: { color: '#7a7a8e', font: { family: 'JetBrains Mono', size: 11 }, callback: function(v) { return 'NT$ ' + v.toLocaleString(); } }, grid: { color: 'rgba(30,30,46,0.3)' } }
-            }
-        }
-    });
-
-    // ── 表格 A：以人為主 ─────────────────────────────────────────
-    var tableAHtml = selectedKols.map(function(name) {
-        var rows = selectedMonths.map(function(m) {
-            var d = getMonthData(m).find(function(r) { return r.name === name; });
-            if (!d) return '<tr><td class="text-col">' + m + '</td><td colspan="5" style="color:var(--text-muted)">無資料</td></tr>';
-            return '<tr>' +
-                '<td class="text-col">' + m + '</td>' +
-                '<td>' + d.orders + '</td>' +
-                '<td>' + fmt(d.amount) + '</td>' +
-                '<td>' + fmt(d.sponsorship) + '</td>' +
-                '<td>' + fmt(d.credit) + '</td>' +
-                '<td>' + fmt(d.commission) + '</td>' +
-                '</tr>';
-        }).join('');
-        return '<div class="compare-section">' +
-            '<div class="compare-section-title">' + name + '</div>' +
-            '<div class="table-wrap"><table class="compare-table">' +
-            '<thead><tr><th>月份</th><th>訂單</th><th>銷售額</th><th>底薪</th><th>Credit</th><th>分潤額</th></tr></thead>' +
-            '<tbody>' + rows + '</tbody></table></div></div>';
-    }).join('');
-    document.getElementById('tableByPerson').innerHTML = tableAHtml;
-
-    // ── 表格 B：以月份為主 ───────────────────────────────────────
-    var tableBHtml = selectedMonths.map(function(m) {
-        var rows = selectedKols.map(function(name) {
-            var d = getMonthData(m).find(function(r) { return r.name === name; });
-            if (!d) return '<tr><td class="text-col">' + name + '</td><td colspan="5" style="color:var(--text-muted)">無資料</td></tr>';
-            return '<tr>' +
-                '<td class="text-col"><strong>' + name + '</strong></td>' +
-                '<td>' + d.orders + '</td>' +
-                '<td>' + fmt(d.amount) + '</td>' +
-                '<td>' + fmt(d.sponsorship) + '</td>' +
-                '<td>' + fmt(d.credit) + '</td>' +
-                '<td>' + fmt(d.commission) + '</td>' +
-                '</tr>';
-        }).join('');
-        return '<div class="compare-section">' +
-            '<div class="compare-section-title">' + m + '</div>' +
-            '<div class="table-wrap"><table class="compare-table">' +
-            '<thead><tr><th>KOL</th><th>訂單</th><th>銷售額</th><th>底薪</th><th>Credit</th><th>分潤額</th></tr></thead>' +
-            '<tbody>' + rows + '</tbody></table></div></div>';
-    }).join('');
-    document.getElementById('tableByMonth').innerHTML = tableBHtml;
-}
-
-function renderAll() {
-    renderKPI(); renderSalesVsCost(); renderRoasDist(); renderTiers();
-    renderDetailTable(); renderInsights(); renderGrowthChart();
-    renderEfficiencyChart(); renderAOVChart(); renderBudgetRec();
-    renderTrendChart(); renderBubbleChart();
-}
-
-function initEventHandlers() {
-    document.getElementById('monthTabs').addEventListener('click', function(e) {
-        var btn=e.target.closest('.tab-btn'); if(!btn) return;
-        document.querySelectorAll('#monthTabs .tab-btn').forEach(function(b){b.classList.remove('active');});
-        btn.classList.add('active'); currentPeriod=btn.dataset.month;
-        destroyAllCharts(); renderAll();
-        if(currentView==='individual') renderIndividual();
-    });
-    var viewBtns=document.querySelectorAll('#viewTabs .tab-btn');
-    viewBtns.forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            viewBtns.forEach(function(b){b.classList.remove('active');}); this.classList.add('active');
-            currentView=this.dataset.view;
-            document.getElementById('overviewSection').style.display = currentView==='overview' ? '' : 'none';
-            document.getElementById('individualSection').style.display = currentView==='individual' ? 'block' : 'none';
-            document.getElementById('eventsSection').style.display = currentView==='events' ? 'block' : 'none';
-            if(currentView==='overview'){
-                destroyAllCharts(); renderAll();
-            } else if(currentView==='individual'){
-                destroyAllCharts(); renderIndividual();
-            } else if(currentView==='events'){
-                renderEventsTab();
-            }
-        });
-    });
-    document.querySelectorAll('#sortGroup .sort-btn').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            var clickedSort = this.dataset.sort;
-            if (currentSort === clickedSort) {
-                // 同一個按鈕：切換升降序
-                currentSortDir = currentSortDir === 'desc' ? 'asc' : 'desc';
-                this.dataset.dir = currentSortDir;
-                var label = this.textContent.replace(/[↓↑]/g, '');
-                this.textContent = label + (currentSortDir === 'desc' ? '↓' : '↑');
-            } else {
-                // 不同按鈕：切換到新排序，預設降序
-                document.querySelectorAll('#sortGroup .sort-btn').forEach(function(b) {
-                    b.classList.remove('active');
-                    var bl = b.textContent.replace(/[↓↑]/g, '');
-                    b.textContent = bl + '↓';
-                    b.dataset.dir = 'desc';
-                });
-                this.classList.add('active');
-                currentSort = clickedSort;
-                currentSortDir = 'desc';
-                this.textContent = this.textContent.replace(/[↓↑]/g, '') + '↓';
-            }
-            renderDetailTable();
-        });
-    });
-    document.querySelectorAll('#classFilterGroup .filter-btn').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            var clickedFilter = this.dataset.filter;
-            // 發文按鈕切換邏輯
-            if (this.classList.contains('fb-posted')) {
-                if (!this.classList.contains('active')) {
-                    // 從其他按鈕切過來 → 有發文
-                    document.querySelectorAll('#classFilterGroup .filter-btn').forEach(function(b) { b.classList.remove('active'); });
-                    this.classList.add('active');
-                    this.dataset.filter = 'posted';
-                    this.textContent = '✅ 有發文';
-                    currentClassFilter = 'posted';
-                } else if (this.dataset.filter === 'posted') {
-                    // 已是有發文 → 切換成未發文
-                    this.dataset.filter = 'nopost';
-                    this.textContent = '❌ 未發文';
-                    currentClassFilter = 'nopost';
-                } else {
-                    // 已是未發文 → 切換成有發文
-                    this.dataset.filter = 'posted';
-                    this.textContent = '✅ 有發文';
-                    currentClassFilter = 'posted';
-                }
-            } else {
-                document.querySelectorAll('#classFilterGroup .filter-btn').forEach(function(b) {
-                    b.classList.remove('active');
-                    // 重置發文按鈕狀態
-                    if (b.classList.contains('fb-posted')) {
-                        b.dataset.filter = 'posted';
-                        b.textContent = '✅ 有發文';
-                    }
-                });
-                this.classList.add('active');
-                currentClassFilter = clickedFilter;
-            }
-            renderDetailTable();
-        });
-    });
-    var zone=document.getElementById('dropZone');
-    if(zone) {
-        zone.addEventListener('dragover',function(e){e.preventDefault();zone.classList.add('dragover');});
-        zone.addEventListener('dragleave',function(){zone.classList.remove('dragover');});
-        zone.addEventListener('drop',function(e){
-            e.preventDefault(); zone.classList.remove('dragover');
-            var file=e.dataTransfer.files[0];
-            if(file&&file.name.toLowerCase().endsWith('.csv')){
-                document.getElementById('selectedFileName').textContent='已選：'+file.name;
-                var reader=new FileReader();
-                reader.onload=function(ev){_csvFileContent=ev.target.result;document.getElementById('uploadSubmitBtn').disabled=false;};
-                reader.readAsText(file,'UTF-8');
-            }
-        });
-    }
-}
-
-// =====================================================================
-// QUICK ACTIONS（取代 google.script.run）
-// =====================================================================
-var _settingsUrl = null;
-
-function openSettings() {
-    if (_settingsUrl) { window.open(_settingsUrl, '_blank'); return; }
-    apiGet('getSettingsUrl')
-        .then(function(data) { _settingsUrl = data.url; window.open(_settingsUrl, '_blank'); })
-        .catch(function() { window.open('https://docs.google.com/spreadsheets/d/1Mui2WGqrxfpm_KDUxkTYCNdvvM_xH4qMQsyHHy8wYCE', '_blank'); });
-}
-
-var _csvFileContent = null;
-
-function showUploadModal() {
-    _csvFileContent=null;
-    document.getElementById('selectedFileName').textContent='';
-    document.getElementById('uploadSubmitBtn').disabled=true;
-    document.getElementById('modalResult').innerHTML='';
-    document.getElementById('csvFileInput').value='';
-    document.getElementById('uploadModal').style.display='flex';
-}
-function hideUploadModal() { document.getElementById('uploadModal').style.display='none'; }
-
-function onFileSelected(input) {
-    var file=input.files[0]; if(!file) return;
-    document.getElementById('selectedFileName').textContent='已選：'+file.name;
-    var reader=new FileReader();
-    reader.onload=function(e){_csvFileContent=e.target.result;document.getElementById('uploadSubmitBtn').disabled=false;};
-    reader.readAsText(file,'UTF-8');
-}
-
-function submitCsvUpload() {
-    if(!_csvFileContent) return;
-    var btn=document.getElementById('uploadSubmitBtn');
-    btn.disabled=true; btn.textContent='匯入中...';
-    document.getElementById('modalResult').innerHTML='';
-
-    // 使用 POST 傳送 CSV（避免 URL 長度限制）
-    apiPost('importCsv', _csvFileContent)
-        .then(function(result) {
-            btn.textContent='開始匯入';
-            var el=document.getElementById('modalResult');
-            if(result.success){
-                el.className='modal-result success';
-                el.textContent='✅ '+result.message;
-                setTimeout(function(){
-                    hideUploadModal();
-                    document.getElementById('dashboard').style.display='none';
-                    var loadingEl=document.getElementById('loading');
-                    loadingEl.style.display='flex';
-                    loadingEl.querySelector('.loading-text').textContent='正在重新載入資料...';
-                    apiGet('getData').then(function(rawData){
-                        RAW_DATA=rawData.data; PERIODS=rawData.periods;
-                        currentPeriod=PERIODS[PERIODS.length-1];
-                        PREV_MONTH_MAP={};
-                        for(var i=1;i<PERIODS.length;i++) PREV_MONTH_MAP[PERIODS[i]]=PERIODS[i-1];
-                        loadingEl.style.display='none';
-                        document.getElementById('dashboard').style.display='block';
-                        buildMonthTabs(); destroyAllCharts(); renderAll();
-                    });
-                }, 2000);
-            } else {
-                el.className='modal-result error';
-                el.textContent='❌ '+result.message;
-                btn.disabled=false;
-            }
-        })
-        .catch(function(err){
-            btn.disabled=false; btn.textContent='開始匯入';
-            var el=document.getElementById('modalResult');
-            el.className='modal-result error';
-            el.textContent='❌ 執行錯誤：'+(err.message||err);
-        });
-}
-
-// =====================================================================
-// 鈴鐺警示系統
-// =====================================================================
-function toggleBell() {
-    var panel = document.getElementById('bellPanel');
-    var isOpen = panel.classList.contains('open');
-    if (isOpen) {
-        panel.classList.remove('open');
-        return;
-    }
-    // 動態定位：把 panel 移到 body 直接子元素，避免被 header 截斷
-    if (panel.parentElement !== document.body) {
-        document.body.appendChild(panel);
-    }
-    // 定位到鈴鐺按鈕右下方
-    var btn = document.getElementById('bellBtn');
-    var rect = btn.getBoundingClientRect();
-    panel.style.position = 'fixed';
-    panel.style.top = (rect.bottom + 8) + 'px';
-    panel.style.right = (window.innerWidth - rect.right) + 'px';
-    panel.style.left = 'auto';
-    panel.classList.add('open');
-    setTimeout(function() {
-        document.addEventListener('click', closeBellOutside, { once: true });
-    }, 0);
-}
-function closeBellOutside(e) {
-    var panel = document.getElementById('bellPanel');
-    var btn = document.getElementById('bellBtn');
-    if (panel && !panel.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
-        panel.classList.remove('open');
-    }
-}
-
-function daysDiff(dateStr) {
-    var today = new Date(); today.setHours(0,0,0,0);
-    var d = new Date(dateStr); d.setHours(0,0,0,0);
-    return Math.round((d - today) / 86400000);
-}
-
-// ── 通知已處理狀態存在 sessionStorage（關頁面自動重設）──────
-// key 格式：bell_done:contract:KK  /  bell_done:event:A賽
-function bellDoneKey(type, name) { return 'bell_done:' + type + ':' + name; }
-function isBellDone(type, name) { return sessionStorage.getItem(bellDoneKey(type, name)) === '1'; }
-function setBellDone(type, name, done) {
-    if (done) sessionStorage.setItem(bellDoneKey(type, name), '1');
-    else sessionStorage.removeItem(bellDoneKey(type, name));
-}
-
-function renderBellAlerts() {
-    var allAlerts = [];
-    var today = new Date(); today.setHours(0,0,0,0);
-    var in30 = new Date(today); in30.setDate(in30.getDate() + 30);
-
-    // 合約：已過期 or 30 天內到期
-    CONTRACTS.forEach(function(c) {
-        if (!c.endDate) return;
-        var end = new Date(c.endDate); end.setHours(0,0,0,0);
-        var diff = daysDiff(c.endDate);
-        var overdue = end < today;
-        if (overdue || end <= in30) {
-            allAlerts.push({
-                type: 'contract',
-                id: 'contract:' + c.name,
-                name: c.name,
-                sub: overdue
-                    ? '合約已於 ' + c.endDate + ' 到期 ⚠️'
-                    : '合約到期：' + c.endDate + '（剩 ' + diff + ' 天）',
-                urgent: overdue || diff <= 7,
-                done: isBellDone('contract', c.name)
-            });
-        }
-    });
-
-    // 賽事：30 天內
-    EVENTS.forEach(function(ev) {
-        var dateToCheck = ev.startDate || ev.date;
-        if (!dateToCheck) return;
-        var evDate = new Date(dateToCheck); evDate.setHours(0,0,0,0);
-        if (evDate >= today && evDate <= in30) {
-            var diff2 = daysDiff(dateToCheck);
-            var dateLabel = ev.startDate && ev.endDate && ev.startDate !== ev.endDate
-                ? ev.startDate + ' ～ ' + ev.endDate
-                : (ev.startDate || ev.date);
-            allAlerts.push({
-                type: 'event',
-                id: 'event:' + ev.name,
-                name: ev.name,
-                sub: dateLabel + '（剩 ' + diff2 + ' 天）' + (ev.kols && ev.kols.length ? ' · ' + ev.kols.join(', ') : ''),
-                urgent: diff2 <= 7,
-                done: isBellDone('event', ev.name)
-            });
-        }
-    });
-
-    // badge 只計算未處理的
-    var pendingCount = allAlerts.filter(function(a){ return !a.done; }).length;
-    var badge = document.getElementById('bellBadge');
-    if (pendingCount > 0) {
-        badge.textContent = pendingCount;
-        badge.style.display = 'flex';
-    } else {
-        badge.style.display = 'none';
+      }
     }
 
-    // 渲染 panel
-    var contractAlerts = allAlerts.filter(function(a){ return a.type==='contract'; });
-    var eventAlerts    = allAlerts.filter(function(a){ return a.type==='event'; });
-
-    var html = '';
-    if (allAlerts.length === 0) {
-        html = '<div class="bell-empty">✅ 30 天內沒有需要注意的事項</div>';
-    } else {
-        function renderBellGroup(items, sectionLabel, tagCls, urgentLabel, normalLabel) {
-            if (!items.length) return '';
-            var s = '<div class="bell-section-label">' + sectionLabel + '</div>';
-            items.forEach(function(a) {
-                var doneStyle = a.done ? 'opacity:0.4;text-decoration:line-through;' : '';
-                s += '<div class="bell-item" style="display:flex;align-items:flex-start;gap:10px;' + doneStyle + '">' +
-                    '<div style="flex:1;">' +
-                    '<div class="bell-item-name"><span class="bell-item-tag ' + tagCls + '">' + (a.urgent ? urgentLabel : normalLabel) + '</span>' + a.name + '</div>' +
-                    '<div class="bell-item-sub">' + a.sub + '</div>' +
-                    '</div>' +
-                    '<label style="display:flex;align-items:center;gap:5px;cursor:pointer;white-space:nowrap;margin-top:2px;user-select:none;">' +
-                    '<input type="checkbox" ' + (a.done?'checked':'') + ' data-type="' + a.type + '" data-name="' + encodeURIComponent(a.name) + '" onchange="toggleBellDone(this.dataset.type,this.dataset.name,this.checked)" style="width:15px;height:15px;accent-color:var(--accent-green);cursor:pointer;">' +
-                    '<span style="font-size:11px;color:var(--text-secondary);">' + (a.done ? '已處理' : '標為完成') + '</span>' +
-                    '</label>' +
-                    '</div>';
-            });
-            return s;
-        }
-        html += renderBellGroup(contractAlerts, '📋 合約到期', 'bell-tag-contract', '⚠️ 緊急', '📅 即將');
-        html += renderBellGroup(eventAlerts,    '🏆 即將賽事',  'bell-tag-event',    '🔥 本週', '📅 本月');
-        if (allAlerts.some(function(a){ return a.done; })) {
-            html += '<div style="padding:8px 18px 12px;border-top:1px solid var(--border);margin-top:4px;">' +
-                '<button onclick="clearAllBellDone()" style="font-size:11px;color:var(--text-muted);background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer;">↺ 重設所有已完成</button>' +
-                '</div>';
-        }
-    }
-    document.getElementById('bellContent').innerHTML = html;
-}
-
-function toggleBellDone(type, nameEncoded, done) {
-    setBellDone(type, decodeURIComponent(nameEncoded), done);
-    renderBellAlerts();
-}
-
-function clearAllBellDone() {
-    // 清除所有 bell_done: 開頭的 key
-    var toRemove = [];
-    for (var i = 0; i < sessionStorage.length; i++) {
-        var k = sessionStorage.key(i);
-        if (k && k.indexOf('bell_done:') === 0) toRemove.push(k);
-    }
-    toRemove.forEach(function(k){ sessionStorage.removeItem(k); });
-    renderBellAlerts();
-}
-
-// =====================================================================
-// 賽事 Tab
-// =====================================================================
-function switchEventView(view, btn) {
-    currentEventView = view;
-    document.querySelectorAll('[data-eview]').forEach(function(b){ b.classList.remove('active'); });
-    btn.classList.add('active');
-    document.getElementById('eventsByEvent').style.display = view==='byEvent' ? '' : 'none';
-    document.getElementById('eventsByKol').style.display = view==='byKol' ? '' : 'none';
-    renderEventsTab();
-}
-
-// 取得日期區間狀態
-function getEventDateStatus(ev) {
-    var today = new Date(); today.setHours(0,0,0,0);
-    var in30 = new Date(today); in30.setDate(in30.getDate()+30);
-    var start = ev.startDate ? new Date(ev.startDate) : null;
-    var end   = ev.endDate   ? new Date(ev.endDate)   : (start ? new Date(ev.startDate) : null);
-    if (start) start.setHours(0,0,0,0);
-    if (end)   end.setHours(0,0,0,0);
-
-    var label = '';
-    if (ev.startDate && ev.endDate && ev.startDate !== ev.endDate) {
-        label = ev.startDate + ' ～ ' + ev.endDate;
-    } else if (ev.startDate) {
-        label = ev.startDate;
-    } else {
-        label = '日期未定';
+    var csvMap = {};
+    var csvAllKeys = [];
+    for (var i = 1; i < importData.length; i++) {
+      var row = importData[i];
+      var rawName = String(row[CONFIG.CSV_COL_DISCOUNT_NAME] || '').trim();
+      if (!rawName) continue;
+      var key = rawName.toLowerCase();
+      csvMap[key] = {
+        name: rawName,
+        orders: parseFloat(row[CONFIG.CSV_COL_ORDERS]) || 0,
+        totalSales: parseFloat(row[CONFIG.CSV_COL_TOTAL_SALES]) || 0
+      };
+      csvAllKeys.push(key);
     }
 
-    var cls = 'event-date-range';
-    var countdown = '';
-    if (!start) return { label: label, cls: cls, countdown: '' };
+    var reportData = mainSheet.getRange(targetStart, 1, CONFIG.KOL_COUNT, 13).getValues();
 
-    if (end < today) {
-        cls += ' past';
-        countdown = '已結束';
-    } else if (start <= today && end >= today) {
-        cls += ' ongoing';
-        countdown = '🟢 進行中';
-    } else if (start <= in30) {
-        cls += ' soon';
-        var diff = Math.round((start - today) / 86400000);
-        countdown = '倒數 ' + diff + ' 天 ⚡';
-    } else {
-        var diff2 = Math.round((start - today) / 86400000);
-        countdown = '倒數 ' + diff2 + ' 天';
-    }
-    return { label: label, cls: cls, countdown: countdown };
-}
+    var updateF = [], updateG = [], updateI = [], updateJ = [], updateL = [];
+    var matched = [], zeroFilled = [];
+    var csvMatched = {};
 
-function renderEventsTab() {
-    var query = (document.getElementById('eventSearchInput') ? document.getElementById('eventSearchInput').value : '').toLowerCase();
+    for (var i = 0; i < CONFIG.KOL_COUNT; i++) {
+      var discountName = String(reportData[i][CONFIG.COL_DISCOUNT - 1] || '').trim();
+      var key = discountName.toLowerCase();
+      var kolName = String(reportData[i][CONFIG.COL_NAME - 1] || '');
+      var settings = settingsMap[key] || {};
 
-    if (currentEventView === 'byEvent') {
-        var filtered = EVENTS.filter(function(ev) {
-            return !query || ev.name.toLowerCase().includes(query) ||
-                (ev.kols && ev.kols.join(',').toLowerCase().includes(query));
-        });
-        filtered.sort(function(a,b){
-            var da = a.startDate || '9999';
-            var db = b.startDate || '9999';
-            return da < db ? -1 : da > db ? 1 : 0;
-        });
+      updateI.push([settings.commissionRate || reportData[i][CONFIG.COL_COMMISSION_RATE - 1] || 0]);
+      updateJ.push([settings.sponsorship !== undefined ? settings.sponsorship : (reportData[i][CONFIG.COL_SPONSORSHIP - 1] || 0)]);
+      updateL.push([settings.credit !== undefined ? settings.credit : (reportData[i][CONFIG.COL_CREDIT - 1] || 0)]);
 
-        if (filtered.length === 0) {
-            document.getElementById('eventsByEvent').innerHTML =
-                '<div style="color:var(--text-muted);text-align:center;padding:40px;">沒有符合的賽事<br><br>' +
-                '<button class="action-btn upload-btn" onclick="openAddEventModal()">＋ 新增第一個賽事</button></div>';
-        } else {
-            var html = filtered.map(function(ev) {
-                var ds = getEventDateStatus(ev);
-                var kolTags = (ev.kols||[]).map(function(k){ return '<span class="event-kol-tag">'+k+'</span>'; }).join('');
-                return '<div class="event-card">' +
-                    '<div class="event-card-header">' +
-                      '<span class="'+ds.cls+'">'+ds.label+'</span>' +
-                      '<div style="flex:1;margin-left:10px;">' +
-                        '<div class="event-name">'+ev.name+'</div>' +
-                        (ev.location ? '<div class="event-location">📍 '+ev.location+'</div>' : '') +
-                      '</div>' +
-                      (ds.countdown ? '<span class="event-countdown">'+ds.countdown+'</span>' : '') +
-                    '</div>' +
-                    (ev.kols&&ev.kols.length ? '<div class="event-kols">'+kolTags+'</div>' : '<div style="color:var(--text-muted);font-size:12px;margin-top:8px;">尚無 KOL 報名</div>') +
-                    (ev.note ? '<div class="event-note">備註：'+ev.note+'</div>' : '') +
-                    '<div style="margin-top:12px;display:flex;gap:8px;">' +
-                      '<button class="sort-btn" style="font-size:11px;" data-ev="'+encodeURIComponent(JSON.stringify(ev))+'" onclick="openEditEventModal(this.dataset.ev)">✏️ 編輯</button>' +
-                    '</div>' +
-                '</div>';
-            }).join('');
-            html += '<div style="margin-top:16px;"><button class="action-btn upload-btn" onclick="openAddEventModal()">＋ 新增賽事</button></div>';
-            document.getElementById('eventsByEvent').innerHTML = html;
-        }
-        return;
+      if (csvMap[key]) {
+        updateF.push([csvMap[key].orders]);
+        updateG.push([csvMap[key].totalSales]);
+        matched.push(kolName);
+        csvMatched[key] = true;
+      } else {
+        updateF.push([0]);
+        updateG.push([0]);
+        zeroFilled.push(kolName);
+      }
     }
 
-    // 以 KOL 看 — 複選並排
-    var allKolsInEvents = [];
-    EVENTS.forEach(function(ev){
-        (ev.kols||[]).forEach(function(k){
-            if (allKolsInEvents.indexOf(k)===-1) allKolsInEvents.push(k);
-        });
-    });
-    allKolsInEvents.sort();
+    mainSheet.getRange(targetStart, CONFIG.COL_ORDERS,          CONFIG.KOL_COUNT, 1).setValues(updateF);
+    mainSheet.getRange(targetStart, CONFIG.COL_TOTAL_SALES,     CONFIG.KOL_COUNT, 1).setValues(updateG);
+    mainSheet.getRange(targetStart, CONFIG.COL_COMMISSION_RATE, CONFIG.KOL_COUNT, 1).setValues(updateI);
+    mainSheet.getRange(targetStart, CONFIG.COL_SPONSORSHIP,     CONFIG.KOL_COUNT, 1).setValues(updateJ);
+    mainSheet.getRange(targetStart, CONFIG.COL_CREDIT,          CONFIG.KOL_COUNT, 1).setValues(updateL);
 
-    if (!window._selectedEventKols) window._selectedEventKols = [];
+    var formulasH = [], formulasK = [], formulasM = [];
+    for (var i = 0; i < CONFIG.KOL_COUNT; i++) {
+      var r = targetStart + i;
+      formulasH.push(['=G' + r + '*I' + r]);
+      formulasK.push(['=J' + r + '+H' + r]);
+      formulasM.push(['=IF(K' + r + '+L' + r + '=0,"",G' + r + '/(K' + r + '+L' + r + '))']);
+    }
+    mainSheet.getRange(targetStart, CONFIG.COL_COMMISSION,    CONFIG.KOL_COUNT, 1).setFormulas(formulasH);
+    mainSheet.getRange(targetStart, CONFIG.COL_TOTAL_PAYMENT, CONFIG.KOL_COUNT, 1).setFormulas(formulasK);
+    mainSheet.getRange(targetStart, CONFIG.COL_ROAS,          CONFIG.KOL_COUNT, 1).setFormulas(formulasM);
 
-    var filterHtml = '<div class="kol-filter-wrap">' +
-        allKolsInEvents.map(function(k){
-            var sel = window._selectedEventKols.indexOf(k)!==-1;
-            return '<button class="kol-filter-tag'+(sel?' selected':'')+'" data-kname="'+encodeURIComponent(k)+'" onclick="toggleEventKolFilter(this.dataset.kname)">'+k+'</button>';
-        }).join('') + '</div>';
-
-    var selectedKols = window._selectedEventKols.length ? window._selectedEventKols : allKolsInEvents;
-    var filtered2 = selectedKols.filter(function(k){ return !query || k.toLowerCase().includes(query); });
-
-    if (filtered2.length === 0) {
-        document.getElementById('eventsByKol').innerHTML = filterHtml + '<div style="color:var(--text-muted);text-align:center;padding:20px;">沒有符合的 KOL</div>';
-        return;
+    var unmatchedKeys = csvAllKeys.filter(function(k) { return !csvMatched[k]; });
+    if (unmatchedKeys.length > 0) {
+      var unmSheet = ss.getSheetByName(CONFIG.UNMATCHED_SHEET);
+      if (!unmSheet) {
+        unmSheet = ss.insertSheet(CONFIG.UNMATCHED_SHEET);
+        unmSheet.getRange('A1:D1').setValues([['匯入日期', 'Discount Name', 'Discounted Orders', 'Total Sales']]);
+        unmSheet.getRange('A1:D1').setFontWeight('bold');
+      }
+      var ts = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd HH:mm');
+      var rows = unmatchedKeys.map(function(k) {
+        return [ts, csvMap[k].name, csvMap[k].orders, csvMap[k].totalSales];
+      });
+      var lr = Math.max(unmSheet.getLastRow(), 1);
+      unmSheet.getRange(lr + 1, 1, rows.length, 4).setValues(rows);
     }
 
-    var kolRows = filtered2.map(function(k){
-        var evs = EVENTS.filter(function(ev){ return (ev.kols||[]).indexOf(k)!==-1; });
-        evs.sort(function(a,b){ return (a.startDate||'9999') < (b.startDate||'9999') ? -1 : 1; });
-        var rows = evs.map(function(ev){
-            var ds = getEventDateStatus(ev);
-            return '<div class="kol-event-row">' +
-                '<span class="'+ds.cls+'" style="font-size:11px;min-width:auto;padding:2px 8px;">'+ds.label+'</span>' +
-                '<span style="flex:1;font-weight:600;">'+ev.name+'</span>' +
-                (ev.location ? '<span style="font-size:11px;color:var(--text-secondary);">📍 '+ev.location+'</span>' : '') +
-                (ds.countdown ? '<span style="font-size:11px;color:var(--accent-yellow);">'+ds.countdown+'</span>' : '') +
-                '</div>';
-        }).join('');
-
-        var cls2 = (function(){ for(var i=0;i<RAW_DATA.length;i++){ if(RAW_DATA[i].name===k) return RAW_DATA[i].classification; } return null; })();
-        var badge = cls2==='AMBASSADOR' ? '<span class="badge-ambassador" style="font-size:10px;">AMB</span>' : (cls2==='PARTNER' ? '<span class="badge-partner" style="font-size:10px;">PAR</span>' : '');
-
-        return '<div class="kol-event-card">' +
-            '<div class="kol-event-header">'+badge+'<span class="kol-event-name">'+k+'</span><span style="color:var(--text-muted);font-size:12px;margin-left:auto;">'+evs.length+' 場賽事</span></div>' +
-            '<div class="kol-event-rows">'+(rows||'<div style="color:var(--text-muted);font-size:13px;padding:8px 0;">尚無賽事</div>')+'</div>' +
-            '</div>';
-    }).join('');
-
-    document.getElementById('eventsByKol').innerHTML = filterHtml + kolRows;
-}
-
-function toggleEventKolFilter(nameEncoded) {
-    var name = decodeURIComponent(nameEncoded);
-    if (!window._selectedEventKols) window._selectedEventKols = [];
-    var idx = window._selectedEventKols.indexOf(name);
-    if (idx===-1) window._selectedEventKols.push(name);
-    else window._selectedEventKols.splice(idx, 1);
-    renderEventsTab();
-}
-
-
-function openAddEventModal() {
-    openEventModal(null);
-}
-function openEditEventModal(encoded) {
-    openEventModal(JSON.parse(decodeURIComponent(encoded)));
-}
-
-function openEventModal(ev) {
-    var isEdit = !!ev;
-    var existingModal = document.getElementById('eventModal');
-    if (existingModal) existingModal.remove();
-
-    // 取得所有 KOL 名單
-    var allKols = [];
-    RAW_DATA.forEach(function(r){ if(allKols.indexOf(r.name)===-1) allKols.push(r.name); });
-    allKols.sort();
-    var selectedKols = ev ? (ev.kols || []) : [];
-
-    var html = '<div class="modal-overlay" id="eventModal" style="display:flex;">' +
-        '<div class="modal-box" style="max-width:520px;width:100%;max-height:90vh;overflow-y:auto;">' +
-        '<div class="modal-title">'+(isEdit?'✏️ 編輯賽事':'＋ 新增賽事')+'</div>' +
-        '<div style="display:flex;flex-direction:column;gap:14px;margin-top:16px;">' +
-
-        // 賽事名稱
-        '<div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">賽事名稱 *</div>' +
-        '<input id="evName" style="width:100%;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:Outfit,sans-serif;font-size:13px;outline:none;" value="'+(ev?ev.name:'')+'"></div>' +
-
-        // 日期區間
-        '<div style="display:flex;gap:12px;">' +
-        '<div style="flex:1;"><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">開始日期</div>' +
-        '<input id="evStartDate" type="date" style="width:100%;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:Outfit,sans-serif;font-size:13px;outline:none;" value="'+(ev?ev.startDate:'')+'"></div>' +
-        '<div style="flex:1;"><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">結束日期</div>' +
-        '<input id="evEndDate" type="date" style="width:100%;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:Outfit,sans-serif;font-size:13px;outline:none;" value="'+(ev?ev.endDate:'')+'"></div>' +
-        '</div>' +
-
-        // 地點
-        '<div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">地點</div>' +
-        '<input id="evLocation" style="width:100%;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:Outfit,sans-serif;font-size:13px;outline:none;" value="'+(ev?ev.location:'')+'"></div>' +
-
-        // 參賽 KOL 複選
-        '<div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;">參賽 KOL（可複選）</div>' +
-        '<div class="kol-multiselect-wrap" id="evKolWrap">' +
-        '<div class="kol-multiselect-display" id="evKolDisplay" onclick="toggleKolDropdown()">' +
-        '<span id="evKolTags" style="display:flex;flex-wrap:wrap;gap:4px;flex:1;"></span>' +
-        '<span style="color:var(--text-muted);font-size:12px;">▾</span>' +
-        '</div>' +
-        '<div class="kol-dropdown" id="evKolDropdown">' +
-        '<div class="kol-dropdown-search"><input type="text" placeholder="搜尋 KOL..." oninput="filterKolDropdown(this.value)"></div>' +
-        '<div id="evKolList">' +
-        allKols.map(function(k){
-            var sel = selectedKols.indexOf(k)!==-1;
-            return '<div class="kol-dropdown-item'+(sel?' selected':'')+'" data-kol="'+k+'" onclick="toggleKolSelection(this)">' +
-                '<input type="checkbox"'+(sel?' checked':'')+' onclick="event.stopPropagation()"> '+k+'</div>';
-        }).join('') +
-        '</div></div></div></div>' +
-
-        // 備註
-        '<div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">備註</div>' +
-        '<input id="evNote" style="width:100%;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:Outfit,sans-serif;font-size:13px;outline:none;" value="'+(ev?ev.note:'')+'"></div>' +
-
-        '</div>' +
-        '<div id="evResult" style="margin-top:12px;"></div>' +
-        '<div class="modal-actions">' +
-        '<button class="modal-btn modal-btn-cancel" onclick="document.getElementById(&quot;eventModal&quot;).remove()">取消</button>' +
-        (isEdit ? '<button class="modal-btn" style="background:var(--accent-red-dim);color:var(--accent-red);border-color:var(--accent-red);" data-evname="'+encodeURIComponent(ev.name)+'" onclick="deleteEvent(this.dataset.evname)">刪除</button>' : '') +
-        '<button class="modal-btn modal-btn-submit" data-oldname="'+(isEdit?encodeURIComponent(ev.name):'')+'" data-isedit="'+(isEdit?'1':'')+'" onclick="saveEvent(this.dataset.isedit?this.dataset.oldname:null)">儲存</button>' +
-        '</div></div></div>';
-
-    document.body.insertAdjacentHTML('beforeend', html);
-
-    // 初始化已選 KOL 標籤
-    updateKolTags();
-
-    // 點外面關閉下拉
-    setTimeout(function(){
-        document.addEventListener('click', function closeDropdown(e) {
-            var wrap = document.getElementById('evKolWrap');
-            if (wrap && !wrap.contains(e.target)) {
-                var dd = document.getElementById('evKolDropdown');
-                if (dd) dd.classList.remove('open');
-                document.removeEventListener('click', closeDropdown);
-            }
-        });
-    }, 0);
-}
-
-function toggleKolDropdown() {
-    var dd = document.getElementById('evKolDropdown');
-    if (dd) dd.classList.toggle('open');
-}
-
-function filterKolDropdown(q) {
-    var items = document.querySelectorAll('#evKolList .kol-dropdown-item');
-    items.forEach(function(item){
-        item.style.display = item.dataset.kol.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
-    });
-}
-
-function toggleKolSelection(item) {
-    item.classList.toggle('selected');
-    var cb = item.querySelector('input[type=checkbox]');
-    if (cb) cb.checked = !cb.checked;
-    updateKolTags();
-}
-
-function updateKolTags() {
-    var selected = Array.from(document.querySelectorAll('#evKolList .kol-dropdown-item.selected')).map(function(i){ return i.dataset.kol; });
-    var tagsEl = document.getElementById('evKolTags');
-    if (!tagsEl) return;
-    if (selected.length === 0) {
-        tagsEl.innerHTML = '<span style="color:var(--text-muted);font-size:12px;">點擊選擇 KOL...</span>';
-    } else {
-        tagsEl.innerHTML = selected.map(function(k){
-            return '<span class="kol-selected-tag">'+k+' <span data-kn="'+encodeURIComponent(k)+'" onclick="removeKolTag(this.dataset.kn,event)">×</span></span>';
-        }).join('');
-    }
-}
-
-function removeKolTag(nameEncoded, e) {
-    e.stopPropagation();
-    var name = decodeURIComponent(nameEncoded);
-    var item = document.querySelector('#evKolList .kol-dropdown-item[data-kol="'+name+'"]');
-    if (item) {
-        item.classList.remove('selected');
-        var cb = item.querySelector('input[type=checkbox]');
-        if (cb) cb.checked = false;
-    }
-    updateKolTags();
-}
-
-function getSelectedKolsFromModal() {
-    return Array.from(document.querySelectorAll('#evKolList .kol-dropdown-item.selected')).map(function(i){ return i.dataset.kol; });
-}
-
-
-
-function saveEvent(oldNameEncoded) {
-    var name = document.getElementById('evName').value.trim();
-    if (!name) { document.getElementById('evResult').innerHTML = '<div style="color:var(--accent-red);font-size:13px;">請填寫賽事名稱</div>'; return; }
-    var evObj = {
-        name: name,
-        startDate: document.getElementById('evStartDate').value,
-        endDate:   document.getElementById('evEndDate').value,
-        location: document.getElementById('evLocation').value.trim(),
-        kols: getSelectedKolsFromModal(),
-        note: document.getElementById('evNote').value.trim(),
-        oldName: oldNameEncoded ? decodeURIComponent(oldNameEncoded) : null
-    };
-    document.getElementById('evResult').innerHTML = '<div style="color:var(--text-secondary);font-size:13px;">儲存中...</div>';
-    apiPost('saveEvent', JSON.stringify(evObj))
-        .then(function(r){
-            if(r.success){
-                document.getElementById('eventModal').remove();
-                // 更新本地 EVENTS
-                var updEvObj = { name: evObj.name, startDate: evObj.startDate, endDate: evObj.endDate, location: evObj.location, kols: evObj.kols, note: evObj.note };
-                if (evObj.oldName) {
-                    var idx = -1; for(var _j=0;_j<EVENTS.length;_j++){ if(EVENTS[_j].name===evObj.oldName){ idx=_j; break; } }
-                    if(idx!==-1){ EVENTS[idx]=updEvObj; } else { EVENTS.push(updEvObj); }
-                } else { EVENTS.push(updEvObj); }
-                window._selectedEventKols = [];
-                renderEventsTab(); renderBellAlerts();
-            } else {
-                document.getElementById('evResult').innerHTML = '<div style="color:var(--accent-red);font-size:13px;">儲存失敗：' + r.message + '</div>';
-            }
-        }).catch(function(){
-            document.getElementById('evResult').innerHTML = '<div style="color:var(--accent-red);font-size:13px;">網路錯誤，請重試</div>';
-        });
-}
-
-function deleteEvent(nameEncoded) {
-    var name = decodeURIComponent(nameEncoded);
-    if (!confirm('確定要刪除「' + name + '」？')) return;
-    apiPost('deleteEvent', JSON.stringify({name: name}))
-        .then(function(r){
-            if(r.success){
-                document.getElementById('eventModal').remove();
-                EVENTS = EVENTS.filter(function(e){ return e.name!==name; });
-                renderEventsTab(); renderBellAlerts();
-            }
-        });
-}
-
-// =====================================================================
-// 個人分析：合約區塊
-// =====================================================================
-function renderContractBlock(kolName) {
-    var contract = null;
-    for(var i=0;i<CONTRACTS.length;i++){ if(CONTRACTS[i].name===kolName){ contract=CONTRACTS[i]; break; } }
-    var today = new Date(); today.setHours(0,0,0,0);
-
-    var html = '<div class="card full-width fade-up" style="margin-bottom:16px;">' +
-        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">' +
-        '<div class="card-title" style="margin-bottom:0;">📋 合約資訊</div>' +
-        '<button class="sort-btn" style="font-size:11px;" data-kol="' + encodeURIComponent(kolName) + '" onclick="openContractModal(this.dataset.kol)">✏️ ' + (contract?'編輯':'新增') + '合約</button>' +
-        '</div>';
-
-    if (!contract) {
-        html += '<div style="color:var(--text-muted);font-size:13px;">尚無合約資料，點右上角新增</div>';
-    } else {
-        var endDate = contract.endDate ? new Date(contract.endDate) : null;
-        var diff = endDate ? daysDiff(contract.endDate) : null;
-        var statusHtml = '';
-        if (endDate) {
-            endDate.setHours(0,0,0,0);
-            if (endDate < today) {
-                statusHtml = '<div class="contract-expiry-warn">⚠️ 合約已於 ' + contract.endDate + ' 到期，請盡快處理！</div>';
-            } else if (diff <= 60) {
-                statusHtml = '<div class="contract-expiry-warn">⚠️ 合約將於 ' + diff + ' 天後到期（' + contract.endDate + '），請安排續約！</div>';
-            } else {
-                statusHtml = '<div class="contract-expiry-ok">✅ 合約有效中，' + diff + ' 天後到期（' + contract.endDate + '）</div>';
-            }
-        }
-        html += '<div class="contract-info-card"><div class="contract-row">' +
-            '<div class="contract-field"><div class="contract-field-label">合約類型</div><div class="contract-field-value">' + (contract.type||'—') + '</div></div>' +
-            '<div class="contract-field"><div class="contract-field-label">開始日期</div><div class="contract-field-value">' + (contract.startDate||'—') + '</div></div>' +
-            '<div class="contract-field"><div class="contract-field-label">結束日期</div><div class="contract-field-value">' + (contract.endDate||'—') + '</div></div>' +
-            (contract.note ? '<div class="contract-field"><div class="contract-field-label">備註</div><div class="contract-field-value" style="font-family:Outfit,sans-serif;font-size:13px;">' + contract.note + '</div></div>' : '') +
-            '</div>' + statusHtml + '</div>';
-    }
-
-    // KOL 的賽事
-    var kolEvents = EVENTS.filter(function(ev){ return ev.kols && ev.kols.indexOf(kolName)!==-1; });
-    kolEvents.sort(function(a,b){ return new Date(a.date)-new Date(b.date); });
-    if (kolEvents.length) {
-        html += '<div class="contract-kol-events"><div style="font-size:13px;font-weight:700;color:var(--text-secondary);margin-bottom:10px;">🏆 本年度參賽計畫</div>';
-        html += kolEvents.map(function(ev){
-            var d = ev.date ? daysDiff(ev.date) : null;
-            var today2 = new Date(); today2.setHours(0,0,0,0);
-            var evD = ev.date ? new Date(ev.date) : null; if(evD) evD.setHours(0,0,0,0);
-            var badge = '';
-            if (!evD) badge = '<span style="color:var(--text-muted);">日期未定</span>';
-            else if (evD < today2) badge = '<span style="color:var(--text-muted);">已結束</span>';
-            else if (d <= 30) badge = '<span style="color:var(--accent-yellow);font-weight:700;">倒數 ' + d + ' 天 ⚡</span>';
-            else badge = '<span style="color:var(--text-secondary);">倒數 ' + d + ' 天</span>';
-            var ds2 = getEventDateStatus(ev);
-            return '<div class="contract-kol-event-item">' +
-                '<span class="'+ds2.cls+'" style="font-size:11px;padding:2px 8px;">' + ds2.label + '</span>' +
-                '<span style="flex:1;font-weight:600;margin-left:8px;">' + ev.name + '</span>' +
-                (ev.location ? '<span style="font-size:12px;color:var(--text-secondary);">📍 ' + ev.location + '</span>' : '') +
-                (ds2.countdown ? '<span style="font-size:11px;color:var(--accent-yellow);">' + ds2.countdown + '</span>' : '') +
-                '</div>';
-        }).join('');
-        html += '</div>';
-    }
-
-    html += '</div>';
-    return html;
-}
-
-// =====================================================================
-// 合約 Modal（含寫回 Sheet）
-// =====================================================================
-function openContractModal(kolNameEncoded) {
-    var kolName = decodeURIComponent(kolNameEncoded);
-    var contract = (function(){ for(var _k=0;_k<CONTRACTS.length;_k++){ if(CONTRACTS[_k].name===kolName) return CONTRACTS[_k]; } return {}; })()
-    var html = '<div class="modal-overlay" id="contractModal" style="display:flex;">' +
-        '<div class="modal-box" style="max-width:460px;width:100%;">' +
-        '<div class="modal-title">📋 合約資訊 — ' + kolName + '</div>' +
-        '<div style="display:flex;flex-direction:column;gap:12px;margin-top:16px;">' +
-        '<div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">合約類型</div>' +
-        '<select id="ctType" style="width:100%;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:Outfit,sans-serif;font-size:13px;outline:none;">' +
-        '<option value="Ambassador" ' + (contract.type==='Ambassador'?'selected':'') + '>Ambassador</option>' +
-        '<option value="Partner" ' + (contract.type==='Partner'?'selected':'') + '>Partner</option>' +
-        '<option value="Other" ' + (contract.type==='Other'?'selected':'') + '>Other</option>' +
-        '</select></div>' +
-        '<div style="display:flex;gap:12px;">' +
-        '<div style="flex:1;"><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">開始日期</div>' +
-        '<input id="ctStart" type="date" style="width:100%;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:Outfit,sans-serif;font-size:13px;outline:none;" value="' + (contract.startDate||'') + '"></div>' +
-        '<div style="flex:1;"><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">結束日期</div>' +
-        '<input id="ctEnd" type="date" style="width:100%;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:Outfit,sans-serif;font-size:13px;outline:none;" value="' + (contract.endDate||'') + '"></div>' +
-        '</div>' +
-        '<div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">備註</div>' +
-        '<input id="ctNote" style="width:100%;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:Outfit,sans-serif;font-size:13px;outline:none;" value="' + (contract.note||'') + '"></div>' +
-        '</div>' +
-        '<div id="ctResult" style="margin-top:12px;"></div>' +
-        '<div class="modal-actions">' +
-        '<button class="modal-btn modal-btn-cancel" onclick="document.getElementById(&quot;contractModal&quot;).remove()">取消</button>' +
-        '<button class="modal-btn modal-btn-submit" data-kol="' + encodeURIComponent(kolName) + '" onclick="saveContract(this.dataset.kol)">儲存</button>' +
-        '</div></div></div>';
-    document.body.insertAdjacentHTML('beforeend', html);
-}
-
-function saveContract(kolNameEncoded) {
-    var kolName = decodeURIComponent(kolNameEncoded);
-    var obj = {
-        name: kolName,
-        type: document.getElementById('ctType').value,
-        startDate: document.getElementById('ctStart').value,
-        endDate: document.getElementById('ctEnd').value,
-        note: document.getElementById('ctNote').value.trim()
-    };
-    document.getElementById('ctResult').innerHTML = '<div style="color:var(--text-secondary);font-size:13px;">儲存中...</div>';
-    apiPost('saveContract', JSON.stringify(obj))
-        .then(function(r){
-            if(r.success){
-                document.getElementById('contractModal').remove();
-                var idx = -1; for(var _i=0;_i<CONTRACTS.length;_i++){ if(CONTRACTS[_i].name===kolName){ idx=_i; break; } }
-                if(idx!==-1){ CONTRACTS[idx]=obj; } else { CONTRACTS.push(obj); }
-                renderBellAlerts();
-                // re-render individual if visible
-                if(currentView==='individual') renderIndividual();
-            } else {
-                document.getElementById('ctResult').innerHTML = '<div style="color:var(--accent-red);font-size:13px;">儲存失敗：' + r.message + '</div>';
-            }
-        }).catch(function(){
-            document.getElementById('ctResult').innerHTML = '<div style="color:var(--accent-red);font-size:13px;">網路錯誤，請重試</div>';
-        });
-}
-// =====================================================================
-// AI 數據助手
-// =====================================================================
-// Gemini API 呼叫由後端 Apps Script 處理，前端不含 API Key
-
-var aiHistory = [];
-var aiIsOpen = false;
-var aiIsLoading = false;
-var aiAutoSpeak = false;
-
-function toggleAiPanel() {
-    aiIsOpen = !aiIsOpen;
-    var panel = document.getElementById('aiPanel');
-    var fab = document.getElementById('aiFab');
-    if (aiIsOpen) {
-        panel.classList.add('open');
-        fab.classList.add('open');
-        fab.textContent = '\u2715';
-        document.getElementById('aiInput').focus();
-    } else {
-        panel.classList.remove('open');
-        fab.classList.remove('open');
-        fab.textContent = '\uD83E\uDD16';
-    }
-}
-
-function clearAiChat() {
-    aiHistory = [];
-    var msgs = document.getElementById('aiMessages');
-    msgs.innerHTML = '<div class="ai-msg assistant">\u5c0d\u8a71\u5df2\u6e05\u7a7a\uff0c\u6709\u4ec0\u9ebc\u60f3\u554f\u7684\u55ce\uff1f\uD83D\uDE0A</div>';
-    document.getElementById('aiSuggestions').style.display = 'flex';
-}
-
-function sendAiSuggestion(btn) {
-    var text = btn.textContent;
-    document.getElementById('aiSuggestions').style.display = 'none';
-    sendAiMessageWithText(text);
-}
-
-function aiInputKeydown(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendAiMessage();
-    }
-}
-
-function aiInputResize(el) {
-    el.style.height = 'auto';
-    el.style.height = Math.min(el.scrollHeight, 80) + 'px';
-}
-
-function sendAiMessage() {
-    var input = document.getElementById('aiInput');
-    var text = input.value.trim();
-    if (!text || aiIsLoading) return;
-    input.value = '';
-    input.style.height = 'auto';
-    document.getElementById('aiSuggestions').style.display = 'none';
-    sendAiMessageWithText(text);
-}
-
-function buildDashboardContext() {
-    var today = new Date().toISOString().split('T')[0];
-    var ctx = '\u4eca\u5929\u65e5\u671f\uff1a' + today + '\n';
-    ctx += '\u76ee\u524d\u67e5\u770b\u6708\u4efd\uff1a' + currentPeriod + '\n';
-    ctx += '\u6240\u6709\u53ef\u7528\u6708\u4efd\uff1a' + PERIODS.join('\u3001') + '\n\n';
-
-    ctx += '=== KOL \u92b7\u552e\u8cc7\u6599 ===\n';
-    PERIODS.forEach(function(period) {
-        var data = getMonthData(period);
-        ctx += '\n\u300a' + period + '\u300b\n';
-        data.forEach(function(r) {
-            var igStatus = r.igPosted === true ? '\u6709\u767c\u6587' : (r.igPosted === false ? '\u672a\u767c\u6587' : '\u7121IG\u8cc7\u6599');
-            ctx += r.name + '\uff5c' + r.classification +
-                '\uff5c\u8a02\u55ae:' + r.orders +
-                '\uff5c\u92b7\u552e:NT$' + Math.round(r.amount) +
-                '\uff5cROAS:' + r.roas.toFixed(2) +
-                '\uff5c\u5e95\u85aa:NT$' + Math.round(r.sponsorship) +
-                '\uff5cCredit:NT$' + Math.round(r.credit) +
-                '\uff5c' + igStatus + '\n';
-        });
-    });
-
-    if (CONTRACTS.length > 0) {
-        ctx += '\n=== KOL \u5408\u7d04\u8cc7\u6599 ===\n';
-        CONTRACTS.forEach(function(c) {
-            ctx += c.name + '\uff5c\u985e\u578b:' + c.type + '\uff5c\u958b\u59cb:' + c.startDate + '\uff5c\u5230\u671f:' + c.endDate;
-            if (c.note) ctx += '\uff5c\u5099\u8a3b:' + c.note;
-            ctx += '\n';
-        });
-    }
-
-    if (EVENTS.length > 0) {
-        ctx += '\n=== \u5e74\u5ea6\u8cfd\u4e8b ===\n';
-        EVENTS.forEach(function(ev) {
-            ctx += ev.name + '\uff5c\u65e5\u671f:' + ev.date + '\uff5c\u5730\u9ede:' + ev.location +
-                '\uff5c\u53c3\u8cfdKOL:' + (ev.kols.join('\u3001') || '\u672a\u5b9a');
-            if (ev.note) ctx += '\uff5c\u5099\u8a3b:' + ev.note;
-            ctx += '\n';
-        });
-    }
-
-    return ctx;
-}
-
-function sendAiMessageWithText(text) {
-    if (aiIsLoading) return;
-    aiIsLoading = true;
-
-    appendAiMsg('user', text);
-    var loadingId = appendAiLoading();
-    aiHistory.push({ role: 'user', parts: [{ text: text }] });
-
-    // 呼叫 Apps Script 後端（text/plain 避免 CORS preflight）
-    var context = buildDashboardContext();
-    fetch(API_URL + '?action=askAI&pw=notag', {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({ messages: aiHistory, context: context })
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-        removeAiLoading(loadingId);
-        aiIsLoading = false;
-        var reply = '';
-        if (data.reply) {
-            reply = data.reply;
-        } else if (data.error) {
-            reply = '⚠️ 發生錯誤：' + data.error;
-        } else {
-            reply = '⚠️ 無法取得回應，請稍後再試';
-        }
-        aiHistory.push({ role: 'model', parts: [{ text: reply }] });
-        appendAiMsg('assistant', reply);
-    })
-    .catch(function() {
-        removeAiLoading(loadingId);
-        aiIsLoading = false;
-        appendAiMsg('assistant', '⚠️ 網路錯誤，請重試');
-        aiHistory.pop();
-    });
-}
-
-function appendAiMsg(role, text) {
-    var msgs = document.getElementById('aiMessages');
-    var wrapper = document.createElement('div');
-    wrapper.style.display = 'flex';
-    wrapper.style.flexDirection = 'column';
-    wrapper.style.alignItems = role === 'user' ? 'flex-end' : 'flex-start';
-
-    var div = document.createElement('div');
-    div.className = 'ai-msg ' + role;
-    div.textContent = text;
-    wrapper.appendChild(div);
-
-    // 助手訊息加朗讀按鈕
-    if (role === 'assistant') {
-        var actions = document.createElement('div');
-        actions.className = 'ai-msg-actions';
-        // 朗讀按鈕
-        var speakBtn = document.createElement('button');
-        speakBtn.className = 'ai-speak-btn';
-        speakBtn.textContent = '🔊 朗讀';
-        speakBtn.onclick = function() { speakText(text, speakBtn, pauseBtn, stopBtn); };
-        actions.appendChild(speakBtn);
-
-        // 暫停按鈕
-        var pauseBtn = document.createElement('button');
-        pauseBtn.className = 'ai-speak-btn';
-        pauseBtn.textContent = '⏸ 暫停';
-        pauseBtn.style.display = 'none';
-        pauseBtn.onclick = function() { pauseOrResumeSpeaking(pauseBtn); };
-        actions.appendChild(pauseBtn);
-
-        // 停止按鈕
-        var stopBtn = document.createElement('button');
-        stopBtn.className = 'ai-speak-btn';
-        stopBtn.textContent = '⏹ 停止';
-        stopBtn.style.display = 'none';
-        stopBtn.style.color = 'var(--accent-red)';
-        stopBtn.style.borderColor = 'var(--accent-red)';
-        stopBtn.onclick = function() { stopSpeaking(); };
-        actions.appendChild(stopBtn);
-        wrapper.appendChild(actions);
-
-        // 自動朗讀
-        if (aiAutoSpeak) {
-            setTimeout(function() { speakText(text, speakBtn, pauseBtn, stopBtn); }, 200);
-        }
-    }
-
-    msgs.appendChild(wrapper);
-    msgs.scrollTop = msgs.scrollHeight;
-    return div;
-}
-
-function appendAiLoading() {
-    var msgs = document.getElementById('aiMessages');
-    var div = document.createElement('div');
-    var id = 'aiLoading_' + Date.now();
-    div.id = id;
-    div.className = 'ai-msg thinking';
-    div.innerHTML = '<div class="ai-typing"><span></span><span></span><span></span></div>';
-    msgs.appendChild(div);
-    msgs.scrollTop = msgs.scrollHeight;
-    document.getElementById('aiSendBtn').disabled = true;
-    return id;
-}
-
-function removeAiLoading(id) {
-    var el = document.getElementById(id);
-    if (el) el.remove();
-    document.getElementById('aiSendBtn').disabled = false;
-}
-// =====================================================================
-// 語音輸入
-// =====================================================================
-var aiRecognition = null;
-var aiIsRecording = false;
-
-function toggleVoiceInput() {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-        appendAiMsg('assistant', '⚠️ 你的瀏覽器不支援語音輸入，請使用 Chrome 或 Edge。');
-        if (!document.getElementById('aiPanel').classList.contains('open')) toggleAiPanel();
-        return;
-    }
-
-    if (aiIsRecording) {
-        stopVoiceInput();
-    } else {
-        startVoiceInput();
-    }
-}
-
-function startVoiceInput() {
-    var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    aiRecognition = new SpeechRecognition();
-    aiRecognition.lang = 'zh-TW';
-    aiRecognition.continuous = true;      // 持續聆聽，不因停頓而中斷
-    aiRecognition.interimResults = true;  // 即時顯示辨識中的文字
-
-    var silenceTimer = null;
-    var finalTranscript = '';
-
-    function resetSilenceTimer() {
-        if (silenceTimer) clearTimeout(silenceTimer);
-        silenceTimer = setTimeout(function() {
-            // 3秒沒有新的語音輸入，停止聆聽並送出
-            if (aiIsRecording) {
-                aiRecognition.stop();
-            }
-        }, 3000);
-    }
-
-    aiRecognition.onstart = function() {
-        aiIsRecording = true;
-        finalTranscript = '';
-        var btn = document.getElementById('aiMicBtn');
-        btn.classList.add('recording');
-        btn.textContent = '⏹';
-        btn.title = '點擊停止';
-        document.getElementById('aiInput').placeholder = '聆聽中（停頓3秒自動送出）...';
-        if (!document.getElementById('aiPanel').classList.contains('open')) toggleAiPanel();
-        resetSilenceTimer();
+    return {
+      success: true,
+      period: targetPeriod,
+      matched: matched.length,
+      zero: zeroFilled.length,
+      unmatched: unmatchedKeys.length,
+      message: '匯入成功！月份：' + targetPeriod +
+        '\n✔ 匹配：' + matched.length + ' 位 KOL' +
+        '\n⭕ 本月無業績：' + zeroFilled.length + ' 位' +
+        '\n⚠ CSV 未對應：' + unmatchedKeys.length + ' 筆'
     };
 
-    aiRecognition.onresult = function(e) {
-        var interim = '';
-        for (var i = e.resultIndex; i < e.results.length; i++) {
-            if (e.results[i].isFinal) {
-                finalTranscript += e.results[i][0].transcript;
-            } else {
-                interim += e.results[i][0].transcript;
-            }
-        }
-        // 顯示已確認+正在辨識的文字
-        document.getElementById('aiInput').value = finalTranscript + interim;
-        aiInputResize(document.getElementById('aiInput'));
-        // 有新語音輸入，重置計時器
-        resetSilenceTimer();
-    };
-
-    aiRecognition.onend = function() {
-        if (silenceTimer) clearTimeout(silenceTimer);
-        aiIsRecording = false;
-        var btn = document.getElementById('aiMicBtn');
-        btn.classList.remove('recording');
-        btn.textContent = '🎤';
-        btn.title = '語音輸入';
-        document.getElementById('aiInput').placeholder = '輸入問題，或點🎤說話...';
-
-        var text = document.getElementById('aiInput').value.trim();
-        if (text) {
-            setTimeout(function() { sendAiMessage(); }, 300);
-        }
-    };
-
-    aiRecognition.onerror = function(e) {
-        if (silenceTimer) clearTimeout(silenceTimer);
-        aiIsRecording = false;
-        var btn = document.getElementById('aiMicBtn');
-        btn.classList.remove('recording');
-        btn.textContent = '🎤';
-        document.getElementById('aiInput').placeholder = '輸入問題，或點🎤說話...';
-        if (e.error === 'not-allowed') {
-            appendAiMsg('assistant', '⚠️ 請允許瀏覽器使用麥克風權限，再試一次。');
-        } else if (e.error !== 'no-speech') {
-            appendAiMsg('assistant', '⚠️ 語音辨識失敗（' + e.error + '），請重試。');
-        }
-    };
-
-    aiRecognition.start();
+  } catch (e) {
+    return { success: false, message: '錯誤：' + e.message };
+  }
 }
 
-function stopVoiceInput() {
-    if (aiRecognition) {
-        aiRecognition.stop();
+function findTargetBlock_() {
+  var ss = getSpreadsheet_();
+  var mainSheet = ss.getSheetByName(CONFIG.MAIN_SHEET);
+  if (!mainSheet) return null;
+
+  var lastRow = mainSheet.getLastRow();
+  if (lastRow < 2) return null;
+
+  var periods = mainSheet.getRange(2, CONFIG.COL_PERIOD, lastRow - 1, 1).getValues();
+  var orders  = mainSheet.getRange(2, CONFIG.COL_ORDERS,  lastRow - 1, 1).getValues();
+
+  var blocks = [];
+  var currentPeriod = null;
+  var blockStart = null;
+
+  for (var i = 0; i < periods.length; i++) {
+    var p = String(periods[i][0]).trim();
+    if (p && p !== currentPeriod) {
+      if (blockStart !== null) {
+        blocks.push({ period: currentPeriod, startRow: blockStart, endRow: i + 1 });
+      }
+      currentPeriod = p;
+      blockStart = i + 2;
     }
-}
-// =====================================================================
-// 語音合成（TTS）
-// =====================================================================
-var aiAutoSpeak = false;
-var aiCurrentUtterance = null;
-var aiCurrentSpeakBtn = null;
-var aiIsSpeaking = false;
-var aiIsPaused = false;
+  }
+  if (blockStart !== null) {
+    blocks.push({ period: currentPeriod, startRow: blockStart, endRow: blockStart + CONFIG.KOL_COUNT - 1 });
+  }
 
-function toggleAutoSpeak() {
-    aiAutoSpeak = !aiAutoSpeak;
-    var btn = document.getElementById('aiAutoSpeakBtn');
-    if (aiAutoSpeak) {
-        btn.classList.add('on');
-        btn.textContent = '🔊 自動 ON';
-        window.speechSynthesis && window.speechSynthesis.getVoices();
+  for (var b = blocks.length - 1; b >= 0; b--) {
+    var block = blocks[b];
+    var blockOrders = mainSheet.getRange(block.startRow, CONFIG.COL_ORDERS, CONFIG.KOL_COUNT, 1).getValues();
+    var hasData = blockOrders.some(function(r) { return r[0] !== '' && r[0] !== null && r[0] !== 0 && r[0] !== '0'; });
+    if (!hasData) {
+      return { block: block, isEmpty: true, allBlocks: blocks };
+    }
+  }
+
+  return { block: blocks[blocks.length - 1], isEmpty: false, allBlocks: blocks };
+}
+
+function parseCsv_(csvText) {
+  var rows = [];
+  var lines = csvText.split(/\r?\n/);
+  for (var i = 0; i < lines.length; i++) {
+    if (lines[i].trim() === '') continue;
+    rows.push(parseCsvLine_(lines[i]));
+  }
+  return rows;
+}
+
+function parseCsvLine_(line) {
+  var fields = [];
+  var field = '';
+  var inQuotes = false;
+  for (var i = 0; i < line.length; i++) {
+    var ch = line[i];
+    if (ch === '"') {
+      if (inQuotes && line[i + 1] === '"') { field += '"'; i++; }
+      else { inQuotes = !inQuotes; }
+    } else if (ch === ',' && !inQuotes) {
+      fields.push(field); field = '';
     } else {
-        btn.classList.remove('on');
-        btn.textContent = '🔊 自動';
-        stopSpeaking();
+      field += ch;
     }
+  }
+  fields.push(field);
+  return fields;
 }
 
-function speakText(text, playBtn, pauseBtn, stopBtn) {
-    if (!window.speechSynthesis) {
-        appendAiMsg('assistant', '⚠️ 你的瀏覽器不支援語音朗讀，請使用 Chrome 或 Edge。');
-        return;
-    }
+// ---- IG Integration ----
+var AMBASSADOR_SET = {
+  'KK':1,'Tayal':1,'Hunk':1,'Doboji':1,'MM':1,'Shelly':1,
+  'Alison':1,'Kerry':1,'Aimee':1,'Angel':1,'Nat':1
+};
 
-    // 停止其他正在播放的
-    if (aiIsSpeaking) {
-        stopSpeaking();
-    }
+var IG_NAME_OVERRIDES = {
+  'tim徐定甫': '徐定甫TIM',
+  'tim(徐定甫)': '徐定甫TIM'
+};
 
-    // 清理文字（移除 emoji 和特殊符號避免奇怪發音）
-    var cleanText = text.replace(/[^一-鿿　-〿＀-￯a-zA-Z0-9\s，。！？、：；「」『』（）\-\.]/g, ' ').trim();
-
-    var utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.lang = 'zh-TW';
-    utterance.rate = 1.05;
-    utterance.pitch = 1.0;
-    utterance.volume = 1.0;
-
-    // 嘗試找中文語音
-    var voices = window.speechSynthesis.getVoices();
-    var zhVoice = voices.find(function(v) {
-        return v.lang === 'zh-TW' || v.lang === 'zh-HK' || v.lang.startsWith('zh');
-    });
-    if (zhVoice) utterance.voice = zhVoice;
-
-    utterance.onstart = function() {
-        aiIsSpeaking = true;
-        aiIsPaused = false;
-        if (playBtn) { playBtn.style.display = 'none'; }
-        if (pauseBtn) { pauseBtn.style.display = ''; pauseBtn.textContent = '⏸ 暫停'; }
-        if (stopBtn) { stopBtn.style.display = ''; }
-        aiCurrentSpeakBtn = playBtn;
-    };
-    utterance.onend = function() {
-        aiIsSpeaking = false;
-        aiIsPaused = false;
-        if (playBtn) { playBtn.style.display = ''; }
-        if (pauseBtn) { pauseBtn.style.display = 'none'; }
-        if (stopBtn) { stopBtn.style.display = 'none'; }
-        aiCurrentUtterance = null;
-        aiCurrentSpeakBtn = null;
-    };
-    utterance.onerror = function() {
-        aiIsSpeaking = false;
-        aiIsPaused = false;
-        if (playBtn) { playBtn.style.display = ''; }
-        if (pauseBtn) { pauseBtn.style.display = 'none'; }
-        if (stopBtn) { stopBtn.style.display = 'none'; }
-        aiCurrentUtterance = null;
-        aiCurrentSpeakBtn = null;
-    };
-
-    aiCurrentUtterance = utterance;
-    window.speechSynthesis.speak(utterance);
+function getKolClassification(name) {
+  return AMBASSADOR_SET[name] ? 'AMBASSADOR' : 'PARTNER';
 }
 
-function pauseOrResumeSpeaking(pauseBtn) {
-    if (!window.speechSynthesis) return;
-    if (aiIsPaused) {
-        window.speechSynthesis.resume();
-        aiIsPaused = false;
-        if (pauseBtn) pauseBtn.textContent = '⏸ 暫停';
+function normalizeIgName_(name) {
+  return String(name).toLowerCase().replace(/\s+/g, '').replace(/[()（）]/g, '');
+}
+
+function periodLabelToIgTabName_(periodLabel) {
+  var monthNum = parseInt(String(periodLabel).replace('月', ''));
+  if (isNaN(monthNum)) return '';
+  var now = new Date();
+  var currentYear = now.getFullYear();
+  var currentMonth = now.getMonth() + 1;
+  var year = (monthNum > currentMonth + 6) ? currentYear - 1 : currentYear;
+  var monthStr = (monthNum < 10 ? '0' : '') + monthNum;
+  return year + '' + monthStr + ' HDEX Sharing Rank';
+}
+
+function readIgSheet_(igSheet) {
+  var lastRow = igSheet.getLastRow();
+  if (lastRow < 2) return {};
+  var data = igSheet.getRange(1, 1, lastRow, 12).getValues();
+  var igMap = {};
+  for (var i = 0; i < data.length; i++) {
+    var row = data[i];
+    var rawName = String(row[2] || '').trim();
+    if (!rawName || rawName === 'Name' || rawName === 'AMBASSADOR' || rawName === 'PARTNER') continue;
+    var normalized = normalizeIgName_(rawName);
+    var resolvedName = IG_NAME_OVERRIDES.hasOwnProperty(normalized) ? IG_NAME_OVERRIDES[normalized] : rawName;
+    igMap[resolvedName] = {
+      story: toNumber(row[9]),
+      post:  toNumber(row[10]),
+      reels: toNumber(row[11])
+    };
+  }
+  return igMap;
+}
+
+function findIgRecord_(kolName, igMap) {
+  if (igMap[kolName]) return igMap[kolName];
+  var normalizedTarget = normalizeIgName_(kolName);
+  for (var igName in igMap) {
+    if (normalizeIgName_(igName) === normalizedTarget) return igMap[igName];
+  }
+  return null;
+}
+
+function loadIgDataForPeriods_(periodLabels) {
+  var result = {};
+  try {
+    var igSS = SpreadsheetApp.openById(IG_SHEET_ID);
+    for (var i = 0; i < periodLabels.length; i++) {
+      var label = periodLabels[i];
+      var tabName = periodLabelToIgTabName_(label);
+      if (!tabName) { result[label] = {}; continue; }
+      var igSheet = igSS.getSheetByName(tabName);
+      result[label] = igSheet ? readIgSheet_(igSheet) : {};
+    }
+  } catch(e) {
+    for (var i = 0; i < periodLabels.length; i++) result[periodLabels[i]] = {};
+  }
+  return result;
+}
+
+// =====================================================================
+// 合約 & 賽事 API
+// =====================================================================
+
+// Google Sheet 新增兩張表的讀取
+// 表：KOL合約  欄位：A=KOL名稱, B=合約類型, C=合約開始日, D=合約結束日, E=備註
+// 表：年度賽事  欄位：A=賽事名稱, B=賽事日期, C=地點, D=參賽KOL(逗號分隔), E=備註
+
+function getContractsAndEvents() {
+  var ss = getSpreadsheet_();
+  var result = { contracts: [], events: [] };
+
+  // ── 合約 ──────────────────────────────────────────────────
+  var contractSheet = ss.getSheetByName('KOL合約');
+  if (contractSheet) {
+    var lastRow = contractSheet.getLastRow();
+    if (lastRow >= 2) {
+      var data = contractSheet.getRange(2, 1, lastRow - 1, 5).getValues();
+      data.forEach(function(row) {
+        var name = String(row[0]).trim();
+        if (!name) return;
+        var startDate = row[2] ? Utilities.formatDate(new Date(row[2]), Session.getScriptTimeZone(), 'yyyy-MM-dd') : '';
+        var endDate   = row[3] ? Utilities.formatDate(new Date(row[3]), Session.getScriptTimeZone(), 'yyyy-MM-dd') : '';
+        result.contracts.push({
+          name:      name,
+          type:      String(row[1]).trim(),
+          startDate: startDate,
+          endDate:   endDate,
+          note:      String(row[4]).trim()
+        });
+      });
+    }
+  }
+
+  // ── 賽事 ──────────────────────────────────────────────────
+  var eventSheet = ss.getSheetByName('年度賽事');
+  if (eventSheet) {
+    var lastRow2 = eventSheet.getLastRow();
+    if (lastRow2 >= 2) {
+      var data2 = eventSheet.getRange(2, 1, lastRow2 - 1, 7).getValues();
+      data2.forEach(function(row) {
+        var eventName = String(row[0]).trim();
+        if (!eventName) return;
+        var startDate = row[1] ? Utilities.formatDate(new Date(row[1]), Session.getScriptTimeZone(), 'yyyy-MM-dd') : '';
+        var endDate   = row[2] ? Utilities.formatDate(new Date(row[2]), Session.getScriptTimeZone(), 'yyyy-MM-dd') : '';
+        var kols = String(row[4]).split(',').map(function(k){ return k.trim(); }).filter(Boolean);
+        result.events.push({
+          name:      eventName,
+          startDate: startDate,
+          endDate:   endDate,
+          location:  String(row[3]).trim(),
+          kols:      kols,
+          note:      String(row[5]).trim()
+        });
+      });
+    }
+  }
+
+  return result;
+}
+
+// =====================================================================
+// 寫回 Sheet：合約 & 賽事
+// =====================================================================
+
+function saveContractToSheet(obj) {
+  try {
+    var ss = getSpreadsheet_();
+    var sheet = ss.getSheetByName('KOL合約');
+    if (!sheet) {
+      sheet = ss.insertSheet('KOL合約');
+      sheet.getRange('A1:E1').setValues([['KOL名稱','合約類型','合約開始日','合約結束日','備註']]);
+      sheet.getRange('A1:E1').setFontWeight('bold');
+    }
+    var lastRow = sheet.getLastRow();
+    var data = lastRow >= 2 ? sheet.getRange(2, 1, lastRow-1, 1).getValues() : [];
+    var rowIdx = -1;
+    for (var i=0; i<data.length; i++) {
+      if (String(data[i][0]).trim() === obj.name) { rowIdx = i+2; break; }
+    }
+    var rowData = [[obj.name, obj.type||'', obj.startDate||'', obj.endDate||'', obj.note||'']];
+    if (rowIdx > 0) {
+      sheet.getRange(rowIdx, 1, 1, 5).setValues(rowData);
     } else {
-        window.speechSynthesis.pause();
-        aiIsPaused = true;
-        if (pauseBtn) pauseBtn.textContent = '▶ 繼續';
+      sheet.getRange(sheet.getLastRow()+1, 1, 1, 5).setValues(rowData);
     }
+    return { success: true };
+  } catch(e) { return { success: false, message: e.message }; }
 }
 
-function stopSpeaking() {
-    aiIsSpeaking = false;
-    aiIsPaused = false;
-    if (window.speechSynthesis) {
-        window.speechSynthesis.cancel();
+function saveEventToSheet(obj) {
+  try {
+    var ss = getSpreadsheet_();
+    var sheet = ss.getSheetByName('年度賽事');
+    if (!sheet) {
+      sheet = ss.insertSheet('年度賽事');
+      sheet.getRange('A1:F1').setValues([['賽事名稱','開始日期','結束日期','地點','參賽KOL','備註']]);
+      sheet.getRange('A1:F1').setFontWeight('bold');
     }
-    // 重置所有朗讀按鈕組
-    document.querySelectorAll('.ai-msg-actions').forEach(function(actions) {
-        var btns = actions.querySelectorAll('.ai-speak-btn');
-        if (btns.length >= 3) {
-            btns[0].style.display = '';  // 朗讀
-            btns[1].style.display = 'none';  // 暫停
-            btns[2].style.display = 'none';  // 停止
-            btns[1].textContent = '⏸ 暫停';
-        }
-    });
-    aiCurrentUtterance = null;
-    aiCurrentSpeakBtn = null;
+    var lastRow = sheet.getLastRow();
+    var data = lastRow >= 2 ? sheet.getRange(2, 1, lastRow-1, 1).getValues() : [];
+    var rowIdx = -1;
+    var searchName = obj.oldName || obj.name;
+    for (var i=0; i<data.length; i++) {
+      if (String(data[i][0]).trim() === searchName) { rowIdx = i+2; break; }
+    }
+    var kolStr = obj.kols ? obj.kols.join(',') : '';
+    var rowData = [[obj.name, obj.startDate||'', obj.endDate||'', obj.location||'', kolStr, obj.note||'']];
+    if (rowIdx > 0) {
+      sheet.getRange(rowIdx, 1, 1, 6).setValues(rowData);
+    } else {
+      sheet.getRange(sheet.getLastRow()+1, 1, 1, 6).setValues(rowData);
+    }
+    return { success: true };
+  } catch(e) { return { success: false, message: e.message }; }
 }
 
-// 預載語音列表（部分瀏覽器需要）
-if (window.speechSynthesis) {
-    window.speechSynthesis.onvoiceschanged = function() {
-        window.speechSynthesis.getVoices();
+function deleteEventFromSheet(name) {
+  try {
+    var ss = getSpreadsheet_();
+    var sheet = ss.getSheetByName('年度賽事');
+    if (!sheet) return { success: false, message: '找不到年度賽事工作表' };
+    var lastRow = sheet.getLastRow();
+    if (lastRow < 2) return { success: false, message: '無資料' };
+    var data = sheet.getRange(2, 1, lastRow-1, 1).getValues();
+    for (var i=0; i<data.length; i++) {
+      if (String(data[i][0]).trim() === name) {
+        sheet.deleteRow(i+2);
+        return { success: true };
+      }
+    }
+    return { success: false, message: '找不到該賽事' };
+  } catch(e) { return { success: false, message: e.message }; }
+}
+
+// =====================================================================
+// Gemini AI 呼叫（後端，Key 安全儲存在 Script Properties）
+// =====================================================================
+function callGeminiAPI_(messages, context) {
+  try {
+    // Key 從 Script Properties 讀取（不寫死在程式碼裡）
+    var props = PropertiesService.getScriptProperties();
+    var apiKey = props.getProperty('GEMINI_API_KEY');
+    if (!apiKey) {
+      return { error: 'API Key 未設定，請聯絡管理員' };
+    }
+
+    var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=' + apiKey;
+
+    var systemPrompt = '你是 HDEX 品牌的 KOL 管理 AI 助手，協助分析 KOL 業績、合約與賽事資訊。\n' +
+      '請用繁體中文回答，語氣親切專業。\n' +
+      '回答要具體，數字要精確。\n' +
+      '如果問題模糊（例如沒說是哪個月份、哪個分類），要先主動詢問釐清條件，再提供答案。\n' +
+      '不要假設用戶的意圖，確認後再回答。\n\n' +
+      '以下是目前的完整儀表板資料：\n' + context;
+
+    var contents = [
+      { role: 'user', parts: [{ text: systemPrompt }] },
+      { role: 'model', parts: [{ text: '好的，我已了解所有 KOL 數據資料，請問有什麼需要幫忙分析的？' }] }
+    ];
+
+    // 加入對話歷史
+    messages.forEach(function(m) { contents.push(m); });
+
+    var payload = {
+      contents: contents,
+      generationConfig: { temperature: 0.7, maxOutputTokens: 1024 }
     };
+
+    var options = {
+      method: 'post',
+      contentType: 'application/json',
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    };
+
+    var response = UrlFetchApp.fetch(url, options);
+    var data = JSON.parse(response.getContentText());
+
+    if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+      return { reply: data.candidates[0].content.parts[0].text };
+    } else if (data.error) {
+      return { error: data.error.message };
+    } else {
+      return { error: '無法取得回應' };
+    }
+  } catch(e) {
+    return { error: e.message };
+  }
 }
 
-
-
-
-</script>
-
-<!-- ── AI 助手 ─────────────────────────────────────── -->
-<button class="ai-fab" id="aiFab" onclick="toggleAiPanel()" title="AI 數據助手">🤖</button>
-
-<div class="ai-panel" id="aiPanel">
-    <div class="ai-panel-header">
-        <div style="flex:1;">
-            <div class="ai-panel-title">✨ AI 數據助手</div>
-            <div class="ai-panel-sub">用中文問我任何關於 KOL 數據的問題</div>
-        </div>
-        <div class="ai-panel-header-btns">
-            <button class="ai-tts-toggle" id="aiAutoSpeakBtn" onclick="toggleAutoSpeak()" title="自動朗讀模式">🔊 自動</button>
-            <button class="ai-clear-btn" onclick="clearAiChat()">清空</button>
-        </div>
-    </div>
-    <div class="ai-messages" id="aiMessages">
-        <div class="ai-msg assistant">你好！我是你的 KOL 數據助手 👋
-
-你可以問我像是：
-• 4月業績最好的前3名是誰？
-• 合約在8月底前到期的有哪些人？
-• 哪些 Ambassador 本月沒有發文？
-
-有什麼想知道的嗎？</div>
-    </div>
-    <div class="ai-suggestions" id="aiSuggestions">
-        <button class="ai-suggestion" onclick="sendAiSuggestion(this)">本月業績前3名</button>
-        <button class="ai-suggestion" onclick="sendAiSuggestion(this)">合約快到期的人</button>
-        <button class="ai-suggestion" onclick="sendAiSuggestion(this)">本月未發文的KOL</button>
-        <button class="ai-suggestion" onclick="sendAiSuggestion(this)">近期賽事</button>
-    </div>
-    <div class="ai-input-row">
-        <button class="ai-mic-btn" id="aiMicBtn" onclick="toggleVoiceInput()" title="語音輸入">🎤</button>
-        <textarea class="ai-input" id="aiInput" placeholder="輸入問題，或點🎤說話..." rows="1"
-            onkeydown="aiInputKeydown(event)" oninput="aiInputResize(this)"></textarea>
-        <button class="ai-send-btn" id="aiSendBtn" onclick="sendAiMessage()">➤</button>
-    </div>
-</div>
-
-</body>
-</html>
+// 設定 API Key 到 Script Properties（執行一次即可）
+function setupGeminiKey() {
+  PropertiesService.getScriptProperties().setProperty('GEMINI_API_KEY', 'AIzaSyAEkpgZz8cpEj6ydelVSGuvQKlRAM1-p0Q');
+  Logger.log('Gemini API Key 設定完成');
+}
