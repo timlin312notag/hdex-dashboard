@@ -1710,11 +1710,12 @@ function submitCsvUpload() {
     btn.disabled=true; btn.textContent='匯入中...';
     document.getElementById('modalResult').innerHTML='';
 
-    // 覆蓋模式：把選擇的月份和 overwrite flag 一起送
+    // 覆蓋模式：檢查外層 section 是否已顯示
     var overwriteMonth = '';
+    var owSection = document.getElementById('overwriteSection');
     var owSelect = document.getElementById('overwriteMonthSelect');
-    if (owSelect && owSelect.style.display !== 'none') {
-        overwriteMonth = owSelect.value;
+    if (owSection && owSection.style.display !== 'none') {
+        overwriteMonth = owSelect ? owSelect.value : '';
         if (!overwriteMonth) {
             document.getElementById('modalResult').className = 'modal-result error';
             document.getElementById('modalResult').textContent = '❌ 請先選擇要覆蓋的月份';
