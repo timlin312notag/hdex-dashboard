@@ -262,6 +262,50 @@
 }
 .kol-event-row:last-child { border-bottom: none; }
 
+/* ── 合約管理頁 ───────────────────────────────────── */
+.cf-row { display: flex; align-items: flex-start; gap: 12px; margin-top: 14px; }
+.cf-label {
+    flex: 0 0 96px; display: flex; flex-direction: column; line-height: 1.3;
+    font-size: 12px; font-weight: 700; color: var(--text-secondary); padding-top: 5px;
+}
+.cf-label small { font-size: 10px; font-weight: 400; color: var(--text-muted); }
+.cf-chips { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; min-width: 0; }
+.cf-chip {
+    padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer;
+    border: 1px solid var(--border); background: var(--bg-primary); color: var(--text-secondary);
+    transition: all 0.15s; font-family: 'Outfit', sans-serif; white-space: nowrap;
+}
+.cf-chip:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+.cf-chip.on { background: var(--accent-blue-dim); border-color: var(--accent-blue); color: var(--accent-blue); }
+.cf-chip .cf-n { opacity: 0.65; font-family: 'JetBrains Mono', monospace; font-size: 11px; margin-left: 4px; }
+.cf-actions { display: flex; align-items: center; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.cf-count { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+
+.ct-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 720px; }
+.ct-table th {
+    text-align: left; padding: 10px 12px; font-size: 12px; font-weight: 600;
+    color: var(--text-secondary); border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+.ct-table th small { display: block; font-weight: 400; color: var(--text-muted); font-size: 10px; }
+.ct-table td { padding: 10px 12px; border-bottom: 1px solid rgba(120,120,150,0.14); white-space: nowrap; }
+.ct-table tr.ct-row { cursor: pointer; transition: background 0.15s; }
+.ct-table tr.ct-row:hover td { background: var(--bg-card-hover); }
+.ct-name { font-weight: 700; color: var(--text-primary); }
+.ct-date { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-primary); }
+.ct-date.unset { color: var(--text-muted); font-family: 'Outfit', sans-serif; font-style: italic; }
+.ct-pill {
+    font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px;
+    border: 1px solid transparent; white-space: nowrap; display: inline-block;
+}
+.ct-pill.expired { background: var(--accent-red-dim);    color: var(--accent-red);    border-color: rgba(255,77,106,0.35); }
+.ct-pill.d30     { background: var(--accent-yellow-dim); color: var(--accent-yellow); border-color: rgba(255,197,66,0.35); }
+.ct-pill.d60     { background: var(--accent-blue-dim);   color: var(--accent-blue);   border-color: rgba(77,156,255,0.35); }
+.ct-pill.ok      { background: var(--accent-green-dim);  color: var(--accent-green);  border-color: rgba(0,232,143,0.3); }
+.ct-pill.unset   { background: var(--bg-card-hover);     color: var(--text-muted);    border-color: var(--border); }
+.ct-days { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+.ct-note { color: var(--text-secondary); font-size: 12px; white-space: normal; max-width: 260px; }
+.ct-empty { color: var(--text-muted); text-align: center; padding: 40px 0; font-size: 13px; }
+
 /* ── 合約區塊 ─────────────────────────────────────── */
 .contract-info-card { background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
 .contract-row { display: flex; flex-wrap: wrap; gap: 20px; }
@@ -339,6 +383,11 @@
     color: var(--accent-green); font-weight: 600;
 }
 .nav-item .nav-ico { width: 18px; text-align: center; flex: 0 0 auto; }
+/* 導覽文字：英文為主、中文小字在下 */
+.nav-label { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; text-align: left; }
+.nav-label small { font-size: 10px; font-weight: 400; color: var(--text-muted); margin-top: 1px; }
+.nav-item.active .nav-label small { color: var(--accent-green); opacity: 0.75; }
+.nav-item:hover .nav-label small { color: var(--text-secondary); }
 .sidebar-foot { border-top: 1px solid var(--border); margin-top: 12px; padding: 10px 6px 0; display: flex; gap: 6px; flex-wrap: wrap; }
 .sidebar-backdrop { display: none; }
 
@@ -676,7 +725,7 @@ table td { font-size: 13px; color: #d0d0e0; padding: 10px 12px; }
 
 <div id="loading">
     <div class="spinner"></div>
-    <div class="loading-text">正在載入儀表板資料...</div>
+    <div class="loading-text">Loading dashboard data… 正在載入儀表板資料...</div>
 </div>
 
 <div id="dashboard" style="display:none;">
@@ -695,7 +744,7 @@ table td { font-size: 13px; color: #d0d0e0; padding: 10px 12px; }
                 🔔<span class="bell-badge" id="bellBadge" style="display:none;">0</span>
             </button>
             <div class="bell-panel" id="bellPanel">
-                <div class="bell-panel-header">🔔 近期提醒</div>
+                <div class="bell-panel-header">🔔 Reminders 近期提醒</div>
                 <div id="bellContent"><div class="bell-empty">載入中...</div></div>
             </div>
         </div>
@@ -709,11 +758,11 @@ table td { font-size: 13px; color: #d0d0e0; padding: 10px 12px; }
 
 <!-- ── 上方：月份選擇（可複選）─────────────────────── -->
 <div class="month-bar fade-up delay-2">
-    <span class="month-bar-label">📅 月份</span>
+    <span class="month-bar-label">📅 Month <small style="font-weight:400;color:var(--text-muted);">月份</small></span>
     <div class="month-chips" id="monthTabs"></div>
     <div class="month-bar-actions">
-        <button class="mini-btn" onclick="selectLatestPeriod()">最新月</button>
-        <button class="mini-btn" onclick="selectAllPeriods()">全選</button>
+        <button class="mini-btn" onclick="selectLatestPeriod()">Latest 最新月</button>
+        <button class="mini-btn" onclick="selectAllPeriods()">All 全選</button>
     </div>
     <span class="month-bar-summary" id="monthBarSummary"></span>
 </div>
@@ -726,27 +775,31 @@ table td { font-size: 13px; color: #d0d0e0; padding: 10px 12px; }
     <nav id="sidebarNav">
         <div class="nav-group">
             <div class="nav-group-title">📊 Overview 總覽</div>
-            <button class="nav-item active" data-view="overview" data-group="all"><span class="nav-ico">▦</span>全部</button>
-            <button class="nav-item" data-view="overview" data-group="kpi"><span class="nav-ico">📌</span>KPI 摘要</button>
-            <button class="nav-item" data-view="overview" data-group="sales"><span class="nav-ico">💵</span>銷售與成本</button>
-            <button class="nav-item" data-view="overview" data-group="tier"><span class="nav-ico">🏅</span>KOL 分級</button>
-            <button class="nav-item" data-view="overview" data-group="detail"><span class="nav-ico">📊</span>詳細數據</button>
-            <button class="nav-item" data-view="overview" data-group="growth"><span class="nav-ico">📈</span>成長與趨勢</button>
-            <button class="nav-item" data-view="overview" data-group="efficiency"><span class="nav-ico">💰</span>效率分析</button>
-            <button class="nav-item" data-view="overview" data-group="budget"><span class="nav-ico">💡</span>預算建議</button>
+            <button class="nav-item active" data-view="overview" data-group="all"><span class="nav-ico">▦</span><span class="nav-label">All<small>全部</small></span></button>
+            <button class="nav-item" data-view="overview" data-group="kpi"><span class="nav-ico">📌</span><span class="nav-label">KPI Summary<small>KPI 摘要</small></span></button>
+            <button class="nav-item" data-view="overview" data-group="sales"><span class="nav-ico">💵</span><span class="nav-label">Sales &amp; Cost<small>銷售與成本</small></span></button>
+            <button class="nav-item" data-view="overview" data-group="tier"><span class="nav-ico">🏅</span><span class="nav-label">KOL Tiers<small>KOL 分級</small></span></button>
+            <button class="nav-item" data-view="overview" data-group="detail"><span class="nav-ico">📊</span><span class="nav-label">Details<small>詳細數據</small></span></button>
+            <button class="nav-item" data-view="overview" data-group="growth"><span class="nav-ico">📈</span><span class="nav-label">Growth &amp; Trend<small>成長與趨勢</small></span></button>
+            <button class="nav-item" data-view="overview" data-group="efficiency"><span class="nav-ico">💰</span><span class="nav-label">Efficiency<small>效率分析</small></span></button>
+            <button class="nav-item" data-view="overview" data-group="budget"><span class="nav-ico">💡</span><span class="nav-label">Budget Plan<small>預算建議</small></span></button>
         </div>
         <div class="nav-group">
             <div class="nav-group-title">👤 Individual 個人</div>
-            <button class="nav-item" data-view="individual" data-group="all"><span class="nav-ico">👥</span>個人分析</button>
+            <button class="nav-item" data-view="individual" data-group="all"><span class="nav-ico">👥</span><span class="nav-label">Individual Analysis<small>個人分析</small></span></button>
+        </div>
+        <div class="nav-group">
+            <div class="nav-group-title">📋 Contracts 合約</div>
+            <button class="nav-item" data-view="contracts" data-group="all"><span class="nav-ico">📋</span><span class="nav-label">Contract Manager<small>合約管理</small></span></button>
         </div>
         <div class="nav-group">
             <div class="nav-group-title">🏆 Events 賽事</div>
-            <button class="nav-item" data-view="events" data-group="all"><span class="nav-ico">🏆</span>賽事行程</button>
+            <button class="nav-item" data-view="events" data-group="all"><span class="nav-ico">🏆</span><span class="nav-label">Event Schedule<small>賽事行程</small></span></button>
         </div>
     </nav>
     <div class="sidebar-foot">
-        <button class="mini-btn" onclick="collapseAllCards(true)">⊟ 全部收合</button>
-        <button class="mini-btn" onclick="collapseAllCards(false)">⊞ 全部展開</button>
+        <button class="mini-btn" onclick="collapseAllCards(true)">⊟ Collapse all 全部收合</button>
+        <button class="mini-btn" onclick="collapseAllCards(false)">⊞ Expand all 全部展開</button>
     </div>
 </aside>
 
@@ -755,11 +808,11 @@ table td { font-size: 13px; color: #d0d0e0; padding: 10px 12px; }
 <div id="overviewSection" class="overview-section">
 
 <div class="group-block" data-group="kpi">
-    <div class="group-head"><h2>📌 KPI 摘要</h2><span>本期整體表現與重點名單</span></div>
+    <div class="group-head"><h2>📌 KPI Summary <small>KPI 摘要</small></h2><span>Overall performance and key names 本期整體表現與重點名單</span></div>
     <div class="kpi-row" id="kpiRow"></div>
     <div class="card full-width" id="monthBreakdownCard" data-card="monthBreakdown" style="display:none;">
         <div class="card-title">🗓️ By Month Breakdown <small style="font-size:11px;color:var(--text-muted);">分月對照</small></div>
-        <div class="card-subtitle">所選月份的各月獨立數據與合計</div>
+        <div class="card-subtitle">Each selected month on its own, plus the combined total 各月獨立數據與合計</div>
         <div class="table-wrap"><div id="monthBreakdownBody"></div></div>
     </div>
     <div class="grid-1-1">
@@ -769,7 +822,7 @@ table td { font-size: 13px; color: #d0d0e0; padding: 10px 12px; }
 </div>
 
 <div class="group-block" data-group="sales">
-<div class="group-head"><h2>💵 銷售與成本</h2><span>各 KOL 的產出與投入對照</span></div>
+<div class="group-head"><h2>💵 Sales &amp; Cost <small>銷售與成本</small></h2><span>Output vs spend per KOL 各 KOL 的產出與投入對照</span></div>
 <div class="grid-2-1 fade-up delay-3">
     <div class="card" data-card="salesVsCost">
         <div class="card-title">Sales vs Cost by KOL <small style='font-size:11px;color:var(--text-muted);'>各KOL銷售額vs總支出</small></div>
@@ -783,7 +836,7 @@ table td { font-size: 13px; color: #d0d0e0; padding: 10px 12px; }
 </div>
 
 <div class="group-block" data-group="tier">
-<div class="group-head"><h2>🏅 KOL 分級</h2><span>依 ROAS 與銷售額自動分級</span></div>
+<div class="group-head"><h2>🏅 KOL Tiers <small>KOL 分級</small></h2><span>Auto-graded by ROAS and sales 依 ROAS 與銷售額自動分級</span></div>
 <div class="card full-width fade-up delay-4" id="tierCard" data-card="tier">
     <div class="card-title">🏅 KOL Tier System <small style='font-size:11px;color:var(--text-muted);'>分級制度</small></div>
     <div class="card-subtitle">依 ROAS 與銷售額自動分級，作為續約決策依據</div>
@@ -792,7 +845,7 @@ table td { font-size: 13px; color: #d0d0e0; padding: 10px 12px; }
 </div>
 
 <div class="group-block" data-group="detail">
-<div class="group-head"><h2>📊 詳細數據</h2><span>可篩選與排序的完整名單</span></div>
+<div class="group-head"><h2>📊 Details <small>詳細數據</small></h2><span>Full list, filterable and sortable 可篩選與排序的完整名單</span></div>
 <div class="card full-width fade-up delay-5" data-card="kolDetails">
     <div class="card-title">📊 KOL Details <small style="font-size:11px;color:var(--text-muted);">詳細數據</small></div>
     <div class="filter-row" id="classFilterGroup">
@@ -821,17 +874,17 @@ table td { font-size: 13px; color: #d0d0e0; padding: 10px 12px; }
         </table>
     </div>
     <div class="legend-text">
-        等級說明：<span class="badge badge-s">S級</span> ROAS≥3 且銷售≥50K &nbsp;
-        <span class="badge badge-a">A級</span> ROAS≥2 或銷售≥30K &nbsp;
+        Tier legend 等級說明：<span class="badge badge-s">S級</span> ROAS≥3 &amp; sales≥50K &nbsp;
+        <span class="badge badge-a">A級</span> ROAS≥2 or sales≥30K &nbsp;
         <span class="badge badge-b">B級</span> ROAS 1~2 &nbsp;
-        <span class="badge badge-c">C級</span> ROAS&lt;1 有成本 &nbsp;
+        <span class="badge badge-c">C級</span> ROAS&lt;1 with cost &nbsp;
         <span class="badge badge-d">D級</span> 零產出
     </div>
 </div>
 </div>
 
 <div class="group-block" data-group="growth">
-<div class="group-head"><h2>📈 成長與趨勢</h2><span>誰在成長、誰在衰退，以及整體走勢</span></div>
+<div class="group-head"><h2>📈 Growth &amp; Trend <small>成長與趨勢</small></h2><span>Who is growing or declining 誰在成長、誰在衰退</span></div>
 <div class="card full-width fade-up delay-7" data-card="growthTracking">
     <div class="card-title">📈 Growth Tracking <small style="font-size:11px;color:var(--text-muted);">成長追蹤</small></div>
     <div class="card-subtitle">月對月銷售額變化，追蹤誰在成長、誰在衰退</div>
@@ -839,13 +892,13 @@ table td { font-size: 13px; color: #d0d0e0; padding: 10px 12px; }
 </div>
 <div class="card full-width" data-card="monthlyTrend">
     <div class="card-title">Monthly Trend: Sales vs Cost <small style='font-size:11px;color:var(--text-muted);'>月度趨勢</small></div>
-    <div class="card-subtitle">所有月份的走勢，已選取的月份會highlight</div>
+    <div class="card-subtitle">All months; the selected ones are highlighted 已選月份會標示</div>
     <div class="chart-container"><canvas id="chartTrend"></canvas></div>
 </div>
 </div>
 
 <div class="group-block" data-group="efficiency">
-<div class="group-head"><h2>💰 效率分析</h2><span>投資報酬、客單價與粉絲轉換</span></div>
+<div class="group-head"><h2>💰 Efficiency <small>效率分析</small></h2><span>ROI, order value and follower conversion 投資報酬、客單價與粉絲轉換</span></div>
 <div class="grid-2-1 fade-up delay-8">
     <div class="card" data-card="roiAnalysis">
         <div class="card-title">💰 ROI Analysis <small style="font-size:11px;color:var(--text-muted);">投資效率</small></div>
@@ -861,7 +914,7 @@ table td { font-size: 13px; color: #d0d0e0; padding: 10px 12px; }
 </div>
 
 <div class="group-block" data-group="budget">
-<div class="group-head"><h2>💡 預算建議</h2><span>依本期表現自動產生的續約與預算調整</span></div>
+<div class="group-head"><h2>💡 Budget Plan <small>預算建議</small></h2><span>Renewal and budget suggestions 續約與預算調整建議</span></div>
 <div class="card full-width fade-up delay-9" data-card="budgetPlan">
     <div class="card-title">💡 Next Month Budget Plan <small style="font-size:11px;color:var(--text-muted);">下月預算建議</small></div>
     <div class="card-subtitle">基於本期表現，自動產生續約與預算調整建議</div>
@@ -880,15 +933,15 @@ table td { font-size: 13px; color: #d0d0e0; padding: 10px 12px; }
 
 <div id="individualSection" class="individual-section">
 
-    <div class="group-head"><h2>👤 個人分析</h2><span>挑 KOL 與月份，看個別表現與跨月比較</span></div>
+    <div class="group-head"><h2>👤 Individual Analysis <small>個人分析</small></h2><span>Pick KOLs and months to compare 挑 KOL 與月份比較</span></div>
 
     <!-- KOL 多選 -->
     <div class="card fade-up delay-1" data-card="selectKol" style="margin-bottom:16px;">
         <div class="card-title">👥 Select KOL <small style="font-size:11px;color:var(--text-muted);">選擇KOL（可多選）</small></div>
         <div id="kolCheckboxGroup" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;"></div>
         <div style="display:flex;gap:8px;">
-            <button class="sort-btn" onclick="selectAllKols()">全選</button>
-            <button class="sort-btn" onclick="clearAllKols()">清除</button>
+            <button class="sort-btn" onclick="selectAllKols()">All 全選</button>
+            <button class="sort-btn" onclick="clearAllKols()">Clear 清除</button>
         </div>
     </div>
 
@@ -897,8 +950,8 @@ table td { font-size: 13px; color: #d0d0e0; padding: 10px 12px; }
         <div class="card-title">📅 Select Month <small style="font-size:11px;color:var(--text-muted);">選擇月份（可多選）</small></div>
         <div id="monthCheckboxGroup" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;"></div>
         <div style="display:flex;gap:8px;">
-            <button class="sort-btn" onclick="selectAllMonths()">全選</button>
-            <button class="sort-btn" onclick="clearAllMonths()">清除</button>
+            <button class="sort-btn" onclick="selectAllMonths()">All 全選</button>
+            <button class="sort-btn" onclick="clearAllMonths()">Clear 清除</button>
         </div>
     </div>
 
@@ -923,21 +976,74 @@ table td { font-size: 13px; color: #d0d0e0; padding: 10px 12px; }
 
 </div>
 
+<!-- ── 合約 Section ──────────────────────────────── -->
+<div id="contractsSection" style="display:none;">
+    <div class="group-head">
+        <h2>📋 Contract Manager <small>合約管理</small></h2>
+        <span>Who expires when, and what is still unfilled 誰何時到期、哪些還沒填</span>
+    </div>
+
+    <div class="kpi-row" id="contractKpiRow"></div>
+
+    <div class="card full-width" data-card="contractFilter">
+        <div class="card-title">🔎 Filters <small style="font-size:11px;color:var(--text-muted);">篩選條件</small></div>
+        <div class="card-subtitle">Narrow by KOL, contract type, or expiry month 依 KOL、類型或到期月份篩選</div>
+
+        <div class="cf-row">
+            <span class="cf-label">Expiry month<small>到期月份</small></span>
+            <div class="cf-chips" id="contractMonthChips"></div>
+        </div>
+
+        <div class="cf-row">
+            <span class="cf-label">Type<small>類型</small></span>
+            <div class="cf-chips" id="contractTypeChips"></div>
+        </div>
+
+        <div class="cf-row">
+            <span class="cf-label">Status<small>狀態</small></span>
+            <div class="cf-chips" id="contractStatusChips"></div>
+        </div>
+
+        <div class="cf-row">
+            <span class="cf-label">KOL<small>可多選</small></span>
+            <div class="cf-chips" id="contractKolChips"></div>
+        </div>
+
+        <div class="cf-actions">
+            <input type="text" class="event-search" id="contractSearch" placeholder="Search name 搜尋姓名..." oninput="renderContracts()">
+            <button class="mini-btn" onclick="resetContractFilters()">↺ Reset 重設</button>
+            <span class="cf-count" id="contractCount"></span>
+        </div>
+    </div>
+
+    <div class="card full-width" data-card="contractTable">
+        <div class="card-title">📋 Contracts <small style="font-size:11px;color:var(--text-muted);">合約一覽</small></div>
+        <div class="card-subtitle">Click a row to see that KOL's performance and events 點任一列可看該 KOL 的成效與賽事</div>
+        <div class="sort-group" id="contractSortGroup">
+            <button class="sort-btn active" data-csort="endDate">Expiry 到期日 ↑</button>
+            <button class="sort-btn" data-csort="name">Name 姓名</button>
+            <button class="sort-btn" data-csort="type">Type 類型</button>
+            <button class="sort-btn" data-csort="startDate">Start 開始日</button>
+        </div>
+        <div class="table-wrap"><div id="contractTableBody"></div></div>
+    </div>
+</div>
+
 <!-- ── 賽事 Section ──────────────────────────────── -->
 <div id="eventsSection" style="display:none;">
     <div class="card full-width fade-up delay-1" style="margin-bottom:16px;">
         <div class="events-head">
             <div>
                 <div class="card-title">🏆 Annual Events <small style='font-size:11px;color:var(--text-muted);'>年度賽事行程</small></div>
-                <div class="card-subtitle">手動建立的賽事 ＋ 賽事 Google Sheet 自動同步</div>
+                <div class="card-subtitle">Manual events + auto-synced from the events Google Sheet 手動建立 ＋ Google Sheet 同步</div>
             </div>
             <div class="events-sync">
                 <span class="events-sync-status" id="eventsSyncStatus">尚未載入賽事表</span>
-                <button class="action-btn" id="eventsRefreshBtn" onclick="refreshSheetEvents()">🔄 重新整理賽事</button>
+                <button class="action-btn" id="eventsRefreshBtn" onclick="refreshSheetEvents()">🔄 Refresh 重新整理</button>
             </div>
         </div>
         <div class="event-filter-row">
-            <input type="text" class="event-search" id="eventSearchInput" placeholder="搜尋賽事名稱..." oninput="renderEventsTab()">
+            <input type="text" class="event-search" id="eventSearchInput" placeholder="Search events 搜尋賽事名稱..." oninput="renderEventsTab()">
             <button class="tab-btn active" data-eview="byEvent" onclick="switchEventView('byEvent', this)">By Event <small style='font-size:10px;color:var(--text-muted);'>以賽事看</small></button>
             <button class="tab-btn" data-eview="byKol" onclick="switchEventView('byKol', this)">By KOL <small style='font-size:10px;color:var(--text-muted);'>以KOL看</small></button>
         </div>
@@ -954,29 +1060,29 @@ table td { font-size: 13px; color: #d0d0e0; padding: 10px 12px; }
 
 <div id="uploadModal" class="modal-overlay" style="display:none;">
     <div class="modal-box">
-        <div class="modal-title">📤 上傳本月 CSV 資料</div>
+        <div class="modal-title">📤 Upload monthly CSV 上傳本月 CSV 資料</div>
         <div class="modal-subtitle">上傳後系統會自動比對 KOL 折扣碼並更新 Google Sheet，儀表板隨即自動刷新。</div>
         <div class="modal-step">
             <div class="modal-step-label">選擇 Shopify CSV 檔案</div>
             <div class="file-drop-zone" id="dropZone" onclick="document.getElementById('csvFileInput').click()">
-                <div>點擊選擇，或直接拖曳 CSV 到這裡</div>
+                <div>Click to choose, or drag a CSV here 點擊選擇或拖曳 CSV</div>
                 <input type="file" id="csvFileInput" accept=".csv" onchange="onFileSelected(this)">
             </div>
             <div class="file-selected-name" id="selectedFileName"></div>
         </div>
         <div id="overwriteSection" style="display:none;margin-top:12px;">
             <div style="background:var(--accent-yellow-dim);border:1px solid var(--accent-yellow);border-radius:10px;padding:12px 16px;">
-                <div style="font-size:13px;font-weight:700;color:var(--accent-yellow);margin-bottom:8px;">⚠️ 所有月份都已有資料</div>
-                <div style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;">請選擇要覆蓋的月份：</div>
+                <div style="font-size:13px;font-weight:700;color:var(--accent-yellow);margin-bottom:8px;">⚠️ Every month already has data 所有月份都已有資料</div>
+                <div style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;">Pick a month to overwrite 請選擇要覆蓋的月份：</div>
                 <select id="overwriteMonthSelect" style="width:100%;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:Outfit,sans-serif;font-size:13px;outline:none;">
-                    <option value="">選擇月份...</option>
+                    <option value="">Select month 選擇月份...</option>
                 </select>
             </div>
         </div>
         <div id="modalResult"></div>
         <div class="modal-actions">
-            <button class="modal-btn modal-btn-cancel" onclick="hideUploadModal()">取消</button>
-            <button class="modal-btn modal-btn-submit" id="uploadSubmitBtn" onclick="submitCsvUpload()" disabled>開始匯入</button>
+            <button class="modal-btn modal-btn-cancel" onclick="hideUploadModal()">Cancel 取消</button>
+            <button class="modal-btn modal-btn-submit" id="uploadSubmitBtn" onclick="submitCsvUpload()" disabled>Start import 開始匯入</button>
         </div>
     </div>
 </div>
@@ -1271,8 +1377,8 @@ function buildMonthTabs() {
     var summary = document.getElementById('monthBarSummary');
     if (summary) {
         summary.textContent = isMultiPeriod()
-            ? '已選 ' + selectedPeriods.length + ' 個月，數據為合計'
-            : '單月檢視';
+            ? 'Combined ' + selectedPeriods.length + ' months 已選 ' + selectedPeriods.length + ' 個月（合計）'
+            : 'Single month 單月檢視';
     }
 }
 
@@ -1288,6 +1394,7 @@ function switchNav(view, group, btn) {
 
     document.getElementById('overviewSection').style.display   = view === 'overview'   ? '' : 'none';
     document.getElementById('individualSection').style.display = view === 'individual' ? 'block' : 'none';
+    document.getElementById('contractsSection').style.display  = view === 'contracts'  ? 'block' : 'none';
     document.getElementById('eventsSection').style.display     = view === 'events'     ? 'block' : 'none';
 
     // 總覽內再依分類顯示對應的區塊
@@ -1297,6 +1404,7 @@ function switchNav(view, group, btn) {
 
     if (view === 'overview') { destroyAllCharts(); renderAll(); }
     else if (view === 'individual') { destroyAllCharts(); renderIndividual(); }
+    else if (view === 'contracts') { renderContracts(); initCollapsibles(); }
     else if (view === 'events') { renderEventsTab(); }
 
     closeSidebar();
@@ -1496,7 +1604,7 @@ function getPrevViewData() {
 function viewPeriodLabel() {
     if (!selectedPeriods.length) return '—';
     if (selectedPeriods.length === 1) return periodLabel(selectedPeriods[0]);
-    return selectedPeriods.map(periodLabel).join(' + ') + '（合計 ' + selectedPeriods.length + ' 個月）';
+    return selectedPeriods.map(periodLabel).join(' + ') + '（Total 合計 ' + selectedPeriods.length + ' 個月）';
 }
 
 function isMultiPeriod() { return selectedPeriods.length > 1; }
@@ -1667,8 +1775,8 @@ function renderKPI() {
         var kr = document.getElementById('kpiRow');
         kr.parentNode.insertBefore(scopeEl, kr);
     }
-    scopeEl.innerHTML = '目前檢視：<strong style="color:var(--text-secondary);">' + viewPeriodLabel() + '</strong>' +
-        (prev ? '　·　比較基準：' + prevPeriods.map(periodLabel).join(' + ') : '　·　無可比較的前期');
+    scopeEl.innerHTML = 'Viewing 目前檢視：<strong style="color:var(--text-secondary);">' + viewPeriodLabel() + '</strong>' +
+        (prev ? '　·　Baseline 比較基準：' + prevPeriods.map(periodLabel).join(' + ') : '　·　No comparable prior period 無可比較的前期');
 
     var kpis = [
         { label:'Total Sales 總銷售額', value: fmt(totalSales), mom: momBadge(totalSales, prevTotalSales) },
@@ -1712,12 +1820,12 @@ function renderKPI() {
         '<div class="card kpi-card fade-up" style="border-left:3px solid var(--accent-blue);flex:1;">' +
             '<div class="kpi-label" style="color:var(--accent-blue);">📅 YTD Total Sales <span style="font-size:10px;color:var(--text-muted);">' + ytdLabel + '</span></div>' +
             '<div class="kpi-value mono">' + fmt(ytd.sales) + '</div>' +
-            '<div style="font-size:11px;color:var(--text-muted);margin-top:4px;">年度累積銷售額</div>' +
+            '<div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Year to date 年度累積銷售額</div>' +
         '</div>' +
         '<div class="card kpi-card fade-up" style="border-left:3px solid var(--accent-blue);flex:1;">' +
             '<div class="kpi-label" style="color:var(--accent-blue);">📅 YTD Orders <span style="font-size:10px;color:var(--text-muted);">' + ytdLabel + '</span></div>' +
             '<div class="kpi-value mono">' + fmtNum(ytd.orders) + '</div>' +
-            '<div style="font-size:11px;color:var(--text-muted);margin-top:4px;">年度累積訂單數</div>' +
+            '<div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Year to date 年度累積訂單數</div>' +
         '</div>';
 }
 
@@ -1758,7 +1866,7 @@ function renderMonthBreakdown() {
 
     var t = statsOf(getViewData());
     rowsHtml += '<tr style="border-top:2px solid var(--accent-green);">' +
-        '<td class="text-col"><strong style="color:var(--accent-green);">合計 ' + selectedPeriods.length + ' 個月</strong></td>' +
+        '<td class="text-col"><strong style="color:var(--accent-green);">Total 合計 ' + selectedPeriods.length + ' 個月</strong></td>' +
         '<td style="color:var(--accent-green);font-weight:700;">' + fmt(t.sales) + '</td>' +
         '<td style="color:var(--accent-green);font-weight:700;">' + fmt(t.cost) + '</td>' +
         '<td style="color:var(--accent-green);font-weight:700;">' + fmtDec(t.roas) + 'x</td>' +
@@ -1872,8 +1980,8 @@ function renderInsights() {
     }).join('');
     var alerts = data.filter(function(r){return r.totalCost>0&&r.roas<1;}).sort(function(a,b){return b.totalCost-a.totalCost;});
     document.getElementById('alertList').innerHTML = alerts.length===0 ?
-        '<li><span style="color:var(--text-muted)">無高成本低產出 KOL</span></li>' :
-        alerts.map(function(r,i){return '<li><span class="insight-rank">'+(i+1)+'</span><span class="insight-name">'+r.name+'</span><span class="insight-val" style="color:var(--accent-red)">ROAS '+fmtDec(r.roas)+'x · 成本 '+fmt(r.totalCost)+'</span></li>';}).join('');
+        '<li><span style="color:var(--text-muted)">No high-cost low-output KOL 無高成本低產出</span></li>' :
+        alerts.map(function(r,i){return '<li><span class="insight-rank">'+(i+1)+'</span><span class="insight-name">'+r.name+'</span><span class="insight-val" style="color:var(--accent-red)">ROAS '+fmtDec(r.roas)+'x · Cost 成本 '+fmt(r.totalCost)+'</span></li>';}).join('');
 }
 
 // 沒資料時顯示訊息，但保留 canvas，之後切回有資料的月份才畫得回來
@@ -1902,7 +2010,7 @@ function renderGrowthChart() {
     destroyChart('chartGrowth');
     if (!document.getElementById('chartGrowth')) return;
     var prevData = getPrevViewData();
-    if (!prevData) { setChartMessage('chartGrowth', '沒有可比較的前期資料'); return; }
+    if (!prevData) { setChartMessage('chartGrowth', 'No comparable prior data 沒有可比較的前期資料'); return; }
     setChartMessage('chartGrowth', null);
     var curData = getViewData();
     var growthData = [];
@@ -2135,8 +2243,8 @@ function clearAllMonths() {
 function renderIndividual() {
     if (selectedKols.length === 0 || selectedMonths.length === 0) {
         destroyChart('chartPersonalTrend');
-        document.getElementById('tableByPerson').innerHTML = '<div class="no-data-msg">請選擇至少一位 KOL 和一個月份</div>';
-        document.getElementById('tableByMonth').innerHTML = '<div class="no-data-msg">請選擇至少一位 KOL 和一個月份</div>';
+        document.getElementById('tableByPerson').innerHTML = '<div class="no-data-msg">Select at least one KOL and one month 請選擇至少一位 KOL 和一個月份</div>';
+        document.getElementById('tableByMonth').innerHTML = '<div class="no-data-msg">Select at least one KOL and one month 請選擇至少一位 KOL 和一個月份</div>';
         return;
     }
 
@@ -2174,12 +2282,12 @@ function renderIndividual() {
             '<div class="card kpi-card" style="flex:1;border-left:3px solid var(--accent-blue);">' +
                 '<div class="kpi-label" style="color:var(--accent-blue);">📅 YTD Total Sales <span style="font-size:10px;color:var(--text-muted);">' + ytdLabel2 + '</span></div>' +
                 '<div class="kpi-value mono">' + fmt(kolYtd.sales) + '</div>' +
-                '<div style="font-size:11px;color:var(--text-muted);margin-top:4px;">年度累積銷售額</div>' +
+                '<div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Year to date 年度累積銷售額</div>' +
             '</div>' +
             '<div class="card kpi-card" style="flex:1;border-left:3px solid var(--accent-blue);">' +
                 '<div class="kpi-label" style="color:var(--accent-blue);">📅 YTD Orders <span style="font-size:10px;color:var(--text-muted);">' + ytdLabel2 + '</span></div>' +
                 '<div class="kpi-value mono">' + fmtNum(kolYtd.orders) + '</div>' +
-                '<div style="font-size:11px;color:var(--text-muted);margin-top:4px;">年度累積訂單數</div>' +
+                '<div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Year to date 年度累積訂單數</div>' +
             '</div>' +
             '</div>';
     } else {
@@ -2225,7 +2333,7 @@ function renderIndividual() {
     var tableAHtml = selectedKols.map(function(name) {
         var rows = selectedMonths.map(function(m) {
             var d = getMonthData(m).find(function(r) { return r.name === name; });
-            if (!d) return '<tr><td class="text-col">' + periodLabel(m) + '</td><td colspan="5" style="color:var(--text-muted)">無資料</td></tr>';
+            if (!d) return '<tr><td class="text-col">' + periodLabel(m) + '</td><td colspan="5" style="color:var(--text-muted)">No data 無資料</td></tr>';
             return '<tr>' +
                 '<td class="text-col">' + periodLabel(m) + '</td>' +
                 '<td>' + d.orders + '</td>' +
@@ -2247,7 +2355,7 @@ function renderIndividual() {
     var tableBHtml = selectedMonths.map(function(m) {
         var rows = selectedKols.map(function(name) {
             var d = getMonthData(m).find(function(r) { return r.name === name; });
-            if (!d) return '<tr><td class="text-col">' + name + '</td><td colspan="5" style="color:var(--text-muted)">無資料</td></tr>';
+            if (!d) return '<tr><td class="text-col">' + name + '</td><td colspan="5" style="color:var(--text-muted)">No data 無資料</td></tr>';
             return '<tr>' +
                 '<td class="text-col"><strong>' + name + '</strong></td>' +
                 '<td>' + d.orders + '</td>' +
@@ -2283,6 +2391,25 @@ function initEventHandlers() {
     document.getElementById('sidebarNav').addEventListener('click', function(e) {
         var btn = e.target.closest('.nav-item');
         if (btn) switchNav(btn.dataset.view, btn.dataset.group, btn);
+    });
+
+    // 合約頁：篩選 chip、排序、點列跳到個人分析
+    var cs = document.getElementById('contractsSection');
+    cs.addEventListener('click', function(e) {
+        var chip = e.target.closest('.cf-chip');
+        if (chip) { toggleContractFilter(chip.dataset.kind, decodeURIComponent(chip.dataset.val)); return; }
+
+        var sortBtn = e.target.closest('#contractSortGroup .sort-btn');
+        if (sortBtn) {
+            contractSort = sortBtn.dataset.csort;
+            document.querySelectorAll('#contractSortGroup .sort-btn').forEach(function(b){ b.classList.remove('active'); });
+            sortBtn.classList.add('active');
+            renderContracts();
+            return;
+        }
+
+        var row = e.target.closest('.ct-row');
+        if (row) focusKolFromContract(decodeURIComponent(row.dataset.kol));
     });
     document.querySelectorAll('#sortGroup .sort-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
@@ -2422,7 +2549,7 @@ function submitCsvUpload() {
 
     apiPost('importCsv', payload)
         .then(function(result) {
-            btn.textContent='開始匯入';
+            btn.textContent='Start import 開始匯入';
             var el=document.getElementById('modalResult');
             if(result.success){
                 el.className='modal-result success';
@@ -2452,7 +2579,7 @@ function submitCsvUpload() {
                     var owSection = document.getElementById('overwriteSection');
                     var owSelect = document.getElementById('overwriteMonthSelect');
                     owSection.style.display = 'block';
-                    owSelect.innerHTML = '<option value="">選擇月份...</option>' +
+                    owSelect.innerHTML = '<option value="">Select month 選擇月份...</option>' +
                         result.allBlocks.map(function(b){
                             return '<option value="'+b.period+'">'+periodLabel(b.period)+'</option>';
                         }).join('');
@@ -2466,7 +2593,7 @@ function submitCsvUpload() {
             }
         })
         .catch(function(err){
-            btn.disabled=false; btn.textContent='開始匯入';
+            btn.disabled=false; btn.textContent='Start import 開始匯入';
             var el=document.getElementById('modalResult');
             el.className='modal-result error';
             el.textContent='❌ 執行錯誤：'+(err.message||err);
@@ -2593,7 +2720,7 @@ function renderBellAlerts() {
 
     var html = '';
     if (allAlerts.length === 0) {
-        html = '<div class="bell-empty">✅ 30 天內沒有需要注意的事項</div>';
+        html = '<div class="bell-empty">✅ Nothing due in 30 days 30 天內沒有需要注意的事項</div>';
     } else {
         function renderBellGroup(items, sectionLabel, tagCls, urgentLabel, normalLabel) {
             if (!items.length) return '';
@@ -2607,17 +2734,17 @@ function renderBellAlerts() {
                     '</div>' +
                     '<label style="display:flex;align-items:center;gap:5px;cursor:pointer;white-space:nowrap;margin-top:2px;user-select:none;">' +
                     '<input type="checkbox" ' + (a.done?'checked':'') + ' data-type="' + a.type + '" data-name="' + encodeURIComponent(a.name) + '" onchange="toggleBellDone(this.dataset.type,this.dataset.name,this.checked)" style="width:15px;height:15px;accent-color:var(--accent-green);cursor:pointer;">' +
-                    '<span style="font-size:11px;color:var(--text-secondary);">' + (a.done ? '已處理' : '標為完成') + '</span>' +
+                    '<span style="font-size:11px;color:var(--text-secondary);">' + (a.done ? 'Done 已處理' : 'Mark done 標為完成') + '</span>' +
                     '</label>' +
                     '</div>';
             });
             return s;
         }
-        html += renderBellGroup(contractAlerts, '📋 合約到期', 'bell-tag-contract', '⚠️ 緊急', '📅 即將');
-        html += renderBellGroup(eventAlerts,    '🏆 即將賽事',  'bell-tag-event',    '🔥 本週', '📅 本月');
+        html += renderBellGroup(contractAlerts, '📋 Contracts expiring 合約到期', 'bell-tag-contract', '⚠️ Urgent 緊急', '📅 Soon 即將');
+        html += renderBellGroup(eventAlerts,    '🏆 Upcoming events 即將賽事',  'bell-tag-event',    '🔥 This week 本週', '📅 This month 本月');
         if (allAlerts.some(function(a){ return a.done; })) {
             html += '<div style="padding:8px 18px 12px;border-top:1px solid var(--border);margin-top:4px;">' +
-                '<button onclick="clearAllBellDone()" style="font-size:11px;color:var(--text-muted);background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer;">↺ 重設所有已完成</button>' +
+                '<button onclick="clearAllBellDone()" style="font-size:11px;color:var(--text-muted);background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer;">↺ Reset all 重設已完成</button>' +
                 '</div>';
         }
     }
@@ -2689,6 +2816,238 @@ function getEventDateStatus(ev) {
         countdown = '倒數 ' + diff2 + ' 天';
     }
     return { label: label, cls: cls, countdown: countdown };
+}
+
+// =====================================================================
+// 合約管理
+// =====================================================================
+var contractFilters = { months: [], types: [], statuses: [], kols: [] };
+var contractSort = 'endDate';
+
+// 合約狀態：未填 / 已過期 / 30天內 / 60天內 / 有效
+function contractStatus(c) {
+    if (!c.endDate) return { key: 'unset', cls: 'unset', label: 'Not set 未填', days: null };
+    var end = new Date(c.endDate);
+    if (isNaN(end.getTime())) return { key: 'unset', cls: 'unset', label: 'Bad date 日期有誤', days: null };
+    end.setHours(0,0,0,0);
+    var today = new Date(); today.setHours(0,0,0,0);
+    var days = Math.round((end - today) / 86400000);
+    if (days < 0)  return { key: 'expired', cls: 'expired', label: 'Expired 已過期', days: days };
+    if (days <= 30) return { key: 'd30', cls: 'd30', label: 'Due 30d 30天內', days: days };
+    if (days <= 60) return { key: 'd60', cls: 'd60', label: 'Due 60d 60天內', days: days };
+    return { key: 'ok', cls: 'ok', label: 'Active 有效', days: days };
+}
+
+// 到期月份 key，例如 "2026/09"
+function contractExpiryMonth(c) {
+    if (!c.endDate) return '';
+    var m = String(c.endDate).match(/^(\d{4})-(\d{2})/);
+    return m ? (m[1] + '/' + m[2]) : '';
+}
+
+function contractsWithMeta() {
+    return CONTRACTS.map(function(c) {
+        var st = contractStatus(c);
+        return {
+            name: c.name, type: c.type || '', startDate: c.startDate || '', endDate: c.endDate || '',
+            note: c.note || '', status: st, month: contractExpiryMonth(c)
+        };
+    });
+}
+
+function applyContractFilters(rows) {
+    var q = (document.getElementById('contractSearch') || {}).value || '';
+    q = q.toLowerCase().trim();
+    return rows.filter(function(r) {
+        if (contractFilters.months.length   && contractFilters.months.indexOf(r.month) === -1) return false;
+        if (contractFilters.types.length    && contractFilters.types.indexOf(r.type) === -1) return false;
+        if (contractFilters.statuses.length && contractFilters.statuses.indexOf(r.status.key) === -1) return false;
+        if (contractFilters.kols.length     && contractFilters.kols.indexOf(r.name) === -1) return false;
+        if (q && r.name.toLowerCase().indexOf(q) === -1 && r.note.toLowerCase().indexOf(q) === -1) return false;
+        return true;
+    });
+}
+
+// 固定用 en 排序：不指定語系的話會跟著瀏覽器語言跑，
+// 中文語系的人和英文語系的同事會看到不同順序
+function cmpName(a, b) {
+    try { return String(a).localeCompare(String(b), 'en'); }
+    catch (e) { return a < b ? -1 : a > b ? 1 : 0; }
+}
+
+function sortContracts(rows) {
+    var s = contractSort;
+    return rows.slice().sort(function(a, b) {
+        if (s === 'name') return cmpName(a.name, b.name);
+        if (s === 'type') return cmpName(a.type || '', b.type || '') || cmpName(a.name, b.name);
+        // 日期排序：未填的一律排最後，否則「未填」會佔住最前面擋住真正快到期的
+        var av = (s === 'startDate') ? a.startDate : a.endDate;
+        var bv = (s === 'startDate') ? b.startDate : b.endDate;
+        if (!av && !bv) return cmpName(a.name, b.name);
+        if (!av) return 1;
+        if (!bv) return -1;
+        return av < bv ? -1 : av > bv ? 1 : cmpName(a.name, b.name);
+    });
+}
+
+function toggleContractFilter(kind, value) {
+    var arr = contractFilters[kind];
+    var i = arr.indexOf(value);
+    if (i === -1) arr.push(value); else arr.splice(i, 1);
+    renderContracts();
+}
+
+function resetContractFilters() {
+    contractFilters = { months: [], types: [], statuses: [], kols: [] };
+    var s = document.getElementById('contractSearch');
+    if (s) s.value = '';
+    renderContracts();
+}
+
+function chipHtml(kind, value, label, count, on) {
+    return '<button class="cf-chip' + (on ? ' on' : '') + '" data-kind="' + kind + '" data-val="' +
+        encodeURIComponent(value) + '">' + label +
+        (count !== null && count !== undefined ? '<span class="cf-n">' + count + '</span>' : '') + '</button>';
+}
+
+function renderContractFilters(all) {
+    // 到期月份
+    var months = [], mCount = {};
+    all.forEach(function(r) {
+        if (!r.month) return;
+        if (mCount[r.month] === undefined) { mCount[r.month] = 0; months.push(r.month); }
+        mCount[r.month]++;
+    });
+    months.sort();
+    var unsetCount = all.filter(function(r){ return !r.month; }).length;
+    var mHtml = months.map(function(m) {
+        return chipHtml('months', m, m, mCount[m], contractFilters.months.indexOf(m) !== -1);
+    }).join('');
+    if (unsetCount) {
+        mHtml += chipHtml('months', '', 'Not set 未填', unsetCount, contractFilters.months.indexOf('') !== -1);
+    }
+    document.getElementById('contractMonthChips').innerHTML = mHtml || '<span class="cf-count">—</span>';
+
+    // 類型
+    var types = [], tCount = {};
+    all.forEach(function(r) {
+        var t = r.type || '(none)';
+        if (tCount[t] === undefined) { tCount[t] = 0; types.push(t); }
+        tCount[t]++;
+    });
+    types.sort();
+    document.getElementById('contractTypeChips').innerHTML = types.map(function(t) {
+        return chipHtml('types', t === '(none)' ? '' : t, t, tCount[t],
+            contractFilters.types.indexOf(t === '(none)' ? '' : t) !== -1);
+    }).join('');
+
+    // 狀態
+    var order = [
+        { k: 'expired', l: 'Expired 已過期' },
+        { k: 'd30',     l: 'Due 30d 30天內' },
+        { k: 'd60',     l: 'Due 60d 60天內' },
+        { k: 'ok',      l: 'Active 有效' },
+        { k: 'unset',   l: 'Not set 未填' }
+    ];
+    document.getElementById('contractStatusChips').innerHTML = order.map(function(o) {
+        var n = all.filter(function(r){ return r.status.key === o.k; }).length;
+        if (!n) return '';
+        return chipHtml('statuses', o.k, o.l, n, contractFilters.statuses.indexOf(o.k) !== -1);
+    }).join('');
+
+    // KOL
+    var names = all.map(function(r){ return r.name; }).sort(cmpName);
+    document.getElementById('contractKolChips').innerHTML = names.map(function(n) {
+        return chipHtml('kols', n, n, null, contractFilters.kols.indexOf(n) !== -1);
+    }).join('');
+}
+
+function renderContractKpis(all) {
+    function n(key) { return all.filter(function(r){ return r.status.key === key; }).length; }
+    // 中英分開存，不要靠正則去猜邊界（"Due 30d 30天內" 會被切錯）
+    var cards = [
+        { en: 'Total',   zh: '合約總數',   value: all.length,   color: 'var(--accent-blue)' },
+        { en: 'Expired', zh: '已過期',     value: n('expired'), color: 'var(--accent-red)' },
+        { en: 'Due 30d', zh: '30 天內到期', value: n('d30'),     color: 'var(--accent-yellow)' },
+        { en: 'Due 60d', zh: '60 天內到期', value: n('d60'),     color: 'var(--accent-blue)' },
+        { en: 'Not set', zh: '未填日期',   value: n('unset'),   color: 'var(--text-muted)' }
+    ];
+    document.getElementById('contractKpiRow').innerHTML = cards.map(function(c) {
+        return '<div class="card kpi-card" style="border-top:3px solid ' + c.color + ';">' +
+            '<div class="kpi-label">' + c.en +
+              ' <small style="font-size:10px;color:var(--text-muted);">' + c.zh + '</small></div>' +
+            '<div class="kpi-value mono" style="color:' + c.color + ';">' + c.value + '</div>' +
+            '</div>';
+    }).join('');
+}
+
+function renderContracts() {
+    if (!document.getElementById('contractTableBody')) return;
+    var all = contractsWithMeta();
+
+    renderContractKpis(all);
+    renderContractFilters(all);
+
+    var rows = sortContracts(applyContractFilters(all));
+
+    var countEl = document.getElementById('contractCount');
+    if (countEl) countEl.textContent = 'Showing 顯示 ' + rows.length + ' / ' + all.length;
+
+    if (!rows.length) {
+        document.getElementById('contractTableBody').innerHTML =
+            '<div class="ct-empty">No contracts match these filters 沒有符合條件的合約</div>';
+        return;
+    }
+
+    var body = rows.map(function(r) {
+        var st = r.status;
+        var daysTxt = '—';
+        if (st.days !== null) {
+            daysTxt = st.days < 0
+                ? '<span style="color:var(--accent-red);">' + Math.abs(st.days) + 'd ago 前</span>'
+                : '<span style="color:' + (st.days <= 30 ? 'var(--accent-yellow)' : 'var(--text-secondary)') + ';">' +
+                  st.days + 'd left 剩</span>';
+        }
+        var badge = r.type === 'Ambassador'
+            ? '<span class="badge-ambassador" style="font-size:10px;">AMB</span>'
+            : (r.type === 'Partner' ? '<span class="badge-partner" style="font-size:10px;">PAR</span>'
+                                    : '<span style="color:var(--text-muted);font-size:11px;">—</span>');
+        function dateCell(v) {
+            return v ? '<span class="ct-date">' + v + '</span>'
+                     : '<span class="ct-date unset">Not set 未填</span>';
+        }
+        return '<tr class="ct-row" data-kol="' + encodeURIComponent(r.name) + '">' +
+            '<td><span class="ct-name">' + r.name + '</span></td>' +
+            '<td>' + badge + '</td>' +
+            '<td>' + dateCell(r.startDate) + '</td>' +
+            '<td>' + dateCell(r.endDate) + '</td>' +
+            '<td><span class="ct-pill ' + st.cls + '">' + st.label + '</span></td>' +
+            '<td class="ct-days">' + daysTxt + '</td>' +
+            '<td class="ct-note">' + (r.note || '<span style="color:var(--text-muted);">—</span>') + '</td>' +
+            '<td><button class="sort-btn" style="font-size:11px;" data-kol="' + encodeURIComponent(r.name) +
+                '" onclick="event.stopPropagation();openContractModal(this.dataset.kol)">✏️ Edit 編輯</button></td>' +
+            '</tr>';
+    }).join('');
+
+    document.getElementById('contractTableBody').innerHTML =
+        '<table class="ct-table"><thead><tr>' +
+        '<th>KOL</th><th>Type<small>類型</small></th>' +
+        '<th>Start<small>開始日</small></th><th>End<small>到期日</small></th>' +
+        '<th>Status<small>狀態</small></th><th>Countdown<small>倒數</small></th>' +
+        '<th>Note<small>備註</small></th><th></th>' +
+        '</tr></thead><tbody>' + body + '</tbody></table>';
+}
+
+// 從合約列跳到該 KOL 的個人分析
+function focusKolFromContract(name) {
+    selectedKols = [name];
+    currentView = 'individual';
+    var navBtn = document.querySelector('.nav-item[data-view="individual"]');
+    switchNav('individual', 'all', navBtn);
+    document.querySelectorAll('#kolCheckboxGroup .kol-tag').forEach(function(b) {
+        b.classList.toggle('selected', b.dataset.kol === name);
+    });
+    renderIndividual();
 }
 
 // =====================================================================
@@ -2930,7 +3289,7 @@ function eventFullyCancelled(ev) {
 
 // 取消標籤（列上顯示）
 function cancelTag() {
-    return '<span class="event-cancel-tag">⛔ 已取消</span>';
+    return '<span class="event-cancel-tag">⛔ Cancelled 已取消</span>';
 }
 
 function eventStatusClass(status) {
@@ -2972,22 +3331,22 @@ function renderEventsSyncStatus() {
     var btn = document.getElementById('eventsRefreshBtn');
     if (btn) {
         btn.disabled = SHEET_EVENTS_STATE.loading;
-        btn.textContent = SHEET_EVENTS_STATE.loading ? '⏳ 更新中…' : '🔄 重新整理賽事';
+        btn.textContent = SHEET_EVENTS_STATE.loading ? '⏳ Refreshing 更新中…' : '🔄 Refresh 重新整理';
     }
     if (!el) return;
 
     el.classList.remove('err');
     if (SHEET_EVENTS_STATE.loading) {
-        el.textContent = '正在讀取賽事 Google Sheet…';
+        el.textContent = 'Loading events sheet… 讀取中…';
     } else if (SHEET_EVENTS_STATE.error) {
         el.classList.add('err');
-        el.textContent = '⚠️ 賽事表讀取失敗：' + SHEET_EVENTS_STATE.error;
+        el.textContent = '⚠️ Events sheet failed 讀取失敗：' + SHEET_EVENTS_STATE.error;
     } else if (SHEET_EVENTS_STATE.updatedAt) {
         var t = SHEET_EVENTS_STATE.updatedAt;
-        el.textContent = '✅ Sheet 賽事 ' + SHEET_EVENTS.length + ' 筆 · 最後更新 ' +
+        el.textContent = '✅ Sheet events 賽事 ' + SHEET_EVENTS.length + ' · updated 最後更新 ' +
             pad2(t.getHours()) + ':' + pad2(t.getMinutes()) + ':' + pad2(t.getSeconds());
     } else {
-        el.textContent = '尚未載入賽事表';
+        el.textContent = 'Not loaded yet 尚未載入';
     }
 }
 
@@ -3003,13 +3362,13 @@ function renderEventEntries(ev) {
         var cancelled = entryCancelled(en);
         return '<div class="event-entry' + (cancelled ? ' row-cancelled' : '') + '">' +
             '<span class="event-entry-kol ev-name">' + en.kol + '</span>' +
-            (en.matched ? '' : '<span class="event-unmatched" title="主資料中找不到同名 KOL">⚠ 未對應</span>') +
+            (en.matched ? '' : '<span class="event-unmatched" title="主資料中找不到同名 KOL">⚠ Unmatched 未對應</span>') +
             (en.category ? '<span class="event-entry-meta">' + en.category + '</span>' : '') +
             (en.location && en.location !== ev.location ? '<span class="event-entry-meta">📍 ' + en.location + '</span>' : '') +
             (range && range !== cardRange ? '<span class="event-entry-date">' + range + '</span>' : '') +
             (cancelled ? cancelTag() : '') +
             (en.status ? '<span class="event-status ' + eventStatusClass(en.status) + '">' + en.status + '</span>' : '') +
-            (en.note ? '<div class="event-entry-note' + (cancelled ? ' warn' : '') + '">備註：' + en.note + '</div>' : '') +
+            (en.note ? '<div class="event-entry-note' + (cancelled ? ' warn' : '') + '">Note 備註：' + en.note + '</div>' : '') +
             '</div>';
     }).join('');
     return '<div class="event-entries">' + rows + '</div>';
@@ -3033,8 +3392,8 @@ function renderEventsTab() {
 
         if (filtered.length === 0) {
             document.getElementById('eventsByEvent').innerHTML =
-                '<div style="color:var(--text-muted);text-align:center;padding:40px;">沒有符合的賽事<br><br>' +
-                '<button class="action-btn upload-btn" onclick="openAddEventModal()">＋ 新增第一個賽事</button></div>';
+                '<div style="color:var(--text-muted);text-align:center;padding:40px;">No matching events 沒有符合的賽事<br><br>' +
+                '<button class="action-btn upload-btn" onclick="openAddEventModal()">＋ Add first event 新增第一個賽事</button></div>';
         } else {
             var html = filtered.map(function(ev) {
                 var ds = getEventDateStatus(ev);
@@ -3050,18 +3409,18 @@ function renderEventsTab() {
                       (isSheet ? '<span class="event-source-tag">📊 SHEET</span>' : '') +
                       (ds.countdown ? '<span class="event-countdown">'+ds.countdown+'</span>' : '') +
                     '</div>' +
-                    (ev.kols&&ev.kols.length ? '<div class="event-kols">'+kolTags+'</div>' : '<div style="color:var(--text-muted);font-size:12px;margin-top:8px;">尚無 KOL 報名</div>') +
+                    (ev.kols&&ev.kols.length ? '<div class="event-kols">'+kolTags+'</div>' : '<div style="color:var(--text-muted);font-size:12px;margin-top:8px;">No KOL registered 尚無 KOL 報名</div>') +
                     (isSheet
                         ? renderEventEntries(ev)
-                        : (ev.note ? '<div class="event-note">備註：'+ev.note+'</div>' : '')) +
+                        : (ev.note ? '<div class="event-note">Note 備註：'+ev.note+'</div>' : '')) +
                     (isSheet
-                        ? '<div style="margin-top:10px;font-size:11px;color:var(--text-muted);">此賽事由賽事 Google Sheet 同步，請直接在 Sheet 修改後按「重新整理賽事」</div>'
+                        ? '<div style="margin-top:10px;font-size:11px;color:var(--text-muted);">Synced from the events Google Sheet — edit there, then hit Refresh 由 Google Sheet 同步，請在 Sheet 修改後按重新整理</div>'
                         : '<div style="margin-top:12px;display:flex;gap:8px;">' +
                             '<button class="sort-btn" style="font-size:11px;" data-ev="'+encodeURIComponent(JSON.stringify(ev))+'" onclick="openEditEventModal(this.dataset.ev)">✏️ 編輯</button>' +
                           '</div>') +
                 '</div>';
             }).join('');
-            html += '<div style="margin-top:16px;"><button class="action-btn upload-btn" onclick="openAddEventModal()">＋ 新增賽事</button></div>';
+            html += '<div style="margin-top:16px;"><button class="action-btn upload-btn" onclick="openAddEventModal()">＋ Add event 新增賽事</button></div>';
             document.getElementById('eventsByEvent').innerHTML = html;
         }
         return;
@@ -3088,7 +3447,7 @@ function renderEventsTab() {
     var filtered2 = selectedKols.filter(function(k){ return !query || k.toLowerCase().includes(query); });
 
     if (filtered2.length === 0) {
-        document.getElementById('eventsByKol').innerHTML = filterHtml + '<div style="color:var(--text-muted);text-align:center;padding:20px;">沒有符合的 KOL</div>';
+        document.getElementById('eventsByKol').innerHTML = filterHtml + '<div style="color:var(--text-muted);text-align:center;padding:20px;">No matching KOL 沒有符合的 KOL</div>';
         return;
     }
 
@@ -3112,7 +3471,7 @@ function renderEventsTab() {
                 (cancelled ? cancelTag() : '') +
                 (mine && mine.status ? '<span class="event-status '+eventStatusClass(mine.status)+'">'+mine.status+'</span>' : '') +
                 (!cancelled && ds.countdown ? '<span style="font-size:11px;color:var(--accent-yellow);">'+ds.countdown+'</span>' : '') +
-                (note ? '<div class="event-row-note'+(cancelled?' warn':'')+'">備註：'+note+'</div>' : '') +
+                (note ? '<div class="event-row-note'+(cancelled?' warn':'')+'">Note 備註：'+note+'</div>' : '') +
                 '</div>';
         }).join('');
 
@@ -3121,7 +3480,7 @@ function renderEventsTab() {
 
         return '<div class="kol-event-card">' +
             '<div class="kol-event-header">'+badge+'<span class="kol-event-name">'+k+'</span><span style="color:var(--text-muted);font-size:12px;margin-left:auto;">'+evs.length+' 場賽事</span></div>' +
-            '<div class="kol-event-rows">'+(rows||'<div style="color:var(--text-muted);font-size:13px;padding:8px 0;">尚無賽事</div>')+'</div>' +
+            '<div class="kol-event-rows">'+(rows||'<div style="color:var(--text-muted);font-size:13px;padding:8px 0;">No events 尚無賽事</div>')+'</div>' +
             '</div>';
     }).join('');
 
@@ -3158,34 +3517,34 @@ function openEventModal(ev) {
 
     var html = '<div class="modal-overlay" id="eventModal" style="display:flex;">' +
         '<div class="modal-box" style="max-width:520px;width:100%;max-height:90vh;overflow-y:auto;">' +
-        '<div class="modal-title">'+(isEdit?'✏️ 編輯賽事':'＋ 新增賽事')+'</div>' +
+        '<div class="modal-title">'+(isEdit?'✏️ 編輯賽事':'＋ Add event 新增賽事')+'</div>' +
         '<div style="display:flex;flex-direction:column;gap:14px;margin-top:16px;">' +
 
         // 賽事名稱
-        '<div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">賽事名稱 *</div>' +
+        '<div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">Event name 賽事名稱 *</div>' +
         '<input id="evName" style="width:100%;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:Outfit,sans-serif;font-size:13px;outline:none;" value="'+(ev?ev.name:'')+'"></div>' +
 
         // 日期區間
         '<div style="display:flex;gap:12px;">' +
-        '<div style="flex:1;"><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">開始日期</div>' +
+        '<div style="flex:1;"><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">Start date 開始日期</div>' +
         '<input id="evStartDate" type="date" style="width:100%;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:Outfit,sans-serif;font-size:13px;outline:none;" value="'+(ev?ev.startDate:'')+'"></div>' +
-        '<div style="flex:1;"><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">結束日期</div>' +
+        '<div style="flex:1;"><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">End date 結束日期</div>' +
         '<input id="evEndDate" type="date" style="width:100%;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:Outfit,sans-serif;font-size:13px;outline:none;" value="'+(ev?ev.endDate:'')+'"></div>' +
         '</div>' +
 
         // 地點
-        '<div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">地點</div>' +
+        '<div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">Location 地點</div>' +
         '<input id="evLocation" style="width:100%;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:Outfit,sans-serif;font-size:13px;outline:none;" value="'+(ev?ev.location:'')+'"></div>' +
 
         // 參賽 KOL 複選
-        '<div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;">參賽 KOL（可複選）</div>' +
+        '<div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;">Participating KOLs 參賽 KOL（可複選）</div>' +
         '<div class="kol-multiselect-wrap" id="evKolWrap">' +
         '<div class="kol-multiselect-display" id="evKolDisplay" onclick="toggleKolDropdown()">' +
         '<span id="evKolTags" style="display:flex;flex-wrap:wrap;gap:4px;flex:1;"></span>' +
         '<span style="color:var(--text-muted);font-size:12px;">▾</span>' +
         '</div>' +
         '<div class="kol-dropdown" id="evKolDropdown">' +
-        '<div class="kol-dropdown-search"><input type="text" placeholder="搜尋 KOL..." oninput="filterKolDropdown(this.value)"></div>' +
+        '<div class="kol-dropdown-search"><input type="text" placeholder="Search KOL 搜尋 KOL..." oninput="filterKolDropdown(this.value)"></div>' +
         '<div id="evKolList">' +
         allKols.map(function(k){
             var sel = selectedKols.indexOf(k)!==-1;
@@ -3195,15 +3554,15 @@ function openEventModal(ev) {
         '</div></div></div></div>' +
 
         // 備註
-        '<div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">備註</div>' +
+        '<div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">Note 備註</div>' +
         '<input id="evNote" style="width:100%;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:Outfit,sans-serif;font-size:13px;outline:none;" value="'+(ev?ev.note:'')+'"></div>' +
 
         '</div>' +
         '<div id="evResult" style="margin-top:12px;"></div>' +
         '<div class="modal-actions">' +
-        '<button class="modal-btn modal-btn-cancel" onclick="document.getElementById(&quot;eventModal&quot;).remove()">取消</button>' +
-        (isEdit ? '<button class="modal-btn" style="background:var(--accent-red-dim);color:var(--accent-red);border-color:var(--accent-red);" data-evname="'+encodeURIComponent(ev.name)+'" onclick="deleteEvent(this.dataset.evname)">刪除</button>' : '') +
-        '<button class="modal-btn modal-btn-submit" data-oldname="'+(isEdit?encodeURIComponent(ev.name):'')+'" data-isedit="'+(isEdit?'1':'')+'" onclick="saveEvent(this.dataset.isedit?this.dataset.oldname:null)">儲存</button>' +
+        '<button class="modal-btn modal-btn-cancel" onclick="document.getElementById(&quot;eventModal&quot;).remove()">Cancel 取消</button>' +
+        (isEdit ? '<button class="modal-btn" style="background:var(--accent-red-dim);color:var(--accent-red);border-color:var(--accent-red);" data-evname="'+encodeURIComponent(ev.name)+'" onclick="deleteEvent(this.dataset.evname)">Delete 刪除</button>' : '') +
+        '<button class="modal-btn modal-btn-submit" data-oldname="'+(isEdit?encodeURIComponent(ev.name):'')+'" data-isedit="'+(isEdit?'1':'')+'" onclick="saveEvent(this.dataset.isedit?this.dataset.oldname:null)">Save 儲存</button>' +
         '</div></div></div>';
 
     document.body.insertAdjacentHTML('beforeend', html);
@@ -3248,7 +3607,7 @@ function updateKolTags() {
     var tagsEl = document.getElementById('evKolTags');
     if (!tagsEl) return;
     if (selected.length === 0) {
-        tagsEl.innerHTML = '<span style="color:var(--text-muted);font-size:12px;">點擊選擇 KOL...</span>';
+        tagsEl.innerHTML = '<span style="color:var(--text-muted);font-size:12px;">Click to select KOLs 點擊選擇 KOL...</span>';
     } else {
         tagsEl.innerHTML = selected.map(function(k){
             return '<span class="kol-selected-tag">'+k+' <span data-kn="'+encodeURIComponent(k)+'" onclick="removeKolTag(this.dataset.kn,event)">×</span></span>';
@@ -3286,7 +3645,7 @@ function saveEvent(oldNameEncoded) {
         note: document.getElementById('evNote').value.trim(),
         oldName: oldNameEncoded ? decodeURIComponent(oldNameEncoded) : null
     };
-    document.getElementById('evResult').innerHTML = '<div style="color:var(--text-secondary);font-size:13px;">儲存中...</div>';
+    document.getElementById('evResult').innerHTML = '<div style="color:var(--text-secondary);font-size:13px;">Saving 儲存中...</div>';
     apiPost('saveEvent', JSON.stringify(evObj))
         .then(function(r){
             if(r.success){
@@ -3300,10 +3659,10 @@ function saveEvent(oldNameEncoded) {
                 window._selectedEventKols = [];
                 renderEventsTab(); renderBellAlerts();
             } else {
-                document.getElementById('evResult').innerHTML = '<div style="color:var(--accent-red);font-size:13px;">儲存失敗：' + r.message + '</div>';
+                document.getElementById('evResult').innerHTML = '<div style="color:var(--accent-red);font-size:13px;">Save failed 儲存失敗：' + r.message + '</div>';
             }
         }).catch(function(){
-            document.getElementById('evResult').innerHTML = '<div style="color:var(--accent-red);font-size:13px;">網路錯誤，請重試</div>';
+            document.getElementById('evResult').innerHTML = '<div style="color:var(--accent-red);font-size:13px;">Network error, please retry 網路錯誤請重試</div>';
         });
 }
 
@@ -3331,11 +3690,11 @@ function renderContractBlock(kolName) {
     var html = '<div class="card full-width fade-up" style="margin-bottom:16px;">' +
         '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">' +
         '<div class="card-title" style="margin-bottom:0;">📋 Contract Info <small style="font-size:10px;color:var(--text-muted);">合約資訊</small></div>' +
-        '<button class="sort-btn" style="font-size:11px;" data-kol="' + encodeURIComponent(kolName) + '" onclick="openContractModal(this.dataset.kol)">✏️ ' + (contract?'編輯':'新增') + '合約</button>' +
+        '<button class="sort-btn" style="font-size:11px;" data-kol="' + encodeURIComponent(kolName) + '" onclick="openContractModal(this.dataset.kol)">✏️ ' + (contract?'Edit 編輯':'Add 新增') + ' 合約</button>' +
         '</div>';
 
     if (!contract) {
-        html += '<div style="color:var(--text-muted);font-size:13px;">尚無合約資料，點右上角新增</div>';
+        html += '<div style="color:var(--text-muted);font-size:13px;">No contract on file — add one from the top right 尚無合約資料，點右上角新增</div>';
     } else {
         var endDate = contract.endDate ? new Date(contract.endDate) : null;
         var diff = endDate ? daysDiff(contract.endDate) : null;
@@ -3351,10 +3710,10 @@ function renderContractBlock(kolName) {
             }
         }
         html += '<div class="contract-info-card"><div class="contract-row">' +
-            '<div class="contract-field"><div class="contract-field-label">合約類型</div><div class="contract-field-value">' + (contract.type||'—') + '</div></div>' +
-            '<div class="contract-field"><div class="contract-field-label">開始日期</div><div class="contract-field-value">' + (contract.startDate||'—') + '</div></div>' +
-            '<div class="contract-field"><div class="contract-field-label">結束日期</div><div class="contract-field-value">' + (contract.endDate||'—') + '</div></div>' +
-            (contract.note ? '<div class="contract-field"><div class="contract-field-label">備註</div><div class="contract-field-value" style="font-family:Outfit,sans-serif;font-size:13px;">' + contract.note + '</div></div>' : '') +
+            '<div class="contract-field"><div class="contract-field-label">Contract type 合約類型</div><div class="contract-field-value">' + (contract.type||'—') + '</div></div>' +
+            '<div class="contract-field"><div class="contract-field-label">Start date 開始日期</div><div class="contract-field-value">' + (contract.startDate||'—') + '</div></div>' +
+            '<div class="contract-field"><div class="contract-field-label">End date 結束日期</div><div class="contract-field-value">' + (contract.endDate||'—') + '</div></div>' +
+            (contract.note ? '<div class="contract-field"><div class="contract-field-label">Note 備註</div><div class="contract-field-value" style="font-family:Outfit,sans-serif;font-size:13px;">' + contract.note + '</div></div>' : '') +
             '</div>' + statusHtml + '</div>';
     }
 
@@ -3362,7 +3721,7 @@ function renderContractBlock(kolName) {
     var kolEvents = allEvents().filter(function(ev){ return ev.kols && ev.kols.indexOf(kolName)!==-1; });
     kolEvents.sort(function(a,b){ return (a.startDate||'9999') < (b.startDate||'9999') ? -1 : 1; });
     if (kolEvents.length) {
-        html += '<div class="contract-kol-events"><div style="font-size:13px;font-weight:700;color:var(--text-secondary);margin-bottom:10px;">🏆 本年度參賽計畫</div>';
+        html += '<div class="contract-kol-events"><div style="font-size:13px;font-weight:700;color:var(--text-secondary);margin-bottom:10px;">🏆 Event Plan 本年度參賽計畫</div>';
         html += kolEvents.map(function(ev){
             // Sheet 賽事：取這位 KOL 自己的日期／組別／狀態
             var mine = null;
@@ -3380,7 +3739,7 @@ function renderContractBlock(kolName) {
                 (cancelled2 ? cancelTag() : '') +
                 (mine && mine.status ? '<span class="event-status '+eventStatusClass(mine.status)+'">' + mine.status + '</span>' : '') +
                 (!cancelled2 && ds2.countdown ? '<span style="font-size:11px;color:var(--accent-yellow);">' + ds2.countdown + '</span>' : '') +
-                (note2 ? '<div class="event-row-note'+(cancelled2?' warn':'')+'">備註：' + note2 + '</div>' : '') +
+                (note2 ? '<div class="event-row-note'+(cancelled2?' warn':'')+'">Note 備註：' + note2 + '</div>' : '') +
                 '</div>';
         }).join('');
         html += '</div>';
@@ -3398,27 +3757,27 @@ function openContractModal(kolNameEncoded) {
     var contract = (function(){ for(var _k=0;_k<CONTRACTS.length;_k++){ if(CONTRACTS[_k].name===kolName) return CONTRACTS[_k]; } return {}; })()
     var html = '<div class="modal-overlay" id="contractModal" style="display:flex;">' +
         '<div class="modal-box" style="max-width:460px;width:100%;">' +
-        '<div class="modal-title">📋 合約資訊 — ' + kolName + '</div>' +
+        '<div class="modal-title">📋 Contract 合約資訊 — ' + kolName + '</div>' +
         '<div style="display:flex;flex-direction:column;gap:12px;margin-top:16px;">' +
-        '<div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">合約類型</div>' +
+        '<div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">Contract type 合約類型</div>' +
         '<select id="ctType" style="width:100%;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:Outfit,sans-serif;font-size:13px;outline:none;">' +
         '<option value="Ambassador" ' + (contract.type==='Ambassador'?'selected':'') + '>Ambassador</option>' +
         '<option value="Partner" ' + (contract.type==='Partner'?'selected':'') + '>Partner</option>' +
         '<option value="Other" ' + (contract.type==='Other'?'selected':'') + '>Other</option>' +
         '</select></div>' +
         '<div style="display:flex;gap:12px;">' +
-        '<div style="flex:1;"><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">開始日期</div>' +
+        '<div style="flex:1;"><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">Start date 開始日期</div>' +
         '<input id="ctStart" type="date" style="width:100%;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:Outfit,sans-serif;font-size:13px;outline:none;" value="' + (contract.startDate||'') + '"></div>' +
-        '<div style="flex:1;"><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">結束日期</div>' +
+        '<div style="flex:1;"><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">End date 結束日期</div>' +
         '<input id="ctEnd" type="date" style="width:100%;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:Outfit,sans-serif;font-size:13px;outline:none;" value="' + (contract.endDate||'') + '"></div>' +
         '</div>' +
-        '<div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">備註</div>' +
+        '<div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;">Note 備註</div>' +
         '<input id="ctNote" style="width:100%;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:Outfit,sans-serif;font-size:13px;outline:none;" value="' + (contract.note||'') + '"></div>' +
         '</div>' +
         '<div id="ctResult" style="margin-top:12px;"></div>' +
         '<div class="modal-actions">' +
-        '<button class="modal-btn modal-btn-cancel" onclick="document.getElementById(&quot;contractModal&quot;).remove()">取消</button>' +
-        '<button class="modal-btn modal-btn-submit" data-kol="' + encodeURIComponent(kolName) + '" onclick="saveContract(this.dataset.kol)">儲存</button>' +
+        '<button class="modal-btn modal-btn-cancel" onclick="document.getElementById(&quot;contractModal&quot;).remove()">Cancel 取消</button>' +
+        '<button class="modal-btn modal-btn-submit" data-kol="' + encodeURIComponent(kolName) + '" onclick="saveContract(this.dataset.kol)">Save 儲存</button>' +
         '</div></div></div>';
     document.body.insertAdjacentHTML('beforeend', html);
 }
@@ -3432,7 +3791,7 @@ function saveContract(kolNameEncoded) {
         endDate: document.getElementById('ctEnd').value,
         note: document.getElementById('ctNote').value.trim()
     };
-    document.getElementById('ctResult').innerHTML = '<div style="color:var(--text-secondary);font-size:13px;">儲存中...</div>';
+    document.getElementById('ctResult').innerHTML = '<div style="color:var(--text-secondary);font-size:13px;">Saving 儲存中...</div>';
     apiPost('saveContract', JSON.stringify(obj))
         .then(function(r){
             if(r.success){
@@ -3440,13 +3799,14 @@ function saveContract(kolNameEncoded) {
                 var idx = -1; for(var _i=0;_i<CONTRACTS.length;_i++){ if(CONTRACTS[_i].name===kolName){ idx=_i; break; } }
                 if(idx!==-1){ CONTRACTS[idx]=obj; } else { CONTRACTS.push(obj); }
                 renderBellAlerts();
+                renderContracts();
                 // re-render individual if visible
                 if(currentView==='individual') renderIndividual();
             } else {
-                document.getElementById('ctResult').innerHTML = '<div style="color:var(--accent-red);font-size:13px;">儲存失敗：' + r.message + '</div>';
+                document.getElementById('ctResult').innerHTML = '<div style="color:var(--accent-red);font-size:13px;">Save failed 儲存失敗：' + r.message + '</div>';
             }
         }).catch(function(){
-            document.getElementById('ctResult').innerHTML = '<div style="color:var(--accent-red);font-size:13px;">網路錯誤，請重試</div>';
+            document.getElementById('ctResult').innerHTML = '<div style="color:var(--accent-red);font-size:13px;">Network error, please retry 網路錯誤請重試</div>';
         });
 }
 </script>
