@@ -229,12 +229,26 @@
 .event-entry-meta { color: var(--text-secondary); }
 .event-entry-date { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); }
 .event-entry-note { color: var(--text-muted); font-size: 11px; flex-basis: 100%; }
+.event-entry-note.warn { color: var(--accent-red); font-weight: 600; }
 .event-status { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 6px; border: 1px solid transparent; white-space: nowrap; }
 .event-status.ok      { background: var(--accent-green-dim);  color: var(--accent-green);  border-color: rgba(0,232,143,0.3); }
 .event-status.warn    { background: var(--accent-yellow-dim); color: var(--accent-yellow); border-color: rgba(255,197,66,0.3); }
 .event-status.bad     { background: var(--accent-red-dim);    color: var(--accent-red);    border-color: rgba(255,77,106,0.3); }
 .event-status.neutral { background: var(--bg-card-hover);     color: var(--text-secondary); border-color: var(--border); }
 .event-unmatched { font-size: 10px; color: var(--accent-red); }
+
+/* 已取消的參賽 */
+.event-cancel-tag {
+    font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 6px; white-space: nowrap;
+    background: var(--accent-red-dim); color: var(--accent-red); border: 1px solid rgba(255,77,106,0.35);
+}
+.row-cancelled .ev-name { text-decoration: line-through; opacity: 0.55; }
+.row-cancelled { background: rgba(255,77,106,0.05); }
+.event-row-note {
+    flex-basis: 100%; font-size: 11px; color: var(--text-muted);
+    padding-left: 2px; margin-top: 2px;
+}
+.event-row-note.warn { color: var(--accent-red); font-weight: 600; }
 .kol-event-card {
     background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius);
     padding: 14px 16px; margin-bottom: 12px;
@@ -2535,6 +2549,7 @@ function renderBellAlerts() {
 
     // 賽事：30 天內（含 Google Sheet 同步的賽事）
     allEvents().forEach(function(ev) {
+        if (eventFullyCancelled(ev)) return;      // 全員取消就不用再提醒
         var dateToCheck = ev.startDate || ev.date;
         if (!dateToCheck) return;
         var evDate = new Date(dateToCheck); evDate.setHours(0,0,0,0);
@@ -2543,11 +2558,19 @@ function renderBellAlerts() {
             var dateLabel = ev.startDate && ev.endDate && ev.startDate !== ev.endDate
                 ? ev.startDate + ' ～ ' + ev.endDate
                 : (ev.startDate || ev.date);
+            // 只列還會出賽的人，已取消的不要出現在提醒裡
+            var goingKols = ev.kols || [];
+            if (ev.entries && ev.entries.length) {
+                goingKols = [];
+                ev.entries.forEach(function(en) {
+                    if (!entryCancelled(en) && goingKols.indexOf(en.kol) === -1) goingKols.push(en.kol);
+                });
+            }
             allAlerts.push({
                 type: 'event',
                 id: 'event:' + ev.name,
                 name: ev.name,
-                sub: dateLabel + '（剩 ' + diff2 + ' 天）' + (ev.kols && ev.kols.length ? ' · ' + ev.kols.join(', ') : ''),
+                sub: dateLabel + '（剩 ' + diff2 + ' 天）' + (goingKols.length ? ' · ' + goingKols.join(', ') : ''),
                 urgent: diff2 <= 7,
                 done: isBellDone('event', ev.name)
             });
@@ -2882,6 +2905,34 @@ function allEvents() {
     return EVENTS.filter(function(ev) { return !taken[eventDedupKey(ev)]; }).concat(SHEET_EVENTS);
 }
 
+// 備註或狀態裡出現「取消/退賽」就視為未實際參賽。
+// 這種資訊藏起來最危險——會以為人要出賽而白做準備。
+function isCancelledText(s) {
+    return /取消|退賽|棄賽|不參加|退出|cancel|withdraw/i.test(String(s || ''));
+}
+
+// 這位 KOL 在這場賽事是否已取消
+function entryCancelled(en) {
+    return !!en && (isCancelledText(en.note) || isCancelledText(en.status));
+}
+
+// 整場賽事的所有參賽者都取消了
+function eventFullyCancelled(ev) {
+    if (!ev) return false;
+    if (ev.entries && ev.entries.length) {
+        for (var i = 0; i < ev.entries.length; i++) {
+            if (!entryCancelled(ev.entries[i])) return false;
+        }
+        return true;
+    }
+    return isCancelledText(ev.note);
+}
+
+// 取消標籤（列上顯示）
+function cancelTag() {
+    return '<span class="event-cancel-tag">⛔ 已取消</span>';
+}
+
 function eventStatusClass(status) {
     var s = tidy(status);
     if (!s) return 'neutral';
@@ -2949,14 +3000,16 @@ function renderEventEntries(ev) {
         // 每位大使的日期若與卡片標題一致就不重複顯示
         var cardRange = (ev.startDate && ev.endDate && ev.startDate !== ev.endDate)
             ? ev.startDate + ' ～ ' + ev.endDate : (ev.startDate || '');
-        return '<div class="event-entry">' +
-            '<span class="event-entry-kol">' + en.kol + '</span>' +
+        var cancelled = entryCancelled(en);
+        return '<div class="event-entry' + (cancelled ? ' row-cancelled' : '') + '">' +
+            '<span class="event-entry-kol ev-name">' + en.kol + '</span>' +
             (en.matched ? '' : '<span class="event-unmatched" title="主資料中找不到同名 KOL">⚠ 未對應</span>') +
             (en.category ? '<span class="event-entry-meta">' + en.category + '</span>' : '') +
             (en.location && en.location !== ev.location ? '<span class="event-entry-meta">📍 ' + en.location + '</span>' : '') +
             (range && range !== cardRange ? '<span class="event-entry-date">' + range + '</span>' : '') +
+            (cancelled ? cancelTag() : '') +
             (en.status ? '<span class="event-status ' + eventStatusClass(en.status) + '">' + en.status + '</span>' : '') +
-            (en.note ? '<div class="event-entry-note">備註：' + en.note + '</div>' : '') +
+            (en.note ? '<div class="event-entry-note' + (cancelled ? ' warn' : '') + '">備註：' + en.note + '</div>' : '') +
             '</div>';
     }).join('');
     return '<div class="event-entries">' + rows + '</div>';
@@ -3049,13 +3102,17 @@ function renderEventsTab() {
             var view = mine ? { startDate: mine.startDate || ev.startDate, endDate: mine.endDate || ev.endDate } : ev;
             var ds = getEventDateStatus(view);
             var loc = (mine && mine.location) || ev.location;
-            return '<div class="kol-event-row">' +
+            var note = (mine && mine.note) || (!mine && ev.note) || '';
+            var cancelled = mine ? entryCancelled(mine) : isCancelledText(ev.note);
+            return '<div class="kol-event-row' + (cancelled ? ' row-cancelled' : '') + '">' +
                 '<span class="'+ds.cls+'" style="font-size:11px;min-width:auto;padding:2px 8px;">'+ds.label+'</span>' +
-                '<span style="flex:1;font-weight:600;">'+ev.name+'</span>' +
+                '<span class="ev-name" style="flex:1;font-weight:600;">'+ev.name+'</span>' +
                 (mine && mine.category ? '<span style="font-size:11px;color:var(--text-secondary);">'+mine.category+'</span>' : '') +
                 (loc ? '<span style="font-size:11px;color:var(--text-secondary);">📍 '+loc+'</span>' : '') +
+                (cancelled ? cancelTag() : '') +
                 (mine && mine.status ? '<span class="event-status '+eventStatusClass(mine.status)+'">'+mine.status+'</span>' : '') +
-                (ds.countdown ? '<span style="font-size:11px;color:var(--accent-yellow);">'+ds.countdown+'</span>' : '') +
+                (!cancelled && ds.countdown ? '<span style="font-size:11px;color:var(--accent-yellow);">'+ds.countdown+'</span>' : '') +
+                (note ? '<div class="event-row-note'+(cancelled?' warn':'')+'">備註：'+note+'</div>' : '') +
                 '</div>';
         }).join('');
 
@@ -3313,13 +3370,17 @@ function renderContractBlock(kolName) {
             var view = mine ? { startDate: mine.startDate || ev.startDate, endDate: mine.endDate || ev.endDate } : ev;
             var ds2 = getEventDateStatus(view);
             var loc = (mine && mine.location) || ev.location;
-            return '<div class="contract-kol-event-item">' +
+            var note2 = (mine && mine.note) || (!mine && ev.note) || '';
+            var cancelled2 = mine ? entryCancelled(mine) : isCancelledText(ev.note);
+            return '<div class="contract-kol-event-item' + (cancelled2 ? ' row-cancelled' : '') + '">' +
                 '<span class="'+ds2.cls+'" style="font-size:11px;padding:2px 8px;">' + ds2.label + '</span>' +
-                '<span style="flex:1;font-weight:600;margin-left:8px;">' + ev.name + '</span>' +
+                '<span class="ev-name" style="flex:1;font-weight:600;margin-left:8px;">' + ev.name + '</span>' +
                 (mine && mine.category ? '<span style="font-size:12px;color:var(--text-secondary);">' + mine.category + '</span>' : '') +
                 (loc ? '<span style="font-size:12px;color:var(--text-secondary);">📍 ' + loc + '</span>' : '') +
+                (cancelled2 ? cancelTag() : '') +
                 (mine && mine.status ? '<span class="event-status '+eventStatusClass(mine.status)+'">' + mine.status + '</span>' : '') +
-                (ds2.countdown ? '<span style="font-size:11px;color:var(--accent-yellow);">' + ds2.countdown + '</span>' : '') +
+                (!cancelled2 && ds2.countdown ? '<span style="font-size:11px;color:var(--accent-yellow);">' + ds2.countdown + '</span>' : '') +
+                (note2 ? '<div class="event-row-note'+(cancelled2?' warn':'')+'">備註：' + note2 + '</div>' : '') +
                 '</div>';
         }).join('');
         html += '</div>';
