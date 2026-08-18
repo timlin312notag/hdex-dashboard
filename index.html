@@ -2,15 +2,22 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- viewport-fit=cover：iPhone 瀏海／底部 home indicator 要靠 env(safe-area-inset-*) 讓開，
+     沒有這個參數 env() 一律回傳 0 -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>HDEX KOL Dashboard</title>
 <meta name="description" content="HDEX KOL Performance Dashboard">
 <meta name="theme-color" content="#0a0a0f">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<!-- default 而非 black-translucent：後者狀態列文字固定白色，切到淺色主題會看不見 -->
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="HDEX KOL">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='24' fill='%230a0a0f'/><text x='96' y='130' font-size='100' text-anchor='middle' fill='%2300e88f'>H</text></svg>">
+<!-- iOS 不吃 SVG 的 apple-touch-icon，必須是 PNG，否則主畫面會拿網頁截圖當圖示 -->
+<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
@@ -193,6 +200,13 @@
 .events-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .events-sync { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .events-sync-status { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+/* 手機：這行字很長，nowrap 會把版面撐出水平捲軸 */
+@media(max-width: 560px){
+    .events-sync-status { white-space: normal; word-break: break-word; }
+    .events-sync { width: 100%; }
+    .event-search { min-width: 0; }
+    .cal-title { min-width: 0; }
+}
 .events-sync-status.err { color: var(--accent-red); white-space: normal; max-width: 320px; }
 .event-filter-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 14px 0 16px; }
 .event-search {
@@ -540,6 +554,34 @@ body {
 .container { max-width: 1440px; margin: 0 auto; padding: 24px 32px; }
 @media(max-width:768px){ .container { padding: 16px; } }
 
+/* ── iPhone 安全區域（瀏海／圓角／底部 home indicator）──────────
+   env() 在非 standalone 或桌機一律是 0，所以這些規則在其他環境無副作用 */
+body { background: var(--bg-primary); }
+.container {
+    padding-left:  calc(32px + env(safe-area-inset-left));
+    padding-right: calc(32px + env(safe-area-inset-right));
+    padding-top:   calc(24px + env(safe-area-inset-top));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom));
+}
+@media(max-width:768px){
+    .container {
+        padding-left:  calc(16px + env(safe-area-inset-left));
+        padding-right: calc(16px + env(safe-area-inset-right));
+        padding-top:   calc(16px + env(safe-area-inset-top));
+        padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    }
+}
+/* 登入畫面與側邊抽屜是 fixed，安全區域要各自處理 */
+#loginGate { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+@media(max-width: 1024px){
+    .sidebar {
+        padding-top: calc(20px + env(safe-area-inset-top));
+        padding-bottom: calc(14px + env(safe-area-inset-bottom));
+        padding-left: calc(10px + env(safe-area-inset-left));
+    }
+}
+.bell-panel { max-height: calc(100vh - 88px - env(safe-area-inset-bottom)); }
+
 #loading {
     display: flex; flex-direction: column; align-items: center;
     justify-content: center; min-height: 60vh; gap: 20px;
@@ -728,7 +770,16 @@ table tr:hover td { background: rgba(26,26,38,0.5); }
 
 .hidden { display: none !important; }
 
-.quick-actions { display: flex; gap: 8px; align-items: center; }
+.quick-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+/* 手機：按鈕縮小並允許換行，否則三顆按鈕會把版面撐出水平捲軸 */
+@media(max-width: 560px){
+    .quick-actions { width: 100%; }
+    .quick-actions .action-btn { flex: 1 1 auto; padding: 8px 10px; font-size: 12px; justify-content: center; }
+    .quick-actions .action-btn small { display: none; }
+    .topbar-right { width: 100%; justify-content: flex-start; }
+    .topbar-left h1 { font-size: 22px; }
+    .topbar-left p { font-size: 12px; }
+}
 .action-btn {
     padding: 8px 16px; border-radius: 8px; font-family: 'Outfit', sans-serif;
     font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid var(--border);
@@ -845,6 +896,7 @@ table td { font-size: 13px; color: #d0d0e0; padding: 10px 12px; }
         </div>
         <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="切換深色/淺色模式">🌙</button>
         <div class="quick-actions">
+            <button class="action-btn" onclick="signOut()" title="Sign out 登出">🚪 Sign out <small style="font-size:10px;">登出</small></button>
             <button class="action-btn" onclick="openSettings()">⚙️ Settings <small style="font-size:10px;">月設定</small></button>
             <button class="action-btn upload-btn" onclick="showUploadModal()">📤 Upload CSV <small style="font-size:10px;">上傳資料</small></button>
         </div>
@@ -1324,6 +1376,35 @@ function apiPost(action, csvText) {
 // =====================================================================
 // PASSWORD GATE
 // =====================================================================
+// ── 登入狀態 ────────────────────────────────────────────────
+// 原本用 sessionStorage，但 iOS 一把 PWA 收掉就清空，每次開都要重打密碼。
+// 改成 localStorage + 30 天到期。
+var AUTH_KEY = 'hdex_auth_until';
+var AUTH_DAYS = 30;
+
+function markAuthed() {
+    try { localStorage.setItem(AUTH_KEY, String(Date.now() + AUTH_DAYS * 86400000)); }
+    catch (e) {
+        // localStorage 被停用（無痕模式等）時退回 sessionStorage
+        try { sessionStorage.setItem('hdex_auth', '1'); } catch (e2) {}
+    }
+}
+
+function isAuthed() {
+    try {
+        var until = parseInt(localStorage.getItem(AUTH_KEY) || '0', 10);
+        if (until && Date.now() < until) return true;
+        if (until) localStorage.removeItem(AUTH_KEY);      // 過期就清掉
+    } catch (e) {}
+    try { return sessionStorage.getItem('hdex_auth') === '1'; } catch (e2) { return false; }
+}
+
+function signOut() {
+    try { localStorage.removeItem(AUTH_KEY); } catch (e) {}
+    try { sessionStorage.removeItem('hdex_auth'); } catch (e2) {}
+    location.reload();
+}
+
 function checkPassword() {
     var pw = document.getElementById('loginPassword').value.toLowerCase().trim();
     var btn = document.getElementById('loginBtn');
@@ -1335,7 +1416,7 @@ function checkPassword() {
             btn.disabled = false;
             btn.textContent = '進入';
             if (result.ok) {
-                sessionStorage.setItem('hdex_auth', '1');
+                markAuthed();
                 document.getElementById('loginGate').style.display = 'none';
                 document.getElementById('app').style.display = '';
                 loadDashboard();
@@ -1362,7 +1443,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (e.key === 'Enter') checkPassword();
         });
     }
-    if (sessionStorage.getItem('hdex_auth') === '1') {
+    if (isAuthed()) {
         document.getElementById('loginGate').style.display = 'none';
         document.getElementById('app').style.display = '';
         loadDashboard();
@@ -1376,6 +1457,13 @@ document.addEventListener('DOMContentLoaded', function() {
 // =====================================================================
 // THEME TOGGLE
 // =====================================================================
+// iOS 15+ 的 standalone 狀態列會跟著 theme-color 走，切主題時要一起改
+function syncThemeColor() {
+    var light = document.documentElement.getAttribute('data-theme') === 'light';
+    var m = document.querySelector('meta[name="theme-color"]');
+    if (m) m.setAttribute('content', light ? '#f0f2f5' : '#0a0a0f');
+}
+
 function toggleTheme() {
     var html = document.documentElement;
     var current = html.getAttribute('data-theme');
@@ -1388,6 +1476,7 @@ function toggleTheme() {
         localStorage.setItem('hdex_theme', 'light');
         document.getElementById('themeToggle').textContent = '☀️';
     }
+    syncThemeColor();
     if (typeof renderOverview === 'function' && currentPeriod) {
         try { renderAll(); } catch(e) {}
     }
@@ -1395,6 +1484,7 @@ function toggleTheme() {
 (function() {
     var saved = localStorage.getItem('hdex_theme');
     if (saved === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    try { syncThemeColor(); } catch(e) {}
 })();
 
 // =====================================================================

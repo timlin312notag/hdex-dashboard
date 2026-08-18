@@ -1,9 +1,13 @@
 // ★ 改動 index.html 後要把版號 +1，舊快取才會被清掉
-const CACHE_NAME = 'hdex-kol-v3';
+const CACHE_NAME = 'hdex-kol-v4';
 const STATIC_ASSETS = [
   '/hdex-dashboard/',
   '/hdex-dashboard/index.html',
   '/hdex-dashboard/manifest.json',
+  '/hdex-dashboard/icons/icon-180.png',
+  '/hdex-dashboard/icons/icon-192.png',
+  '/hdex-dashboard/icons/icon-512.png',
+  '/hdex-dashboard/icons/icon-512-maskable.png',
   'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap',
   'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js'
 ];
