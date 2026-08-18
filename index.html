@@ -152,149 +152,6 @@
 .bell-tag-event { background: var(--accent-blue-dim); color: var(--accent-blue); }
 .bell-empty { padding: 20px 18px; color: var(--text-muted); font-size: 13px; text-align: center; }
 
-/* ── AI 助手對話框 ──────────────────────────────────── */
-.ai-fab {
-    position: fixed; bottom: 28px; right: 28px; z-index: 9000;
-    width: 56px; height: 56px; border-radius: 50%;
-    background: linear-gradient(135deg, #00e88f, #4d9cff);
-    border: none; cursor: pointer; box-shadow: 0 4px 20px rgba(0,232,143,0.4);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 24px; transition: transform 0.2s, box-shadow 0.2s;
-}
-.ai-fab:hover { transform: scale(1.1); box-shadow: 0 6px 28px rgba(0,232,143,0.5); }
-.ai-fab.open { transform: scale(1.1); }
-
-.ai-panel {
-    position: fixed; bottom: 96px; right: 28px; z-index: 9000;
-    width: 380px; height: 520px;
-    background: var(--bg-card); border: 1px solid var(--border);
-    border-radius: 20px; box-shadow: 0 8px 40px rgba(0,0,0,0.4);
-    display: none; flex-direction: column; overflow: hidden;
-    animation: aiPanelIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
-}
-.ai-panel.open { display: flex; }
-@keyframes aiPanelIn {
-    from { opacity:0; transform: translateY(20px) scale(0.95); }
-    to   { opacity:1; transform: translateY(0) scale(1); }
-}
-.ai-panel-header {
-    padding: 16px 18px 12px;
-    background: linear-gradient(135deg, rgba(0,232,143,0.1), rgba(77,156,255,0.1));
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; gap: 10px;
-}
-.ai-panel-title { font-size: 15px; font-weight: 700; color: var(--text-primary); flex: 1; }
-.ai-panel-sub { font-size: 11px; color: var(--text-secondary); }
-.ai-clear-btn {
-    font-size: 11px; color: var(--text-muted); background: none;
-    border: 1px solid var(--border); border-radius: 6px;
-    padding: 3px 8px; cursor: pointer; transition: all 0.15s;
-}
-.ai-clear-btn:hover { color: var(--text-primary); border-color: var(--text-muted); }
-
-.ai-messages {
-    flex: 1; overflow-y: auto; padding: 14px 16px;
-    display: flex; flex-direction: column; gap: 10px;
-    scroll-behavior: smooth;
-}
-.ai-messages::-webkit-scrollbar { width: 4px; }
-.ai-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-.ai-msg {
-    max-width: 88%; padding: 10px 14px; border-radius: 14px;
-    font-size: 13px; line-height: 1.6; white-space: pre-wrap;
-}
-.ai-msg.user {
-    align-self: flex-end;
-    background: linear-gradient(135deg, #00e88f, #00c97a);
-    color: #0a0a0f; border-bottom-right-radius: 4px;
-}
-.ai-msg.assistant {
-    align-self: flex-start;
-    background: var(--bg-primary); color: var(--text-primary);
-    border: 1px solid var(--border); border-bottom-left-radius: 4px;
-}
-.ai-msg.thinking {
-    align-self: flex-start;
-    background: var(--bg-primary); border: 1px solid var(--border);
-    color: var(--text-muted); font-style: italic; border-bottom-left-radius: 4px;
-}
-.ai-typing { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
-.ai-typing span {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--text-muted); animation: aiDot 1.2s infinite;
-}
-.ai-typing span:nth-child(2) { animation-delay: 0.2s; }
-.ai-typing span:nth-child(3) { animation-delay: 0.4s; }
-@keyframes aiDot { 0%,80%,100%{opacity:0.2;transform:scale(0.8);} 40%{opacity:1;transform:scale(1);} }
-
-.ai-suggestions {
-    padding: 0 16px 10px; display: flex; flex-wrap: wrap; gap: 6px;
-}
-.ai-suggestion {
-    font-size: 11px; padding: 5px 10px; border-radius: 20px;
-    background: var(--bg-primary); border: 1px solid var(--border);
-    color: var(--text-secondary); cursor: pointer; transition: all 0.15s;
-    white-space: nowrap;
-}
-.ai-suggestion:hover { border-color: var(--accent-green); color: var(--accent-green); }
-
-.ai-input-row {
-    padding: 12px 14px; border-top: 1px solid var(--border);
-    display: flex; gap: 8px; align-items: flex-end;
-}
-.ai-input {
-    flex: 1; padding: 9px 12px; background: var(--bg-primary);
-    border: 1px solid var(--border); border-radius: 10px;
-    color: var(--text-primary); font-family: 'Outfit', sans-serif;
-    font-size: 13px; outline: none; resize: none; max-height: 80px;
-    min-height: 36px; line-height: 1.4; transition: border-color 0.2s;
-}
-.ai-input:focus { border-color: var(--accent-green); }
-.ai-send-btn {
-    width: 36px; height: 36px; border-radius: 10px; border: none;
-    background: var(--accent-green); color: #0a0a0f;
-    font-size: 16px; cursor: pointer; transition: opacity 0.2s;
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-}
-.ai-send-btn:hover { opacity: 0.85; }
-.ai-send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-/* ── 語音輸入 ──────────────────────────────────────── */
-.ai-mic-btn {
-    width: 36px; height: 36px; border-radius: 10px; border: none;
-    background: var(--bg-primary); color: var(--text-secondary);
-    font-size: 16px; cursor: pointer; transition: all 0.2s;
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-    border: 1px solid var(--border);
-}
-.ai-mic-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
-.ai-mic-btn.recording {
-    background: var(--accent-red-dim); border-color: var(--accent-red);
-    color: var(--accent-red); animation: micPulse 1s infinite;
-}
-@keyframes micPulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(255,77,106,0.4); }
-    50% { box-shadow: 0 0 0 6px rgba(255,77,106,0); }
-}
-/* ── 語音回答 ──────────────────────────────────────── */
-.ai-tts-toggle {
-    display: flex; align-items: center; gap: 6px;
-    font-size: 11px; color: var(--text-muted); cursor: pointer;
-    padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border);
-    background: none; transition: all 0.15s; white-space: nowrap;
-}
-.ai-tts-toggle:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
-.ai-tts-toggle.on { border-color: var(--accent-green); color: var(--accent-green); background: var(--accent-green-dim); }
-.ai-msg-actions {
-    display: flex; align-items: center; gap: 6px; margin-top: 6px;
-}
-.ai-speak-btn {
-    font-size: 11px; color: var(--text-muted); cursor: pointer;
-    padding: 3px 8px; border-radius: 6px; border: 1px solid var(--border);
-    background: none; transition: all 0.15s;
-}
-.ai-speak-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
-.ai-speak-btn.speaking { border-color: var(--accent-green); color: var(--accent-green); animation: micPulse 1s infinite; }
 /* ── 賽事複選 KOL ──────────────────────────────────── */
 .kol-multiselect-wrap { position: relative; }
 .kol-multiselect-display {
@@ -331,7 +188,185 @@
 .kol-filter-tag { font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px; cursor: pointer; border: 1px solid var(--border); background: var(--bg-primary); color: var(--text-secondary); transition: all 0.15s; }
 .kol-filter-tag.selected { background: var(--accent-blue-dim); color: var(--accent-blue); border-color: var(--accent-blue); }
 
-.ai-panel-header-btns { display: flex; gap: 6px; align-items: center; }
+/* ── 賽事卡片 ─────────────────────────────────────── */
+.events-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.events-sync { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.events-sync-status { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+.events-sync-status.err { color: var(--accent-red); white-space: normal; max-width: 320px; }
+.event-filter-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 14px 0 16px; }
+.event-search {
+    flex: 1; min-width: 180px; padding: 8px 14px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--bg-primary); color: var(--text-primary);
+    font-family: 'Outfit', sans-serif; font-size: 13px; outline: none;
+}
+.event-search:focus { border-color: var(--accent-green); }
+.event-card {
+    background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 16px 18px; margin-bottom: 12px; transition: border-color 0.18s;
+}
+.event-card:hover { border-color: var(--text-muted); }
+.event-card-header { display: flex; align-items: flex-start; gap: 8px; flex-wrap: wrap; }
+.event-name { font-size: 15px; font-weight: 600; color: var(--text-primary); line-height: 1.45; }
+.event-location { font-size: 12px; color: var(--text-secondary); margin-top: 3px; }
+.event-countdown { font-size: 11px; font-weight: 700; color: var(--accent-yellow); white-space: nowrap; margin-left: auto; }
+.event-kols { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.event-kol-tag {
+    font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px;
+    background: var(--accent-green-dim); color: var(--accent-green); border: 1px solid rgba(0,232,143,0.3);
+}
+.event-note { font-size: 12px; color: var(--text-secondary); margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+.event-source-tag {
+    font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 6px; white-space: nowrap;
+    background: var(--accent-purple-dim); color: var(--accent-purple); border: 1px solid rgba(168,85,247,0.3);
+}
+.event-entries { margin-top: 12px; border-top: 1px solid var(--border); }
+.event-entry {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    padding: 7px 0; border-bottom: 1px solid rgba(120,120,150,0.14); font-size: 12px;
+}
+.event-entry:last-child { border-bottom: none; }
+.event-entry-kol { font-weight: 700; color: var(--text-primary); min-width: 74px; }
+.event-entry-meta { color: var(--text-secondary); }
+.event-entry-date { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); }
+.event-entry-note { color: var(--text-muted); font-size: 11px; flex-basis: 100%; }
+.event-status { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 6px; border: 1px solid transparent; white-space: nowrap; }
+.event-status.ok      { background: var(--accent-green-dim);  color: var(--accent-green);  border-color: rgba(0,232,143,0.3); }
+.event-status.warn    { background: var(--accent-yellow-dim); color: var(--accent-yellow); border-color: rgba(255,197,66,0.3); }
+.event-status.bad     { background: var(--accent-red-dim);    color: var(--accent-red);    border-color: rgba(255,77,106,0.3); }
+.event-status.neutral { background: var(--bg-card-hover);     color: var(--text-secondary); border-color: var(--border); }
+.event-unmatched { font-size: 10px; color: var(--accent-red); }
+.kol-event-card {
+    background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 14px 16px; margin-bottom: 12px;
+}
+.kol-event-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.kol-event-name { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+.kol-event-rows { display: flex; flex-direction: column; }
+.kol-event-row {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    padding: 7px 0; border-bottom: 1px solid rgba(120,120,150,0.14); font-size: 13px; color: var(--text-primary);
+}
+.kol-event-row:last-child { border-bottom: none; }
+
+/* ── 合約區塊 ─────────────────────────────────────── */
+.contract-info-card { background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
+.contract-row { display: flex; flex-wrap: wrap; gap: 20px; }
+.contract-field { min-width: 118px; }
+.contract-field-label { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
+.contract-field-value { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-primary); }
+.contract-expiry-warn { margin-top: 12px; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; background: var(--accent-yellow-dim); color: var(--accent-yellow); }
+.contract-expiry-ok   { margin-top: 12px; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; background: var(--accent-green-dim); color: var(--accent-green); }
+.contract-kol-events { margin-top: 18px; }
+.contract-kol-event-item {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    padding: 7px 0; border-bottom: 1px solid rgba(120,120,150,0.14); font-size: 13px;
+}
+.contract-kol-event-item:last-child { border-bottom: none; }
+
+/* ── 版面：上方工具列 ＋ 左側分類導覽 ──────────────── */
+.topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap; margin-bottom: 16px;
+}
+.topbar-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.topbar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.sidebar-toggle {
+    display: none; width: 40px; height: 40px; border-radius: 10px; flex: 0 0 auto;
+    border: 1px solid var(--border); background: var(--bg-card); color: var(--text-primary);
+    font-size: 17px; cursor: pointer;
+}
+
+/* 月份列 */
+.month-bar {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 12px 16px; margin-bottom: 20px;
+}
+.month-bar-label { font-size: 12px; font-weight: 700; color: var(--text-secondary); white-space: nowrap; }
+.month-chips { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; min-width: 200px; }
+.month-chip {
+    padding: 6px 14px; border-radius: 8px; font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.16s;
+    border: 1px solid var(--border); background: var(--bg-primary); color: var(--text-secondary);
+}
+.month-chip:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+.month-chip.active { background: var(--accent-green); border-color: var(--accent-green); color: #0a0a0f; }
+.month-bar-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.mini-btn {
+    padding: 5px 12px; border-radius: 7px; font-family: 'Outfit', sans-serif; font-size: 12px;
+    cursor: pointer; border: 1px solid var(--border); background: var(--bg-primary);
+    color: var(--text-secondary); transition: all 0.16s; white-space: nowrap;
+}
+.mini-btn:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+.month-bar-summary { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
+
+/* 版面骨架 */
+.layout { display: grid; grid-template-columns: 208px minmax(0, 1fr); gap: 20px; align-items: start; }
+.sidebar {
+    position: sticky; top: 20px; background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px 10px; max-height: calc(100vh - 40px); overflow-y: auto;
+}
+.main { min-width: 0; }
+.nav-group { margin-bottom: 14px; }
+.nav-group:last-child { margin-bottom: 0; }
+.nav-group-title {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text-muted); padding: 0 10px 6px;
+}
+.nav-item {
+    display: flex; align-items: center; gap: 8px; width: 100%; text-align: left;
+    padding: 8px 10px; margin-bottom: 2px; border-radius: 8px; border: 1px solid transparent;
+    background: transparent; color: var(--text-secondary); cursor: pointer;
+    font-family: 'Outfit', sans-serif; font-size: 13px; transition: all 0.15s;
+}
+.nav-item:hover { background: var(--bg-card-hover); color: var(--text-primary); }
+.nav-item.active {
+    background: var(--accent-green-dim); border-color: var(--accent-green);
+    color: var(--accent-green); font-weight: 600;
+}
+.nav-item .nav-ico { width: 18px; text-align: center; flex: 0 0 auto; }
+.sidebar-foot { border-top: 1px solid var(--border); margin-top: 12px; padding: 10px 6px 0; display: flex; gap: 6px; flex-wrap: wrap; }
+.sidebar-backdrop { display: none; }
+
+@media(max-width: 1024px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar-toggle { display: flex; align-items: center; justify-content: center; }
+    .sidebar {
+        position: fixed; top: 0; left: 0; bottom: 0; width: 250px; z-index: 9000;
+        border-radius: 0; max-height: none; transform: translateX(-100%);
+        transition: transform 0.22s ease; padding-top: 20px;
+    }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-backdrop.show {
+        display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 8999;
+    }
+}
+
+/* 群組區塊：被側欄分類切換顯示 */
+.group-block { display: block; }
+.group-block[hidden] { display: none; }
+.group-head {
+    display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;
+}
+.group-head h2 { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+.group-head span { font-size: 12px; color: var(--text-muted); }
+
+/* ── 卡片收合 ─────────────────────────────────────── */
+.card-head { display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
+.card-head > .card-title { margin-bottom: 0; flex: 1; min-width: 0; }
+.card-toggle {
+    flex: 0 0 auto; width: 26px; height: 26px; border-radius: 7px; border: 1px solid var(--border);
+    background: var(--bg-primary); color: var(--text-secondary); cursor: pointer;
+    display: flex; align-items: center; justify-content: center; font-size: 12px; padding: 0;
+    transition: all 0.15s;
+}
+.card-toggle:hover { color: var(--text-primary); border-color: var(--text-secondary); }
+.card-toggle .chev { display: block; transition: transform 0.2s; line-height: 1; }
+.card-body { margin-top: 16px; }
+.card.collapsed .card-body { display: none; }
+.card.collapsed .card-toggle .chev { transform: rotate(-90deg); }
+.card.collapsed { padding-bottom: 18px; }
+
 
 
 
@@ -632,18 +667,15 @@ table td { font-size: 13px; color: #d0d0e0; padding: 10px 12px; }
 
 <div id="dashboard" style="display:none;">
 
-<div class="header fade-up delay-1">
-    <div class="header-left">
-        <h1>HDEX KOL Performance</h1>
-        <p>KOL 合作成效儀表板 — 銷售額 · ROAS · 投資報酬 · 成長分析</p>
-    </div>
-    <div class="header-right">
-        <div class="tab-group" id="monthTabs"></div>
-        <div class="tab-group" id="viewTabs">
-            <button class="tab-btn active" data-view="overview">Overview <small style="font-size:10px;color:var(--text-muted);">總覽</small></button>
-            <button class="tab-btn" data-view="individual">Individual <small style="font-size:10px;color:var(--text-muted);">Analysis <small style='font-size:10px;color:var(--text-muted);'>個人分析</small></small></button>
-            <button class="tab-btn" data-view="events">🏆 Events <small style="font-size:10px;color:var(--text-muted);">賽事</small></button>
+<div class="topbar fade-up delay-1">
+    <div class="topbar-left">
+        <button class="sidebar-toggle" onclick="toggleSidebar()" title="選單">☰</button>
+        <div>
+            <h1>HDEX KOL Performance</h1>
+            <p>KOL 合作成效儀表板 — 銷售額 · ROAS · 投資報酬 · 成長分析</p>
         </div>
+    </div>
+    <div class="topbar-right">
         <div class="bell-wrap">
             <button class="bell-btn" id="bellBtn" onclick="toggleBell()" title="提醒事項">
                 🔔<span class="bell-badge" id="bellBadge" style="display:none;">0</span>
@@ -661,24 +693,93 @@ table td { font-size: 13px; color: #d0d0e0; padding: 10px 12px; }
     </div>
 </div>
 
+<!-- ── 上方：月份選擇（可複選）─────────────────────── -->
+<div class="month-bar fade-up delay-2">
+    <span class="month-bar-label">📅 月份</span>
+    <div class="month-chips" id="monthTabs"></div>
+    <div class="month-bar-actions">
+        <button class="mini-btn" onclick="selectLatestPeriod()">最新月</button>
+        <button class="mini-btn" onclick="selectAllPeriods()">全選</button>
+    </div>
+    <span class="month-bar-summary" id="monthBarSummary"></span>
+</div>
+
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
+
+<div class="layout">
+<!-- ── 左側：分類導覽 ──────────────────────────────── -->
+<aside class="sidebar" id="sidebar">
+    <nav id="sidebarNav">
+        <div class="nav-group">
+            <div class="nav-group-title">📊 Overview 總覽</div>
+            <button class="nav-item active" data-view="overview" data-group="all"><span class="nav-ico">▦</span>全部</button>
+            <button class="nav-item" data-view="overview" data-group="kpi"><span class="nav-ico">📌</span>KPI 摘要</button>
+            <button class="nav-item" data-view="overview" data-group="sales"><span class="nav-ico">💵</span>銷售與成本</button>
+            <button class="nav-item" data-view="overview" data-group="tier"><span class="nav-ico">🏅</span>KOL 分級</button>
+            <button class="nav-item" data-view="overview" data-group="detail"><span class="nav-ico">📊</span>詳細數據</button>
+            <button class="nav-item" data-view="overview" data-group="growth"><span class="nav-ico">📈</span>成長與趨勢</button>
+            <button class="nav-item" data-view="overview" data-group="efficiency"><span class="nav-ico">💰</span>效率分析</button>
+            <button class="nav-item" data-view="overview" data-group="budget"><span class="nav-ico">💡</span>預算建議</button>
+        </div>
+        <div class="nav-group">
+            <div class="nav-group-title">👤 Individual 個人</div>
+            <button class="nav-item" data-view="individual" data-group="all"><span class="nav-ico">👥</span>個人分析</button>
+        </div>
+        <div class="nav-group">
+            <div class="nav-group-title">🏆 Events 賽事</div>
+            <button class="nav-item" data-view="events" data-group="all"><span class="nav-ico">🏆</span>賽事行程</button>
+        </div>
+    </nav>
+    <div class="sidebar-foot">
+        <button class="mini-btn" onclick="collapseAllCards(true)">⊟ 全部收合</button>
+        <button class="mini-btn" onclick="collapseAllCards(false)">⊞ 全部展開</button>
+    </div>
+</aside>
+
+<main class="main">
+
 <div id="overviewSection" class="overview-section">
-<div class="kpi-row" id="kpiRow"></div>
+
+<div class="group-block" data-group="kpi">
+    <div class="group-head"><h2>📌 KPI 摘要</h2><span>本期整體表現與重點名單</span></div>
+    <div class="kpi-row" id="kpiRow"></div>
+    <div class="card full-width" id="monthBreakdownCard" data-card="monthBreakdown" style="display:none;">
+        <div class="card-title">🗓️ By Month Breakdown <small style="font-size:11px;color:var(--text-muted);">分月對照</small></div>
+        <div class="card-subtitle">所選月份的各月獨立數據與合計</div>
+        <div class="table-wrap"><div id="monthBreakdownBody"></div></div>
+    </div>
+    <div class="grid-1-1">
+        <div class="card" data-card="topSales"><div class="card-title">🏆 Top 5 Sales <small style="font-size:11px;color:var(--text-muted);">銷售Top5</small></div><ul class="insight-list" id="topSalesList"></ul></div>
+        <div class="card" data-card="watchList"><div class="card-title">🚨 Watch: High Cost, Low Output <small style="font-size:11px;color:var(--text-muted);">需關注</small></div><ul class="insight-list" id="alertList"></ul></div>
+    </div>
+</div>
+
+<div class="group-block" data-group="sales">
+<div class="group-head"><h2>💵 銷售與成本</h2><span>各 KOL 的產出與投入對照</span></div>
 <div class="grid-2-1 fade-up delay-3">
-    <div class="card">
+    <div class="card" data-card="salesVsCost">
         <div class="card-title">Sales vs Cost by KOL <small style='font-size:11px;color:var(--text-muted);'>各KOL銷售額vs總支出</small></div>
         <div class="chart-container"><canvas id="chartSalesVsCost"></canvas></div>
     </div>
-    <div class="card">
+    <div class="card" data-card="roasDist">
         <div class="card-title">ROAS Distribution <small style="font-size:11px;color:var(--text-muted);">ROAS分布</small></div>
         <div class="chart-container"><canvas id="chartRoasDist"></canvas></div>
     </div>
 </div>
-<div class="card full-width fade-up delay-4" id="tierCard">
+</div>
+
+<div class="group-block" data-group="tier">
+<div class="group-head"><h2>🏅 KOL 分級</h2><span>依 ROAS 與銷售額自動分級</span></div>
+<div class="card full-width fade-up delay-4" id="tierCard" data-card="tier">
     <div class="card-title">🏅 KOL Tier System <small style='font-size:11px;color:var(--text-muted);'>分級制度</small></div>
     <div class="card-subtitle">依 ROAS 與銷售額自動分級，作為續約決策依據</div>
     <div class="tier-section" id="tierSection"></div>
 </div>
-<div class="card full-width fade-up delay-5">
+</div>
+
+<div class="group-block" data-group="detail">
+<div class="group-head"><h2>📊 詳細數據</h2><span>可篩選與排序的完整名單</span></div>
+<div class="card full-width fade-up delay-5" data-card="kolDetails">
     <div class="card-title">📊 KOL Details <small style="font-size:11px;color:var(--text-muted);">詳細數據</small></div>
     <div class="filter-row" id="classFilterGroup">
         <button class="filter-btn active" data-filter="all">All 全部</button>
@@ -713,26 +814,43 @@ table td { font-size: 13px; color: #d0d0e0; padding: 10px 12px; }
         <span class="badge badge-d">D級</span> 零產出
     </div>
 </div>
-<div class="grid-1-1 fade-up delay-6">
-    <div class="card"><div class="card-title">🏆 Top 5 Sales <small style="font-size:11px;color:var(--text-muted);">銷售Top5</small></div><ul class="insight-list" id="topSalesList"></ul></div>
-    <div class="card"><div class="card-title">🚨 Watch: High Cost, Low Output <small style="font-size:11px;color:var(--text-muted);">需關注</small></div><ul class="insight-list" id="alertList"></ul></div>
 </div>
-<div class="card full-width fade-up delay-7">
+
+<div class="group-block" data-group="growth">
+<div class="group-head"><h2>📈 成長與趨勢</h2><span>誰在成長、誰在衰退，以及整體走勢</span></div>
+<div class="card full-width fade-up delay-7" data-card="growthTracking">
     <div class="card-title">📈 Growth Tracking <small style="font-size:11px;color:var(--text-muted);">成長追蹤</small></div>
     <div class="card-subtitle">月對月銷售額變化，追蹤誰在成長、誰在衰退</div>
     <div class="chart-container"><canvas id="chartGrowth"></canvas></div>
 </div>
+<div class="card full-width" data-card="monthlyTrend">
+    <div class="card-title">Monthly Trend: Sales vs Cost <small style='font-size:11px;color:var(--text-muted);'>月度趨勢</small></div>
+    <div class="card-subtitle">所有月份的走勢，已選取的月份會highlight</div>
+    <div class="chart-container"><canvas id="chartTrend"></canvas></div>
+</div>
+</div>
+
+<div class="group-block" data-group="efficiency">
+<div class="group-head"><h2>💰 效率分析</h2><span>投資報酬、客單價與粉絲轉換</span></div>
 <div class="grid-2-1 fade-up delay-8">
-    <div class="card">
+    <div class="card" data-card="roiAnalysis">
         <div class="card-title">💰 ROI Analysis <small style="font-size:11px;color:var(--text-muted);">投資效率</small></div>
         <div class="card-subtitle">每花 NT$1 帶回的銷售額</div>
         <div class="chart-container"><canvas id="chartEfficiency"></canvas></div>
     </div>
-    <div class="card"><div class="card-title">🎯 Avg Order Value <small style="font-size:11px;color:var(--text-muted);">客單價分析</small></div><div class="chart-container"><canvas id="chartAOV"></canvas></div></div>
+    <div class="card" data-card="aov"><div class="card-title">🎯 Avg Order Value <small style="font-size:11px;color:var(--text-muted);">客單價分析</small></div><div class="chart-container"><canvas id="chartAOV"></canvas></div></div>
 </div>
-<div class="card full-width fade-up delay-9">
+<div class="card full-width" data-card="bubble">
+    <div class="card-title">Followers vs Sales <small style="font-size:11px;color:var(--text-muted);">粉絲數vs銷售額</small></div>
+    <div class="chart-container"><canvas id="chartBubble"></canvas></div>
+</div>
+</div>
+
+<div class="group-block" data-group="budget">
+<div class="group-head"><h2>💡 預算建議</h2><span>依本期表現自動產生的續約與預算調整</span></div>
+<div class="card full-width fade-up delay-9" data-card="budgetPlan">
     <div class="card-title">💡 Next Month Budget Plan <small style="font-size:11px;color:var(--text-muted);">下月預算建議</small></div>
-    <div class="card-subtitle">基於本月表現，自動產生續約與預算調整建議</div>
+    <div class="card-subtitle">基於本期表現，自動產生續約與預算調整建議</div>
     <div class="table-wrap">
         <table class="budget-table" id="budgetTable">
             <thead>
@@ -742,16 +860,16 @@ table td { font-size: 13px; color: #d0d0e0; padding: 10px 12px; }
         </table>
     </div>
 </div>
-<div class="grid-1-1 fade-up delay-10">
-    <div class="card"><div class="card-title">Monthly Trend: Sales vs Cost <small style='font-size:11px;color:var(--text-muted);'>月度趨勢</small></div><div class="chart-container"><canvas id="chartTrend"></canvas></div></div>
-    <div class="card"><div class="card-title">Followers vs Sales <small style="font-size:11px;color:var(--text-muted);">粉絲數vs銷售額</small></div><div class="chart-container"><canvas id="chartBubble"></canvas></div></div>
 </div>
+
 </div><!-- end overviewSection -->
 
 <div id="individualSection" class="individual-section">
 
+    <div class="group-head"><h2>👤 個人分析</h2><span>挑 KOL 與月份，看個別表現與跨月比較</span></div>
+
     <!-- KOL 多選 -->
-    <div class="card fade-up delay-1" style="margin-bottom:16px;">
+    <div class="card fade-up delay-1" data-card="selectKol" style="margin-bottom:16px;">
         <div class="card-title">👥 Select KOL <small style="font-size:11px;color:var(--text-muted);">選擇KOL（可多選）</small></div>
         <div id="kolCheckboxGroup" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;"></div>
         <div style="display:flex;gap:8px;">
@@ -761,7 +879,7 @@ table td { font-size: 13px; color: #d0d0e0; padding: 10px 12px; }
     </div>
 
     <!-- 月份多選 -->
-    <div class="card fade-up delay-2" style="margin-bottom:16px;">
+    <div class="card fade-up delay-2" data-card="selectMonth" style="margin-bottom:16px;">
         <div class="card-title">📅 Select Month <small style="font-size:11px;color:var(--text-muted);">選擇月份（可多選）</small></div>
         <div id="monthCheckboxGroup" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;"></div>
         <div style="display:flex;gap:8px;">
@@ -771,20 +889,20 @@ table td { font-size: 13px; color: #d0d0e0; padding: 10px 12px; }
     </div>
 
     <!-- 趨勢折線圖 -->
-    <div class="card full-width fade-up delay-3" style="margin-bottom:16px;">
+    <div class="card full-width fade-up delay-3" data-card="personalTrend" style="margin-bottom:16px;">
         <div class="card-title">📈 Sales Trend <small style="font-size:11px;color:var(--text-muted);">銷售趨勢比較</small></div>
         <div class="card-subtitle">各 KOL 跨月銷售額趨勢</div>
         <div class="chart-container"><canvas id="chartPersonalTrend"></canvas></div>
     </div>
 
     <!-- 表格 A：以人為主 -->
-    <div class="card full-width fade-up delay-4" style="margin-bottom:16px;">
+    <div class="card full-width fade-up delay-4" data-card="byPerson" style="margin-bottom:16px;">
         <div class="card-title">📋 By Person <small style="font-size:11px;color:var(--text-muted);">以人為主</small></div>
         <div id="tableByPerson"></div>
     </div>
 
     <!-- 表格 B：以月份為主 -->
-    <div class="card full-width fade-up delay-5" style="margin-bottom:16px;">
+    <div class="card full-width fade-up delay-5" data-card="byMonth" style="margin-bottom:16px;">
         <div class="card-title">📋 By Month <small style="font-size:11px;color:var(--text-muted);">以月份為主</small></div>
         <div id="tableByMonth"></div>
     </div>
@@ -794,7 +912,16 @@ table td { font-size: 13px; color: #d0d0e0; padding: 10px 12px; }
 <!-- ── 賽事 Section ──────────────────────────────── -->
 <div id="eventsSection" style="display:none;">
     <div class="card full-width fade-up delay-1" style="margin-bottom:16px;">
-        <div class="card-title">🏆 Annual Events <small style='font-size:11px;color:var(--text-muted);'>年度賽事行程</small></div>
+        <div class="events-head">
+            <div>
+                <div class="card-title">🏆 Annual Events <small style='font-size:11px;color:var(--text-muted);'>年度賽事行程</small></div>
+                <div class="card-subtitle">手動建立的賽事 ＋ 賽事 Google Sheet 自動同步</div>
+            </div>
+            <div class="events-sync">
+                <span class="events-sync-status" id="eventsSyncStatus">尚未載入賽事表</span>
+                <button class="action-btn" id="eventsRefreshBtn" onclick="refreshSheetEvents()">🔄 重新整理賽事</button>
+            </div>
+        </div>
         <div class="event-filter-row">
             <input type="text" class="event-search" id="eventSearchInput" placeholder="搜尋賽事名稱..." oninput="renderEventsTab()">
             <button class="tab-btn active" data-eview="byEvent" onclick="switchEventView('byEvent', this)">By Event <small style='font-size:10px;color:var(--text-muted);'>以賽事看</small></button>
@@ -804,6 +931,9 @@ table td { font-size: 13px; color: #d0d0e0; padding: 10px 12px; }
         <div id="eventsByKol" style="display:none;"></div>
     </div>
 </div>
+
+</main>
+</div><!-- end layout -->
 
 </div><!-- end dashboard -->
 </div><!-- end container -->
@@ -842,6 +972,20 @@ table td { font-size: 13px; color: #d0d0e0; padding: 10px 12px; }
 // ★ 在這裡填入你的 Apps Script 部署網址（/exec 結尾）
 // =====================================================================
 var API_URL = 'https://script.google.com/macros/s/AKfycbyux5KbUFdQonvSn5EVTsS7pTt5irD0e-WKPsTDN3dlCXsV1BSX2NWvol_zsDxiPgmu/exec';
+
+// =====================================================================
+// ★ 賽事 Google Sheet（共用權限需為「知道連結的人 → 檢視者」）
+//   EVENTS_SHEET_NAME 留空 = 讀第一個工作表；要指定分頁可填工作表名稱或 gid
+// =====================================================================
+var EVENTS_SHEET_ID   = '1qEYdHbxhtXMQ_iJ8Vno94BaPWezKae6XgTt3u1LTgzM';
+var EVENTS_SHEET_NAME = '';
+var EVENTS_SHEET_GID  = '';
+
+// =====================================================================
+// ★ 月份年份基準：PERIODS 裡的「12月」屬於 2025 年
+//   之後沿 PERIODS 順序推算，月份回捲（12 → 1）就自動進位到下一年
+// =====================================================================
+var PERIOD_ANCHOR = { month: 12, year: 2025 };
 
 // =====================================================================
 // API 呼叫封裝（取代所有 google.script.run）
@@ -941,14 +1085,19 @@ function toggleTheme() {
 var RAW_DATA = [];
 var PERIODS = [];
 var PREV_MONTH_MAP = {};
-var currentPeriod = '';
+var currentPeriod = '';          // 已選月份中的最後一個（YTD、連續零產出等單月計算用）
+var selectedPeriods = [];        // 總覽的已選月份（可複選）
+var currentGroup = 'all';        // 左側分類
 var currentSort = 'roas';
 var currentSortDir = 'desc';
 var currentView = 'overview';
 var currentClassFilter = 'all';
 var chartInstances = {};
 var CONTRACTS = [];
-var EVENTS = [];
+var EVENTS = [];                 // 手動建立（Apps Script）
+var SHEET_EVENTS = [];           // 賽事 Google Sheet 同步而來
+var SHEET_EVENTS_STATE = { loading: false, error: '', updatedAt: null };
+var PERIOD_LABELS = {};          // period 原始值 → "YYYY/MM"
 var currentEventView = 'byEvent';
 
 // =====================================================================
@@ -964,9 +1113,13 @@ function loadDashboard() {
             var ceData = results[1];
             RAW_DATA = result.data;
             PERIODS = result.periods;
+            clearAggCache();
             currentPeriod = PERIODS[PERIODS.length - 1];
+            selectedPeriods = currentPeriod ? [currentPeriod] : [];
             CONTRACTS = ceData.contracts || [];
             EVENTS = ceData.events || [];
+
+            buildPeriodLabels();
 
             PREV_MONTH_MAP = {};
             for (var i = 1; i < PERIODS.length; i++) {
@@ -980,7 +1133,9 @@ function loadDashboard() {
             initEventHandlers();
             initKolSelect();
             renderAll();
+            initCollapsibles();
             renderBellAlerts();
+            loadSheetEvents();
         })
         .catch(function(err) {
             document.getElementById('loading').innerHTML =
@@ -1002,16 +1157,230 @@ function pct(n) {
     return (n >= 0 ? '+' : '') + n.toFixed(1) + '%';
 }
 
+// ── 月份標籤：一律以 YYYY/MM 顯示 ──────────────────────────────
+// period 的原始值可能是 "12月"（後端已轉過）或 "12/1~12/31"（Sheet 原始格式），
+// 兩種都解析得出月份；年份則由 PERIOD_ANCHOR 沿 PERIODS 順序推算。
+function pad2(n) { return (n < 10 ? '0' : '') + n; }
+function ym(y, m) { return y + '/' + pad2(m); }
+
+function periodMonthNum(period) {
+    var s = String(period === null || period === undefined ? '' : period).trim();
+    var m = s.match(/^(\d{4})\s*[\/\-.]\s*(\d{1,2})/);   // 2025/12
+    if (m) return parseInt(m[2], 10);
+    m = s.match(/^(\d{1,2})\s*月/);                  // 12月
+    if (m) return parseInt(m[1], 10);
+    m = s.match(/^(\d{1,2})\s*[\/\-.]/);                 // 12/1~12/31
+    if (m) return parseInt(m[1], 10);
+    return NaN;
+}
+
+// 後端若已回傳帶年份的 key（"2025/12"），直接採用，不必靠 anchor 推算
+function periodEmbeddedYear(period) {
+    var m = String(period === null || period === undefined ? '' : period)
+        .trim().match(/^(\d{4})\s*[\/\-.]\s*(\d{1,2})$/);
+    return m ? parseInt(m[1], 10) : NaN;
+}
+
+function periodYearNum(period) {
+    var lab = PERIOD_LABELS[period];
+    if (!lab) return periodEmbeddedYear(period);
+    var y = parseInt(String(lab).slice(0, 4), 10);
+    return isNaN(y) ? NaN : y;
+}
+
+function buildPeriodLabels() {
+    PERIOD_LABELS = {};
+    var months = PERIODS.map(periodMonthNum);
+    if (!months.length) return;
+
+    var anchorIdx = months.indexOf(PERIOD_ANCHOR.month);
+    if (anchorIdx === -1) anchorIdx = 0;
+
+    // 由基準點往後：月份變小代表跨年
+    var years = [];
+    var y = PERIOD_ANCHOR.year;
+    for (var i = anchorIdx; i < months.length; i++) {
+        if (i > anchorIdx && !isNaN(months[i]) && !isNaN(months[i-1]) && months[i] < months[i-1]) y++;
+        years[i] = y;
+    }
+    // 由基準點往前
+    y = PERIOD_ANCHOR.year;
+    for (var j = anchorIdx - 1; j >= 0; j--) {
+        if (!isNaN(months[j]) && !isNaN(months[j+1]) && months[j] > months[j+1]) y--;
+        years[j] = y;
+    }
+
+    PERIODS.forEach(function(p, k) {
+        if (isNaN(months[k])) { PERIOD_LABELS[p] = String(p); return; }
+        var embedded = periodEmbeddedYear(p);          // key 自帶年份時以它為準
+        PERIOD_LABELS[p] = ym(isNaN(embedded) ? years[k] : embedded, months[k]);
+    });
+}
+
+// 給不在 PERIODS 裡的 period 用（例如上傳覆蓋清單的未來月份區塊）
+function periodLabel(period) {
+    if (period === null || period === undefined || period === '') return '';
+    if (PERIOD_LABELS[period]) return PERIOD_LABELS[period];
+    var mm = periodMonthNum(period);
+    if (isNaN(mm)) return String(period);
+
+    var embedded = periodEmbeddedYear(period);
+    if (!isNaN(embedded)) return ym(embedded, mm);
+
+    var year = PERIOD_ANCHOR.year;
+    if (PERIODS.length) {
+        var last = PERIODS[PERIODS.length - 1];
+        var lastM = periodMonthNum(last);
+        var lastY = periodYearNum(last);
+        if (!isNaN(lastM) && !isNaN(lastY)) year = (mm >= lastM) ? lastY : lastY + 1;
+    } else if (mm < PERIOD_ANCHOR.month) {
+        year = PERIOD_ANCHOR.year + 1;
+    }
+    return ym(year, mm);
+}
+
+// YTD 區間標籤，例如 "2026/01 – 2026/02"
+function ytdRangeLabel(period) {
+    var m = periodMonthNum(period);
+    var y = periodYearNum(period);
+    if (isNaN(m) || isNaN(y)) return '';
+    return ym(y, 1) + ' – ' + ym(y, m);
+}
+
 function buildMonthTabs() {
     var tabsContainer = document.getElementById('monthTabs');
     tabsContainer.innerHTML = PERIODS.map(function(p) {
-        var activeClass = (p === currentPeriod) ? ' active' : '';
-        return '<button class="tab-btn' + activeClass + '" data-month="' + p + '">' + p + '</button>';
+        var activeClass = (selectedPeriods.indexOf(p) !== -1) ? ' active' : '';
+        return '<button class="month-chip' + activeClass + '" data-month="' + p + '">' + periodLabel(p) + '</button>';
     }).join('');
+
+    var summary = document.getElementById('monthBarSummary');
+    if (summary) {
+        summary.textContent = isMultiPeriod()
+            ? '已選 ' + selectedPeriods.length + ' 個月，數據為合計'
+            : '單月檢視';
+    }
+}
+
+// =====================================================================
+// 左側分類導覽
+// =====================================================================
+function switchNav(view, group, btn) {
+    currentView = view;
+    currentGroup = group || 'all';
+
+    document.querySelectorAll('#sidebarNav .nav-item').forEach(function(b) { b.classList.remove('active'); });
+    if (btn) btn.classList.add('active');
+
+    document.getElementById('overviewSection').style.display   = view === 'overview'   ? '' : 'none';
+    document.getElementById('individualSection').style.display = view === 'individual' ? 'block' : 'none';
+    document.getElementById('eventsSection').style.display     = view === 'events'     ? 'block' : 'none';
+
+    // 總覽內再依分類顯示對應的區塊
+    document.querySelectorAll('#overviewSection .group-block').forEach(function(block) {
+        block.hidden = !(currentGroup === 'all' || block.getAttribute('data-group') === currentGroup);
+    });
+
+    if (view === 'overview') { destroyAllCharts(); renderAll(); }
+    else if (view === 'individual') { destroyAllCharts(); renderIndividual(); }
+    else if (view === 'events') { renderEventsTab(); }
+
+    closeSidebar();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function toggleSidebar() {
+    var sb = document.getElementById('sidebar');
+    var bd = document.getElementById('sidebarBackdrop');
+    var open = sb.classList.toggle('open');
+    bd.classList.toggle('show', open);
+}
+
+function closeSidebar() {
+    var sb = document.getElementById('sidebar');
+    var bd = document.getElementById('sidebarBackdrop');
+    if (sb) sb.classList.remove('open');
+    if (bd) bd.classList.remove('show');
+}
+
+// =====================================================================
+// 卡片收合（每張卡各自獨立，狀態記在 localStorage）
+// =====================================================================
+function cardKeyFromText(t) {
+    return String(t || '').replace(/\s+/g, '').replace(/[^\w一-鿿]/g, '').slice(0, 24);
+}
+function getCardCollapsed(key) {
+    try { return localStorage.getItem('hdex_card:' + key) === '1'; } catch (e) { return false; }
+}
+function setCardCollapsed(key, v) {
+    try { localStorage.setItem('hdex_card:' + key, v ? '1' : '0'); } catch (e) {}
+}
+
+function resizeChartsIn(el) {
+    el.querySelectorAll('canvas').forEach(function(cv) {
+        var ch = chartInstances[cv.id];
+        if (ch) { try { ch.resize(); } catch (e) {} }
+    });
+}
+
+function toggleCard(card) {
+    var collapsed = card.classList.toggle('collapsed');
+    setCardCollapsed(card.getAttribute('data-card'), collapsed);
+    if (!collapsed) resizeChartsIn(card);   // 展開後圖表要重新量尺寸，否則寬度會是 0
+}
+
+function initCollapsibles() {
+    document.querySelectorAll('.card').forEach(function(card) {
+        if (card.getAttribute('data-collapsible') === '1') return;
+
+        // 只處理「標題是直接子元素」的卡片
+        var title = null;
+        for (var i = 0; i < card.children.length; i++) {
+            if (card.children[i].classList.contains('card-title')) { title = card.children[i]; break; }
+        }
+        if (!title) return;
+
+        card.setAttribute('data-collapsible', '1');
+        var key = card.getAttribute('data-card') || cardKeyFromText(title.textContent);
+        card.setAttribute('data-card', key);
+
+        var head = document.createElement('div');
+        head.className = 'card-head';
+        card.insertBefore(head, title);
+        head.appendChild(title);
+
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'card-toggle';
+        btn.setAttribute('aria-label', '收合或展開');
+        btn.innerHTML = '<span class="chev">⌄</span>';
+        head.appendChild(btn);
+
+        // 標題以外的內容全部搬進 card-body，收合時只藏 body
+        var body = document.createElement('div');
+        body.className = 'card-body';
+        while (head.nextSibling) body.appendChild(head.nextSibling);
+        card.appendChild(body);
+
+        head.addEventListener('click', function() { toggleCard(card); });
+
+        if (getCardCollapsed(key)) card.classList.add('collapsed');
+    });
+}
+
+function collapseAllCards(collapsed) {
+    document.querySelectorAll('.card[data-collapsible="1"]').forEach(function(card) {
+        card.classList.toggle('collapsed', collapsed);
+        setCardCollapsed(card.getAttribute('data-card'), collapsed);
+        if (!collapsed) resizeChartsIn(card);
+    });
 }
 
 function computeRow(r) {
-    var commission = r.amount * r.rate;
+    // 合併多個月時分潤已逐月算好，不能用「總銷售 × 最後一個月的抽成」重算
+    var commission = (r.commissionFixed !== undefined && r.commissionFixed !== null)
+        ? r.commissionFixed
+        : r.amount * r.rate;
     var totalPayment = r.sponsorship + commission;
     var totalCost = totalPayment + r.credit;
     var roas = totalCost > 0 ? r.amount / totalCost : (r.amount > 0 ? 999 : 0);
@@ -1034,16 +1403,154 @@ function getMonthData(month) {
     return RAW_DATA.filter(function(r) { return r.period === month; }).map(computeRow);
 }
 
-// 取得 YTD 資料（當年1月到當前月份的累積）
-function getYtdData(currentPeriodLabel) {
-    // periodLabel 格式是 "4月"，取月份數字
-    var currentMonthNum = parseInt(String(currentPeriodLabel).replace('月', ''));
-    if (isNaN(currentMonthNum)) return [];
+// =====================================================================
+// 多月份合併：把選取的每個月逐一相加，得到「合計」的每位 KOL 資料
+// =====================================================================
+var _aggCache = {};
+function clearAggCache() { _aggCache = {}; }
 
-    // 找同年所有月份（1月 到 currentMonth）
+function aggregateData(periods) {
+    if (!periods || !periods.length) return [];
+    if (periods.length === 1) return getMonthData(periods[0]);
+
+    var byName = {}, order = [];
+    periods.forEach(function(p) {
+        RAW_DATA.forEach(function(r) {
+            if (r.period !== p) return;
+            var a = byName[r.name];
+            if (!a) {
+                a = byName[r.name] = {
+                    name: r.name, discount: r.discount, followers: r.followers,
+                    period: periods.join('+'), classification: r.classification,
+                    orders: 0, amount: 0, sponsorship: 0, credit: 0,
+                    rate: r.rate, commissionFixed: 0,
+                    story: 0, post: 0, reels: 0,
+                    igMonths: 0, postedMonths: 0, monthsCount: 0
+                };
+                order.push(r.name);
+            }
+            a.orders      += r.orders;
+            a.amount      += r.amount;
+            a.sponsorship += r.sponsorship;
+            a.credit      += r.credit;
+            a.commissionFixed += r.amount * r.rate;   // 逐月算分潤再加總
+            a.followers = r.followers;                // 粉絲數取最後一個月
+            a.rate      = r.rate;
+            a.monthsCount++;
+            a.story += (r.story || 0);
+            a.post  += (r.post  || 0);
+            a.reels += (r.reels || 0);
+            if (r.igPosted === true || r.igPosted === false) {
+                a.igMonths++;
+                if (r.igPosted) a.postedMonths++;
+            }
+        });
+    });
+
+    return order.map(function(n) {
+        var a = byName[n];
+        a.igPosted = a.igMonths ? (a.postedMonths > 0) : null;
+        return computeRow(a);
+    });
+}
+
+function aggregateCached(periods) {
+    var key = (periods || []).join('|');
+    if (!_aggCache[key]) _aggCache[key] = aggregateData(periods);
+    return _aggCache[key];
+}
+
+// 目前總覽要呈現的資料（單選＝該月，複選＝合計）
+function getViewData() { return aggregateCached(selectedPeriods); }
+
+// 比較基準：已選月份之前、長度完全相同的那一段。
+// 前面月份數不夠時回傳空陣列——拿 2 個月去比 1 個月會得到看起來很嚇人但沒意義的數字。
+function prevPeriodsFor(periods) {
+    if (!periods || !periods.length) return [];
+    var firstIdx = PERIODS.indexOf(periods[0]);
+    var n = periods.length;
+    if (firstIdx < n) return [];
+    return PERIODS.slice(firstIdx - n, firstIdx);
+}
+
+function getPrevViewData() {
+    var prev = prevPeriodsFor(selectedPeriods);
+    return prev.length ? aggregateCached(prev) : null;
+}
+
+// 目前檢視的標題文字，例如 "2026/02" 或 "2026/06 + 2026/07（合計 2 個月）"
+function viewPeriodLabel() {
+    if (!selectedPeriods.length) return '—';
+    if (selectedPeriods.length === 1) return periodLabel(selectedPeriods[0]);
+    return selectedPeriods.map(periodLabel).join(' + ') + '（合計 ' + selectedPeriods.length + ' 個月）';
+}
+
+function isMultiPeriod() { return selectedPeriods.length > 1; }
+
+// MoM：單選時比上個月，複選時比「前面同樣長度的那一段」。
+// 回傳格式與原本的 getMoM 相同（type / text / pct），呼叫端不用改。
+function getMoMView(name) {
+    var prevData = getPrevViewData();
+    if (!prevData) return { type: 'none' };
+
+    var curRow = getViewData().find(function(r) { return r.name === name; });
+    var prvRow = prevData.find(function(r) { return r.name === name; });
+    var cur = curRow ? curRow.amount : 0;
+    var prv = prvRow ? prvRow.amount : 0;
+
+    if (prv === 0 && cur === 0) return { type: 'flat', text: '—' };
+    if (prv === 0 && cur > 0)   return { type: 'new',  text: 'NEW', pct: 100 };
+    var change = ((cur - prv) / prv) * 100;
+    if (change > 0) return { type: 'up',   text: '▲ ' + pct(change), pct: change };
+    if (change < 0) return { type: 'down', text: '▼ ' + pct(change), pct: change };
+    return { type: 'flat', text: '—', pct: 0 };
+}
+
+function getGrowthTrendView(name) {
+    var mom = getMoMView(name);
+    if (mom.type === 'up' || mom.type === 'new') return 'growing';
+    if (mom.type === 'down') return 'declining';
+    return 'flat';
+}
+
+// =====================================================================
+// 月份選取（上方月份列）
+// =====================================================================
+function setSelectedPeriods(periods) {
+    // 一律照 PERIODS 的順序排列，且至少保留一個月份
+    var next = PERIODS.filter(function(p) { return periods.indexOf(p) !== -1; });
+    if (!next.length) return;
+    selectedPeriods = next;
+    currentPeriod = next[next.length - 1];
+    buildMonthTabs();
+    destroyAllCharts();
+    renderAll();
+    if (currentView === 'individual') renderIndividual();
+}
+
+function togglePeriod(period) {
+    var next = selectedPeriods.slice();
+    var i = next.indexOf(period);
+    if (i === -1) next.push(period);
+    else if (next.length > 1) next.splice(i, 1);   // 不允許全部取消
+    else return;
+    setSelectedPeriods(next);
+}
+
+function selectAllPeriods()   { setSelectedPeriods(PERIODS.slice()); }
+function selectLatestPeriod() { setSelectedPeriods([PERIODS[PERIODS.length - 1]]); }
+
+// 取得 YTD 資料（同一年 1 月到當前月份的累積）
+function getYtdData(currentPeriodLabel) {
+    var currentMonthNum = periodMonthNum(currentPeriodLabel);
+    var currentYearNum  = periodYearNum(currentPeriodLabel);
+    if (isNaN(currentMonthNum) || isNaN(currentYearNum)) return [];
+
+    // 只累計「同一年」且月份 <= 當前月份的區間（跨年時不會把去年的月份算進來）
     var ytdPeriods = PERIODS.filter(function(p) {
-        var m = parseInt(String(p).replace('月', ''));
-        return !isNaN(m) && m >= 1 && m <= currentMonthNum;
+        var m = periodMonthNum(p);
+        var y = periodYearNum(p);
+        return !isNaN(m) && !isNaN(y) && y === currentYearNum && m >= 1 && m <= currentMonthNum;
     });
 
     var result = [];
@@ -1090,28 +1597,6 @@ function getRecTag(tier) {
     return { text:'停止', cls:'rec-stop' };
 }
 
-function getMoM(name, month) {
-    var prev = PREV_MONTH_MAP[month];
-    if (!prev) return { type:'none' };
-    var curData = getMonthData(month).find(function(r) { return r.name === name; });
-    var prevData = getMonthData(prev).find(function(r) { return r.name === name; });
-    var cur = curData ? curData.amount : 0;
-    var prv = prevData ? prevData.amount : 0;
-    if (prv === 0 && cur === 0) return { type:'flat', text:'—' };
-    if (prv === 0 && cur > 0) return { type:'new', text:'NEW', pct: 100 };
-    var change = ((cur - prv) / prv) * 100;
-    if (change > 0) return { type:'up', text:'▲ ' + pct(change), pct: change };
-    if (change < 0) return { type:'down', text:'▼ ' + pct(change), pct: change };
-    return { type:'flat', text:'—', pct: 0 };
-}
-
-function getGrowthTrend(name, month) {
-    var mom = getMoM(name, month);
-    if (mom.type === 'up' || mom.type === 'new') return 'growing';
-    if (mom.type === 'down') return 'declining';
-    return 'flat';
-}
-
 function destroyChart(id) {
     if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; }
 }
@@ -1124,9 +1609,11 @@ function destroyAllCharts() {
 // RENDER FUNCTIONS（與原版完全相同，不重複說明）
 // =====================================================================
 function renderKPI() {
-    var data = getMonthData(currentPeriod);
-    var prev = PREV_MONTH_MAP[currentPeriod];
-    var prevData = prev ? getMonthData(prev) : null;
+    renderMonthBreakdown();
+    var data = getViewData();
+    var prevPeriods = prevPeriodsFor(selectedPeriods);
+    var prev = prevPeriods.length ? prevPeriods : null;
+    var prevData = getPrevViewData();
     var totalSales = data.reduce(function(s,r) { return s + r.amount; }, 0);
     var totalCost = data.reduce(function(s,r) { return s + r.totalCost; }, 0);
     var overallRoas = totalCost > 0 ? totalSales / totalCost : 0;
@@ -1155,8 +1642,19 @@ function renderKPI() {
     var partnerTotal     = data.filter(function(r) { return r.classification === 'PARTNER'; }).length;
     // YTD 計算
     var ytd = getYtdTotals(currentPeriod);
-    var currentMonthNum = parseInt(String(currentPeriod).replace('月',''));
-    var ytdLabel = isNaN(currentMonthNum) ? '' : ('Jan – ' + ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][currentMonthNum-1]);
+    var ytdLabel = ytdRangeLabel(currentPeriod);
+
+    // 標題列：說明目前看的是哪些月份、MoM 是跟什麼比
+    var scopeEl = document.getElementById('kpiScope');
+    if (!scopeEl) {
+        scopeEl = document.createElement('div');
+        scopeEl.id = 'kpiScope';
+        scopeEl.style.cssText = 'font-size:12px;color:var(--text-muted);margin-bottom:10px;';
+        var kr = document.getElementById('kpiRow');
+        kr.parentNode.insertBefore(scopeEl, kr);
+    }
+    scopeEl.innerHTML = '目前檢視：<strong style="color:var(--text-secondary);">' + viewPeriodLabel() + '</strong>' +
+        (prev ? '　·　比較基準：' + prevPeriods.map(periodLabel).join(' + ') : '　·　無可比較的前期');
 
     var kpis = [
         { label:'Total Sales 總銷售額', value: fmt(totalSales), mom: momBadge(totalSales, prevTotalSales) },
@@ -1209,9 +1707,61 @@ function renderKPI() {
         '</div>';
 }
 
+// 複選月份時：每個月各自一列 ＋ 最後一列合計
+function renderMonthBreakdown() {
+    var card = document.getElementById('monthBreakdownCard');
+    var body = document.getElementById('monthBreakdownBody');
+    if (!card || !body) return;
+
+    if (!isMultiPeriod()) { card.style.display = 'none'; return; }
+    card.style.display = '';
+
+    function statsOf(rows) {
+        var sales  = rows.reduce(function(s,r){ return s + r.amount; }, 0);
+        var cost   = rows.reduce(function(s,r){ return s + r.totalCost; }, 0);
+        var orders = rows.reduce(function(s,r){ return s + r.orders; }, 0);
+        return {
+            sales: sales, cost: cost, orders: orders,
+            roas: cost > 0 ? sales / cost : 0,
+            aov: orders > 0 ? sales / orders : 0,
+            active: rows.filter(function(r){ return r.amount > 0 || r.orders > 0; }).length,
+            total: rows.length
+        };
+    }
+
+    var rowsHtml = selectedPeriods.map(function(p) {
+        var s = statsOf(getMonthData(p));
+        return '<tr>' +
+            '<td class="text-col"><strong>' + periodLabel(p) + '</strong></td>' +
+            '<td>' + fmt(s.sales) + '</td>' +
+            '<td>' + fmt(s.cost) + '</td>' +
+            '<td>' + fmtDec(s.roas) + 'x</td>' +
+            '<td>' + fmtNum(s.orders) + '</td>' +
+            '<td>' + fmt(s.aov) + '</td>' +
+            '<td>' + s.active + ' / ' + s.total + '</td>' +
+            '</tr>';
+    }).join('');
+
+    var t = statsOf(getViewData());
+    rowsHtml += '<tr style="border-top:2px solid var(--accent-green);">' +
+        '<td class="text-col"><strong style="color:var(--accent-green);">合計 ' + selectedPeriods.length + ' 個月</strong></td>' +
+        '<td style="color:var(--accent-green);font-weight:700;">' + fmt(t.sales) + '</td>' +
+        '<td style="color:var(--accent-green);font-weight:700;">' + fmt(t.cost) + '</td>' +
+        '<td style="color:var(--accent-green);font-weight:700;">' + fmtDec(t.roas) + 'x</td>' +
+        '<td style="color:var(--accent-green);font-weight:700;">' + fmtNum(t.orders) + '</td>' +
+        '<td style="color:var(--accent-green);font-weight:700;">' + fmt(t.aov) + '</td>' +
+        '<td style="color:var(--accent-green);font-weight:700;">' + t.active + ' / ' + t.total + '</td>' +
+        '</tr>';
+
+    body.innerHTML = '<table class="compare-table">' +
+        '<thead><tr><th>Month 月份</th><th>Sales 銷售額</th><th>Cost 總支出</th><th>ROAS</th>' +
+        '<th>Orders 訂單</th><th>AOV 客單價</th><th>Active 有產出</th></tr></thead>' +
+        '<tbody>' + rowsHtml + '</tbody></table>';
+}
+
 function renderSalesVsCost() {
     destroyChart('chartSalesVsCost');
-    var data = getMonthData(currentPeriod).filter(function(r) { return r.amount > 0 || r.totalCost > 0; }).sort(function(a,b) { return b.amount - a.amount; });
+    var data = getViewData().filter(function(r) { return r.amount > 0 || r.totalCost > 0; }).sort(function(a,b) { return b.amount - a.amount; });
     var ctx = document.getElementById('chartSalesVsCost').getContext('2d');
     chartInstances['chartSalesVsCost'] = new Chart(ctx, {
         type: 'bar',
@@ -1225,7 +1775,7 @@ function renderSalesVsCost() {
 
 function renderRoasDist() {
     destroyChart('chartRoasDist');
-    var data = getMonthData(currentPeriod);
+    var data = getViewData();
     var tiers = { S:0, A:0, B:0, C:0, D:0 };
     data.forEach(function(r) { tiers[getTier(r)]++; });
     var ctx = document.getElementById('chartRoasDist').getContext('2d');
@@ -1237,7 +1787,7 @@ function renderRoasDist() {
 }
 
 function renderTiers() {
-    var data = getMonthData(currentPeriod);
+    var data = getViewData();
     var tiered = { S:[], A:[], B:[], C:[], D:[] };
     data.forEach(function(r) { tiered[getTier(r)].push(r); });
     var tierInfo = [
@@ -1260,7 +1810,7 @@ function renderTiers() {
 }
 
 function renderDetailTable() {
-    var data = getMonthData(currentPeriod);
+    var data = getViewData();
     if (currentClassFilter === 'AMBASSADOR') data = data.filter(function(r) { return r.classification === 'AMBASSADOR'; });
     else if (currentClassFilter === 'PARTNER') data = data.filter(function(r) { return r.classification === 'PARTNER'; });
     else if (currentClassFilter === 'posted') data = data.filter(function(r) { return r.igPosted === true; });
@@ -1270,7 +1820,7 @@ function renderDetailTable() {
         amount: function(a,b) { return b.amount - a.amount; },
         followers: function(a,b) { return b.followers - a.followers; },
         efficiency: function(a,b) { var ea=a.totalCost>0?a.amount/a.totalCost:(a.amount>0?999:0); var eb=b.totalCost>0?b.amount/b.totalCost:(b.amount>0?999:0); return eb-ea; },
-        growth: function(a,b) { var pa=getMoM(a.name,currentPeriod).pct||0; var pb=getMoM(b.name,currentPeriod).pct||0; return pb-pa; }
+        growth: function(a,b) { var pa=getMoMView(a.name).pct||0; var pb=getMoMView(b.name).pct||0; return pb-pa; }
     };
     var sortFn = sortFns[currentSort] || sortFns.roas;
     data.sort(function(a, b) {
@@ -1280,7 +1830,7 @@ function renderDetailTable() {
     tbody.innerHTML = data.map(function(r, i) {
         var tier = getTier(r);
         var tierCls = 'badge-' + tier.toLowerCase();
-        var mom = getMoM(r.name, currentPeriod);
+        var mom = getMoMView(r.name);
         var momHtml = '';
         if (mom.type==='up') momHtml='<span style="color:var(--accent-green)">'+mom.text+'</span>';
         else if (mom.type==='new') momHtml='<span class="badge badge-s">NEW</span>';
@@ -1301,7 +1851,7 @@ function renderDetailTable() {
 }
 
 function renderInsights() {
-    var data = getMonthData(currentPeriod);
+    var data = getViewData();
     var top5 = data.slice().sort(function(a,b){return b.amount-a.amount;}).slice(0,5);
     document.getElementById('topSalesList').innerHTML = top5.map(function(r,i) {
         return '<li><span class="insight-rank">'+(i+1)+'</span><span class="insight-name">'+r.name+'</span><span class="insight-val" style="color:var(--accent-green)">'+fmt(r.amount)+'</span></li>';
@@ -1312,12 +1862,35 @@ function renderInsights() {
         alerts.map(function(r,i){return '<li><span class="insight-rank">'+(i+1)+'</span><span class="insight-name">'+r.name+'</span><span class="insight-val" style="color:var(--accent-red)">ROAS '+fmtDec(r.roas)+'x · 成本 '+fmt(r.totalCost)+'</span></li>';}).join('');
 }
 
+// 沒資料時顯示訊息，但保留 canvas，之後切回有資料的月份才畫得回來
+function setChartMessage(canvasId, msg) {
+    var cv = document.getElementById(canvasId);
+    if (!cv) return;
+    var box = cv.parentElement;
+    var msgEl = box.querySelector('.chart-msg');
+    if (msg) {
+        cv.style.display = 'none';
+        if (!msgEl) {
+            msgEl = document.createElement('p');
+            msgEl.className = 'chart-msg';
+            msgEl.style.cssText = 'color:var(--text-muted);text-align:center;padding:40px 0;';
+            box.appendChild(msgEl);
+        }
+        msgEl.textContent = msg;
+        msgEl.style.display = '';
+    } else {
+        cv.style.display = '';
+        if (msgEl) msgEl.style.display = 'none';
+    }
+}
+
 function renderGrowthChart() {
     destroyChart('chartGrowth');
-    var prev = PREV_MONTH_MAP[currentPeriod];
-    if (!prev) { document.getElementById('chartGrowth').parentElement.innerHTML='<p style="color:var(--text-muted);text-align:center;padding:40px 0;">首月無比較數據</p>'; return; }
-    var curData = getMonthData(currentPeriod);
-    var prevData = getMonthData(prev);
+    if (!document.getElementById('chartGrowth')) return;
+    var prevData = getPrevViewData();
+    if (!prevData) { setChartMessage('chartGrowth', '沒有可比較的前期資料'); return; }
+    setChartMessage('chartGrowth', null);
+    var curData = getViewData();
     var growthData = [];
     curData.forEach(function(r) {
         var p = prevData.find(function(x){return x.name===r.name;});
@@ -1337,7 +1910,7 @@ function renderGrowthChart() {
 
 function renderEfficiencyChart() {
     destroyChart('chartEfficiency');
-    var data = getMonthData(currentPeriod).filter(function(r){return r.totalCost>0&&r.amount>0;});
+    var data = getViewData().filter(function(r){return r.totalCost>0&&r.amount>0;});
     data.sort(function(a,b){return (b.amount/b.totalCost)-(a.amount/a.totalCost);});
     var ctx = document.getElementById('chartEfficiency').getContext('2d');
     chartInstances['chartEfficiency'] = new Chart(ctx, {
@@ -1349,7 +1922,7 @@ function renderEfficiencyChart() {
 
 function renderAOVChart() {
     destroyChart('chartAOV');
-    var data = getMonthData(currentPeriod).filter(function(r){return r.orders>0;}).sort(function(a,b){return b.aov-a.aov;});
+    var data = getViewData().filter(function(r){return r.orders>0;}).sort(function(a,b){return b.aov-a.aov;});
     var ctx = document.getElementById('chartAOV').getContext('2d');
     chartInstances['chartAOV'] = new Chart(ctx, {
         type:'bar',
@@ -1359,14 +1932,14 @@ function renderAOVChart() {
 }
 
 function renderBudgetRec() {
-    var data = getMonthData(currentPeriod);
+    var data = getViewData();
     function zeroMonths(name) {
         var count=0; var mi=PERIODS.indexOf(currentPeriod);
         for(var i=mi;i>=0;i--){var md=getMonthData(PERIODS[i]).find(function(r){return r.name===name;});if(md&&md.amount===0&&md.orders===0)count++;else break;}
         return count;
     }
     var rows = data.map(function(r) {
-        var tier=getTier(r); var trend=getGrowthTrend(r.name,currentPeriod); var mom=getMoM(r.name,currentPeriod); var rec='',budget='';
+        var tier=getTier(r); var trend=getGrowthTrendView(r.name); var mom=getMoMView(r.name); var rec='',budget='';
         if(tier==='S'&&trend==='growing'){rec='🔥 強力加碼 — 提高底薪或 Credit，爭取獨家合作';budget='▲ +30~50%';}
         else if(tier==='S'){rec='✅ 維持投入 — 持續合作，嘗試新活動類型';budget='維持';}
         else if(tier==='A'&&trend==='growing'){rec='📈 適度加碼 — 增加 Credit 或提高抽傭比例';budget='▲ +15~30%';}
@@ -1392,12 +1965,16 @@ function renderTrendChart() {
         var d=getMonthData(m);
         return {month:m,sales:d.reduce(function(s,r){return s+r.amount;},0),cost:d.reduce(function(s,r){return s+r.totalCost;},0)};
     });
+    // 已選月份的點畫大一點、加白框，一眼看得出目前在看哪幾個月
+    var isSel = monthlyAgg.map(function(d){ return selectedPeriods.indexOf(d.month) !== -1; });
+    var ptR   = isSel.map(function(s){ return s ? 9 : 4; });
+    var ptBW  = isSel.map(function(s){ return s ? 3 : 0; });
     var ctx = document.getElementById('chartTrend').getContext('2d');
     chartInstances['chartTrend'] = new Chart(ctx, {
         type:'line',
-        data:{labels:monthlyAgg.map(function(d){return d.month;}),datasets:[
-            {label:'Total Sales 總銷售額',data:monthlyAgg.map(function(d){return Math.round(d.sales);}),borderColor:'#4ade80',backgroundColor:'rgba(74,222,128,0.1)',fill:true,tension:0.4,pointRadius:6,pointBackgroundColor:'#4ade80',yAxisID:'y'},
-            {label:'Total Cost 總支出',data:monthlyAgg.map(function(d){return Math.round(d.cost);}),borderColor:'#f87171',backgroundColor:'rgba(248,113,113,0.1)',fill:true,tension:0.4,pointRadius:6,pointBackgroundColor:'#f87171',yAxisID:'y1'}
+        data:{labels:monthlyAgg.map(function(d){return periodLabel(d.month);}),datasets:[
+            {label:'Total Sales 總銷售額',data:monthlyAgg.map(function(d){return Math.round(d.sales);}),borderColor:'#4ade80',backgroundColor:'rgba(74,222,128,0.1)',fill:true,tension:0.4,pointRadius:ptR,pointBorderWidth:ptBW,pointBorderColor:'#ffffff',pointBackgroundColor:'#4ade80',yAxisID:'y'},
+            {label:'Total Cost 總支出',data:monthlyAgg.map(function(d){return Math.round(d.cost);}),borderColor:'#f87171',backgroundColor:'rgba(248,113,113,0.1)',fill:true,tension:0.4,pointRadius:ptR,pointBorderWidth:ptBW,pointBorderColor:'#ffffff',pointBackgroundColor:'#f87171',yAxisID:'y1'}
         ]},
         options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#7a7a8e',font:{family:'Outfit'}}},tooltip:{callbacks:{label:function(ctx){return ctx.dataset.label+': NT$ '+ctx.parsed.y.toLocaleString();}}}},scales:{x:{ticks:{color:'#7a7a8e',font:{family:'Outfit'}},grid:{color:'rgba(30,30,46,0.5)'}},y:{type:'linear',position:'left',ticks:{color:'#4ade80',font:{family:'JetBrains Mono',size:11},callback:function(v){return 'NT$ '+(v/1000).toFixed(0)+'K';}},grid:{color:'rgba(30,30,46,0.3)'}},y1:{type:'linear',position:'right',ticks:{color:'#ff4d6a',font:{family:'JetBrains Mono',size:11},callback:function(v){return 'NT$ '+(v/1000).toFixed(0)+'K';}},grid:{drawOnChartArea:false}}}}
     });
@@ -1405,7 +1982,7 @@ function renderTrendChart() {
 
 function renderBubbleChart() {
     destroyChart('chartBubble');
-    var data = getMonthData(currentPeriod).filter(function(r){return r.amount>0;});
+    var data = getViewData().filter(function(r){return r.amount>0;});
     var ctx = document.getElementById('chartBubble').getContext('2d');
     chartInstances['chartBubble'] = new Chart(ctx, {
         type:'bubble',
@@ -1474,7 +2051,7 @@ function initKolSelect() {
     // Month checkbox tags
     var monthGroup = document.getElementById('monthCheckboxGroup');
     monthGroup.innerHTML = PERIODS.map(function(p) {
-        return '<button class="month-tag selected" data-month="' + p + '" onclick="toggleMonth(this)">' + p + '</button>';
+        return '<button class="month-tag selected" data-month="' + p + '" onclick="toggleMonth(this)">' + periodLabel(p) + '</button>';
     }).join('');
 
     // 預設全選月份
@@ -1553,7 +2130,9 @@ function renderIndividual() {
     var contractBlockEl = document.getElementById('contractBlock');
     if (!contractBlockEl) {
         var cb = document.createElement('div'); cb.id='contractBlock';
-        document.getElementById('individualSection').insertBefore(cb, document.getElementById('individualSection').firstChild);
+        var indSec = document.getElementById('individualSection');
+        var indHead = indSec.querySelector('.group-head');   // 標題之後，不要插到標題前面
+        indSec.insertBefore(cb, indHead ? indHead.nextSibling : indSec.firstChild);
         contractBlockEl = cb;
     }
     if (selectedKols.length === 1) {
@@ -1575,8 +2154,7 @@ function renderIndividual() {
     if (selectedKols.length === 1) {
         var latestMonth = selectedMonths[selectedMonths.length - 1];
         var kolYtd = getKolYtdTotals(selectedKols[0], latestMonth);
-        var currentMonthNum2 = parseInt(String(latestMonth).replace('月',''));
-        var ytdLabel2 = isNaN(currentMonthNum2) ? '' : ('Jan – ' + ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][currentMonthNum2-1]);
+        var ytdLabel2 = ytdRangeLabel(latestMonth);
         indYtdBlock.innerHTML =
             '<div style="display:flex;gap:12px;margin-bottom:16px;">' +
             '<div class="card kpi-card" style="flex:1;border-left:3px solid var(--accent-blue);">' +
@@ -1615,7 +2193,7 @@ function renderIndividual() {
     });
     chartInstances['chartPersonalTrend'] = new Chart(ctx, {
         type: 'line',
-        data: { labels: selectedMonths, datasets: datasets },
+        data: { labels: selectedMonths.map(periodLabel), datasets: datasets },
         options: {
             responsive: true,
             interaction: { mode: 'index', intersect: false },
@@ -1633,9 +2211,9 @@ function renderIndividual() {
     var tableAHtml = selectedKols.map(function(name) {
         var rows = selectedMonths.map(function(m) {
             var d = getMonthData(m).find(function(r) { return r.name === name; });
-            if (!d) return '<tr><td class="text-col">' + m + '</td><td colspan="5" style="color:var(--text-muted)">無資料</td></tr>';
+            if (!d) return '<tr><td class="text-col">' + periodLabel(m) + '</td><td colspan="5" style="color:var(--text-muted)">無資料</td></tr>';
             return '<tr>' +
-                '<td class="text-col">' + m + '</td>' +
+                '<td class="text-col">' + periodLabel(m) + '</td>' +
                 '<td>' + d.orders + '</td>' +
                 '<td>' + fmt(d.amount) + '</td>' +
                 '<td>' + fmt(d.sponsorship) + '</td>' +
@@ -1666,12 +2244,13 @@ function renderIndividual() {
                 '</tr>';
         }).join('');
         return '<div class="compare-section">' +
-            '<div class="compare-section-title">' + m + '</div>' +
+            '<div class="compare-section-title">' + periodLabel(m) + '</div>' +
             '<div class="table-wrap"><table class="compare-table">' +
             '<thead><tr><th>KOL</th><th>Orders 訂單</th><th>Sales 銷售額</th><th>Base Pay 底薪</th><th>Credit</th><th>Commission 分潤</th></tr></thead>' +
             '<tbody>' + rows + '</tbody></table></div></div>';
     }).join('');
     document.getElementById('tableByMonth').innerHTML = tableBHtml;
+    initCollapsibles();
 }
 
 function renderAll() {
@@ -1679,32 +2258,17 @@ function renderAll() {
     renderDetailTable(); renderInsights(); renderGrowthChart();
     renderEfficiencyChart(); renderAOVChart(); renderBudgetRec();
     renderTrendChart(); renderBubbleChart();
+    initCollapsibles();
 }
 
 function initEventHandlers() {
     document.getElementById('monthTabs').addEventListener('click', function(e) {
-        var btn=e.target.closest('.tab-btn'); if(!btn) return;
-        document.querySelectorAll('#monthTabs .tab-btn').forEach(function(b){b.classList.remove('active');});
-        btn.classList.add('active'); currentPeriod=btn.dataset.month;
-        destroyAllCharts(); renderAll();
-        if(currentView==='individual') renderIndividual();
+        var btn = e.target.closest('.month-chip');
+        if (btn) togglePeriod(btn.dataset.month);
     });
-    var viewBtns=document.querySelectorAll('#viewTabs .tab-btn');
-    viewBtns.forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            viewBtns.forEach(function(b){b.classList.remove('active');}); this.classList.add('active');
-            currentView=this.dataset.view;
-            document.getElementById('overviewSection').style.display = currentView==='overview' ? '' : 'none';
-            document.getElementById('individualSection').style.display = currentView==='individual' ? 'block' : 'none';
-            document.getElementById('eventsSection').style.display = currentView==='events' ? 'block' : 'none';
-            if(currentView==='overview'){
-                destroyAllCharts(); renderAll();
-            } else if(currentView==='individual'){
-                destroyAllCharts(); renderIndividual();
-            } else if(currentView==='events'){
-                renderEventsTab();
-            }
-        });
+    document.getElementById('sidebarNav').addEventListener('click', function(e) {
+        var btn = e.target.closest('.nav-item');
+        if (btn) switchNav(btn.dataset.view, btn.dataset.group, btn);
     });
     document.querySelectorAll('#sortGroup .sort-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
@@ -1857,7 +2421,10 @@ function submitCsvUpload() {
                     loadingEl.querySelector('.loading-text').textContent='正在重新載入資料...';
                     apiGet('getData').then(function(rawData){
                         RAW_DATA=rawData.data; PERIODS=rawData.periods;
+                        clearAggCache();
                         currentPeriod=PERIODS[PERIODS.length-1];
+                        selectedPeriods=currentPeriod?[currentPeriod]:[];
+                        buildPeriodLabels();
                         PREV_MONTH_MAP={};
                         for(var i=1;i<PERIODS.length;i++) PREV_MONTH_MAP[PERIODS[i]]=PERIODS[i-1];
                         loadingEl.style.display='none';
@@ -1873,7 +2440,7 @@ function submitCsvUpload() {
                     owSection.style.display = 'block';
                     owSelect.innerHTML = '<option value="">選擇月份...</option>' +
                         result.allBlocks.map(function(b){
-                            return '<option value="'+b.period+'">'+b.period+'</option>';
+                            return '<option value="'+b.period+'">'+periodLabel(b.period)+'</option>';
                         }).join('');
                     el.className='modal-result error';
                     el.textContent='❌ '+result.message;
@@ -1966,8 +2533,8 @@ function renderBellAlerts() {
         }
     });
 
-    // 賽事：30 天內
-    EVENTS.forEach(function(ev) {
+    // 賽事：30 天內（含 Google Sheet 同步的賽事）
+    allEvents().forEach(function(ev) {
         var dateToCheck = ev.startDate || ev.date;
         if (!dateToCheck) return;
         var evDate = new Date(dateToCheck); evDate.setHours(0,0,0,0);
@@ -2101,11 +2668,307 @@ function getEventDateStatus(ev) {
     return { label: label, cls: cls, countdown: countdown };
 }
 
+// =====================================================================
+// 賽事 Google Sheet 同步
+// 用 gviz JSONP 讀取（免 API key、免後端；Sheet 需開「知道連結的人可檢視」）
+// =====================================================================
+function normKey(s) { return String(s === null || s === undefined ? '' : s).replace(/\s+/g, '').toLowerCase(); }
+function tidy(s)    { return String(s === null || s === undefined ? '' : s).replace(/\s+/g, ' ').trim(); }
+
+function gvizCellText(cell) {
+    if (!cell) return '';
+    if (cell.f !== null && cell.f !== undefined && cell.f !== '') return tidy(cell.f);
+    var v = cell.v;
+    if (v === null || v === undefined) return '';
+    if (typeof v === 'boolean') return v ? 'TRUE' : 'FALSE';
+    if (typeof v === 'string') {
+        var d = v.match(/^Date\((\d+),(\d+),(\d+)/);   // gviz 的日期物件序列化
+        if (d) return d[1] + '/' + pad2(parseInt(d[2],10) + 1) + '/' + pad2(parseInt(d[3],10));
+        return tidy(v);
+    }
+    return tidy(String(v));
+}
+
+function gvizToRows(table) {
+    if (!table || !table.rows) return [];
+    var width = (table.cols || []).length;
+    return table.rows.map(function(row) {
+        var cells = (row && row.c) ? row.c : [];
+        var out = [];
+        for (var i = 0; i < width; i++) out.push(gvizCellText(cells[i]));
+        return out;
+    });
+}
+
+function fetchSheetRows(sheetId, sheetName, gid) {
+    return new Promise(function(resolve, reject) {
+        var cb = 'hdexGviz_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
+        var url = 'https://docs.google.com/spreadsheets/d/' + encodeURIComponent(sheetId) +
+                  '/gviz/tq?tqx=out:json;responseHandler:' + cb +
+                  '&headers=0&_=' + Date.now();            // headers=0：不要讓 gviz 自作主張抓表頭
+        if (sheetName) url += '&sheet=' + encodeURIComponent(sheetName);
+        if (gid)       url += '&gid='   + encodeURIComponent(gid);
+
+        var script = document.createElement('script');
+        var timer = setTimeout(function() { cleanup(); reject(new Error('讀取逾時，請稍後再試')); }, 20000);
+
+        function cleanup() {
+            clearTimeout(timer);
+            try { delete window[cb]; } catch (e) { window[cb] = undefined; }
+            if (script.parentNode) script.parentNode.removeChild(script);
+        }
+
+        window[cb] = function(res) {
+            cleanup();
+            if (!res || res.status === 'error') {
+                var e0 = res && res.errors && res.errors[0];
+                var msg = e0 ? (e0.detailed_message || e0.message || e0.reason) : '未知錯誤';
+                reject(new Error(String(msg).replace(/<[^>]+>/g, '').trim()));
+                return;
+            }
+            resolve(gvizToRows(res.table));
+        };
+        script.onerror = function() {
+            cleanup();
+            reject(new Error('無法連線到 Google Sheet（請確認共用設定為「知道連結的人 → 檢視者」）'));
+        };
+        script.src = url;
+        document.head.appendChild(script);
+    });
+}
+
+// 表頭欄位比對（依關鍵字，不綁死欄位順序）
+var EVENT_COL_DEFS = [
+    { key: 'ambassador', match: ['大使', 'kol', 'ambassador'] },
+    { key: 'startDate',  match: ['開始'] },
+    { key: 'endDate',    match: ['結束'] },
+    { key: 'name',       match: ['賽事', '活動', '比賽'] },
+    { key: 'category',   match: ['項目', '組別'] },
+    { key: 'location',   match: ['地點', '地區'] },
+    { key: 'status',     match: ['狀態'] },
+    { key: 'note',       match: ['備註', '說明'] }
+];
+
+// 表頭列 = 有一格剛好是「大使」，且另一格含「賽事」（避開第 1 列的標題文字）
+function findEventHeaderRow(rows) {
+    var limit = Math.min(rows.length, 12);
+    for (var i = 0; i < limit; i++) {
+        var row = rows[i] || [];
+        var ambIdx = -1, nameIdx = -1;
+        for (var c = 0; c < row.length; c++) {
+            var cell = tidy(row[c]);
+            if (ambIdx === -1 && (cell === '大使' || cell.toLowerCase() === 'kol')) ambIdx = c;
+            else if (nameIdx === -1 && cell.indexOf('賽事') !== -1) nameIdx = c;
+        }
+        if (ambIdx !== -1 && nameIdx !== -1) return i;
+    }
+    return rows.length > 2 ? 2 : -1;   // 退回預設的 Row 3
+}
+
+function mapEventColumns(headerRow) {
+    var map = {};
+    (headerRow || []).forEach(function(cell, idx) {
+        var h = tidy(cell).toLowerCase();
+        if (!h) return;
+        for (var i = 0; i < EVENT_COL_DEFS.length; i++) {
+            var def = EVENT_COL_DEFS[i];
+            if (map[def.key] !== undefined) continue;
+            for (var j = 0; j < def.match.length; j++) {
+                if (h.indexOf(def.match[j]) !== -1) { map[def.key] = idx; return; }
+            }
+        }
+    });
+    return map;
+}
+
+function toIsoDate(raw) {
+    var t = tidy(raw);
+    if (!t) return '';
+    var m = t.match(/^(\d{4})\s*[\/\-.]\s*(\d{1,2})\s*[\/\-.]\s*(\d{1,2})$/);   // 2026/10/18
+    if (m) return m[1] + '-' + pad2(parseInt(m[2],10)) + '-' + pad2(parseInt(m[3],10));
+    m = t.match(/^(\d{1,2})\s*[\/\-.]\s*(\d{1,2})$/);                           // 10/18（無年份）
+    if (m) return new Date().getFullYear() + '-' + pad2(parseInt(m[1],10)) + '-' + pad2(parseInt(m[2],10));
+    var d = new Date(t);
+    if (!isNaN(d.getTime())) return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+    return '';
+}
+
+function parseEventSheetRows(rows) {
+    var headerIdx = findEventHeaderRow(rows);
+    if (headerIdx === -1) throw new Error('找不到標題列（需要有「大使」與「賽事」欄）');
+    var col = mapEventColumns(rows[headerIdx]);
+    if (col.name === undefined) throw new Error('標題列找不到「賽事」欄位');
+
+    var entries = [];
+    for (var i = headerIdx + 1; i < rows.length; i++) {
+        var row = rows[i] || [];
+        function cell(key) { return col[key] === undefined ? '' : tidy(row[col[key]]); }
+        var evName = cell('name');
+        var amb    = cell('ambassador');
+        if (!evName && !amb) continue;                       // 跳過空白列
+        entries.push({
+            rawKol:    amb,
+            name:      evName || '（未命名賽事）',
+            startDate: toIsoDate(cell('startDate')),
+            endDate:   toIsoDate(cell('endDate')),
+            category:  cell('category'),
+            location:  cell('location'),
+            status:    cell('status'),
+            note:      cell('note')
+        });
+    }
+    return entries;
+}
+
+// 大使名稱 → 主資料 KOL 名稱（不分大小寫、忽略空白）
+function buildKolNameIndex() {
+    var idx = {};
+    RAW_DATA.forEach(function(r) {
+        var k = normKey(r.name);
+        if (k && !idx[k]) idx[k] = r.name;
+    });
+    return idx;
+}
+
+// 同名賽事合併成一張卡，各大使的日期／組別／狀態保留在 entries
+function buildSheetEvents(entries) {
+    var kolIndex = buildKolNameIndex();
+    var groups = [], byKey = {};
+
+    entries.forEach(function(e) {
+        var key = normKey(e.name);
+        var g = byKey[key];
+        if (!g) {
+            g = byKey[key] = {
+                source: 'sheet', name: e.name,
+                startDate: '', endDate: '', location: '', note: '',
+                kols: [], entries: [], _locs: [], _notes: []
+            };
+            groups.push(g);
+        }
+
+        var canon = kolIndex[normKey(e.rawKol)];
+        var kolName = canon || e.rawKol;
+        g.entries.push({
+            kol: kolName, rawKol: e.rawKol, matched: !!canon,
+            category: e.category, status: e.status, note: e.note,
+            startDate: e.startDate, endDate: e.endDate, location: e.location
+        });
+        if (kolName && g.kols.indexOf(kolName) === -1) g.kols.push(kolName);
+
+        // 卡片層級的日期 = 所有大使的最早開始 ~ 最晚結束（ISO 字串可直接比大小）
+        if (e.startDate && (!g.startDate || e.startDate < g.startDate)) g.startDate = e.startDate;
+        var end = e.endDate || e.startDate;
+        if (end && (!g.endDate || end > g.endDate)) g.endDate = end;
+
+        if (e.location && g._locs.indexOf(e.location) === -1) g._locs.push(e.location);
+        if (e.note     && g._notes.indexOf(e.note)    === -1) g._notes.push(e.note);
+    });
+
+    groups.forEach(function(g) {
+        g.location = g._locs.join(' / ');
+        g.note     = g._notes.join(' / ');      // 供鈴鐺與 AI context 使用；卡片上逐列顯示
+        delete g._locs; delete g._notes;
+    });
+    return groups;
+}
+
+function eventDedupKey(ev) { return normKey(ev.name) + '|' + (ev.startDate || ''); }
+
+// 顯示用的完整賽事清單：Sheet 為準，同名同日的手動賽事讓位
+function allEvents() {
+    var taken = {};
+    SHEET_EVENTS.forEach(function(ev) { taken[eventDedupKey(ev)] = true; });
+    return EVENTS.filter(function(ev) { return !taken[eventDedupKey(ev)]; }).concat(SHEET_EVENTS);
+}
+
+function eventStatusClass(status) {
+    var s = tidy(status);
+    if (!s) return 'neutral';
+    if (/取消|退賽|不參加|cancel/i.test(s))          return 'bad';
+    if (/待|暫定|評估|未定|pending|tbd/i.test(s))    return 'warn';
+    if (/已|確認|確定|完成|報名|ok|done/i.test(s))   return 'ok';
+    return 'neutral';
+}
+
+function loadSheetEvents() {
+    if (SHEET_EVENTS_STATE.loading) return Promise.resolve();
+    SHEET_EVENTS_STATE.loading = true;
+    SHEET_EVENTS_STATE.error = '';
+    renderEventsSyncStatus();
+
+    return fetchSheetRows(EVENTS_SHEET_ID, EVENTS_SHEET_NAME, EVENTS_SHEET_GID)
+        .then(function(rows) {
+            SHEET_EVENTS = buildSheetEvents(parseEventSheetRows(rows));
+            SHEET_EVENTS_STATE.updatedAt = new Date();
+        })
+        .catch(function(err) {
+            SHEET_EVENTS = [];
+            SHEET_EVENTS_STATE.error = (err && err.message) ? err.message : String(err);
+        })
+        .then(function() {
+            SHEET_EVENTS_STATE.loading = false;
+            renderEventsTab();
+            renderBellAlerts();
+            if (currentView === 'individual') { try { renderIndividual(); } catch (e) {} }
+        });
+}
+
+function refreshSheetEvents() { loadSheetEvents(); }
+
+function renderEventsSyncStatus() {
+    var el  = document.getElementById('eventsSyncStatus');
+    var btn = document.getElementById('eventsRefreshBtn');
+    if (btn) {
+        btn.disabled = SHEET_EVENTS_STATE.loading;
+        btn.textContent = SHEET_EVENTS_STATE.loading ? '⏳ 更新中…' : '🔄 重新整理賽事';
+    }
+    if (!el) return;
+
+    el.classList.remove('err');
+    if (SHEET_EVENTS_STATE.loading) {
+        el.textContent = '正在讀取賽事 Google Sheet…';
+    } else if (SHEET_EVENTS_STATE.error) {
+        el.classList.add('err');
+        el.textContent = '⚠️ 賽事表讀取失敗：' + SHEET_EVENTS_STATE.error;
+    } else if (SHEET_EVENTS_STATE.updatedAt) {
+        var t = SHEET_EVENTS_STATE.updatedAt;
+        el.textContent = '✅ Sheet 賽事 ' + SHEET_EVENTS.length + ' 筆 · 最後更新 ' +
+            pad2(t.getHours()) + ':' + pad2(t.getMinutes()) + ':' + pad2(t.getSeconds());
+    } else {
+        el.textContent = '尚未載入賽事表';
+    }
+}
+
+function renderEventEntries(ev) {
+    if (!ev.entries || !ev.entries.length) return '';
+    var rows = ev.entries.map(function(en) {
+        var range = '';
+        if (en.startDate && en.endDate && en.startDate !== en.endDate) range = en.startDate + ' ～ ' + en.endDate;
+        else if (en.startDate) range = en.startDate;
+        // 每位大使的日期若與卡片標題一致就不重複顯示
+        var cardRange = (ev.startDate && ev.endDate && ev.startDate !== ev.endDate)
+            ? ev.startDate + ' ～ ' + ev.endDate : (ev.startDate || '');
+        return '<div class="event-entry">' +
+            '<span class="event-entry-kol">' + en.kol + '</span>' +
+            (en.matched ? '' : '<span class="event-unmatched" title="主資料中找不到同名 KOL">⚠ 未對應</span>') +
+            (en.category ? '<span class="event-entry-meta">' + en.category + '</span>' : '') +
+            (en.location && en.location !== ev.location ? '<span class="event-entry-meta">📍 ' + en.location + '</span>' : '') +
+            (range && range !== cardRange ? '<span class="event-entry-date">' + range + '</span>' : '') +
+            (en.status ? '<span class="event-status ' + eventStatusClass(en.status) + '">' + en.status + '</span>' : '') +
+            (en.note ? '<div class="event-entry-note">備註：' + en.note + '</div>' : '') +
+            '</div>';
+    }).join('');
+    return '<div class="event-entries">' + rows + '</div>';
+}
+
 function renderEventsTab() {
+    renderEventsSyncStatus();
+    var ALL = allEvents();
     var query = (document.getElementById('eventSearchInput') ? document.getElementById('eventSearchInput').value : '').toLowerCase();
 
     if (currentEventView === 'byEvent') {
-        var filtered = EVENTS.filter(function(ev) {
+        var filtered = ALL.filter(function(ev) {
             return !query || ev.name.toLowerCase().includes(query) ||
                 (ev.kols && ev.kols.join(',').toLowerCase().includes(query));
         });
@@ -2122,6 +2985,7 @@ function renderEventsTab() {
         } else {
             var html = filtered.map(function(ev) {
                 var ds = getEventDateStatus(ev);
+                var isSheet = ev.source === 'sheet';
                 var kolTags = (ev.kols||[]).map(function(k){ return '<span class="event-kol-tag">'+k+'</span>'; }).join('');
                 return '<div class="event-card">' +
                     '<div class="event-card-header">' +
@@ -2130,13 +2994,18 @@ function renderEventsTab() {
                         '<div class="event-name">'+ev.name+'</div>' +
                         (ev.location ? '<div class="event-location">📍 '+ev.location+'</div>' : '') +
                       '</div>' +
+                      (isSheet ? '<span class="event-source-tag">📊 SHEET</span>' : '') +
                       (ds.countdown ? '<span class="event-countdown">'+ds.countdown+'</span>' : '') +
                     '</div>' +
                     (ev.kols&&ev.kols.length ? '<div class="event-kols">'+kolTags+'</div>' : '<div style="color:var(--text-muted);font-size:12px;margin-top:8px;">尚無 KOL 報名</div>') +
-                    (ev.note ? '<div class="event-note">備註：'+ev.note+'</div>' : '') +
-                    '<div style="margin-top:12px;display:flex;gap:8px;">' +
-                      '<button class="sort-btn" style="font-size:11px;" data-ev="'+encodeURIComponent(JSON.stringify(ev))+'" onclick="openEditEventModal(this.dataset.ev)">✏️ 編輯</button>' +
-                    '</div>' +
+                    (isSheet
+                        ? renderEventEntries(ev)
+                        : (ev.note ? '<div class="event-note">備註：'+ev.note+'</div>' : '')) +
+                    (isSheet
+                        ? '<div style="margin-top:10px;font-size:11px;color:var(--text-muted);">此賽事由賽事 Google Sheet 同步，請直接在 Sheet 修改後按「重新整理賽事」</div>'
+                        : '<div style="margin-top:12px;display:flex;gap:8px;">' +
+                            '<button class="sort-btn" style="font-size:11px;" data-ev="'+encodeURIComponent(JSON.stringify(ev))+'" onclick="openEditEventModal(this.dataset.ev)">✏️ 編輯</button>' +
+                          '</div>') +
                 '</div>';
             }).join('');
             html += '<div style="margin-top:16px;"><button class="action-btn upload-btn" onclick="openAddEventModal()">＋ 新增賽事</button></div>';
@@ -2147,7 +3016,7 @@ function renderEventsTab() {
 
     // 以 KOL 看 — 複選並排
     var allKolsInEvents = [];
-    EVENTS.forEach(function(ev){
+    ALL.forEach(function(ev){
         (ev.kols||[]).forEach(function(k){
             if (allKolsInEvents.indexOf(k)===-1) allKolsInEvents.push(k);
         });
@@ -2171,14 +3040,21 @@ function renderEventsTab() {
     }
 
     var kolRows = filtered2.map(function(k){
-        var evs = EVENTS.filter(function(ev){ return (ev.kols||[]).indexOf(k)!==-1; });
+        var evs = ALL.filter(function(ev){ return (ev.kols||[]).indexOf(k)!==-1; });
         evs.sort(function(a,b){ return (a.startDate||'9999') < (b.startDate||'9999') ? -1 : 1; });
         var rows = evs.map(function(ev){
-            var ds = getEventDateStatus(ev);
+            // 這位 KOL 在此賽事的專屬資料（Sheet 賽事才有）
+            var mine = null;
+            (ev.entries||[]).forEach(function(en){ if (!mine && en.kol === k) mine = en; });
+            var view = mine ? { startDate: mine.startDate || ev.startDate, endDate: mine.endDate || ev.endDate } : ev;
+            var ds = getEventDateStatus(view);
+            var loc = (mine && mine.location) || ev.location;
             return '<div class="kol-event-row">' +
                 '<span class="'+ds.cls+'" style="font-size:11px;min-width:auto;padding:2px 8px;">'+ds.label+'</span>' +
                 '<span style="flex:1;font-weight:600;">'+ev.name+'</span>' +
-                (ev.location ? '<span style="font-size:11px;color:var(--text-secondary);">📍 '+ev.location+'</span>' : '') +
+                (mine && mine.category ? '<span style="font-size:11px;color:var(--text-secondary);">'+mine.category+'</span>' : '') +
+                (loc ? '<span style="font-size:11px;color:var(--text-secondary);">📍 '+loc+'</span>' : '') +
+                (mine && mine.status ? '<span class="event-status '+eventStatusClass(mine.status)+'">'+mine.status+'</span>' : '') +
                 (ds.countdown ? '<span style="font-size:11px;color:var(--accent-yellow);">'+ds.countdown+'</span>' : '') +
                 '</div>';
         }).join('');
@@ -2426,24 +3302,23 @@ function renderContractBlock(kolName) {
     }
 
     // KOL 的賽事
-    var kolEvents = EVENTS.filter(function(ev){ return ev.kols && ev.kols.indexOf(kolName)!==-1; });
-    kolEvents.sort(function(a,b){ return new Date(a.date)-new Date(b.date); });
+    var kolEvents = allEvents().filter(function(ev){ return ev.kols && ev.kols.indexOf(kolName)!==-1; });
+    kolEvents.sort(function(a,b){ return (a.startDate||'9999') < (b.startDate||'9999') ? -1 : 1; });
     if (kolEvents.length) {
         html += '<div class="contract-kol-events"><div style="font-size:13px;font-weight:700;color:var(--text-secondary);margin-bottom:10px;">🏆 本年度參賽計畫</div>';
         html += kolEvents.map(function(ev){
-            var d = ev.date ? daysDiff(ev.date) : null;
-            var today2 = new Date(); today2.setHours(0,0,0,0);
-            var evD = ev.date ? new Date(ev.date) : null; if(evD) evD.setHours(0,0,0,0);
-            var badge = '';
-            if (!evD) badge = '<span style="color:var(--text-muted);">日期未定</span>';
-            else if (evD < today2) badge = '<span style="color:var(--text-muted);">已結束</span>';
-            else if (d <= 30) badge = '<span style="color:var(--accent-yellow);font-weight:700;">倒數 ' + d + ' 天 ⚡</span>';
-            else badge = '<span style="color:var(--text-secondary);">倒數 ' + d + ' 天</span>';
-            var ds2 = getEventDateStatus(ev);
+            // Sheet 賽事：取這位 KOL 自己的日期／組別／狀態
+            var mine = null;
+            (ev.entries||[]).forEach(function(en){ if (!mine && en.kol === kolName) mine = en; });
+            var view = mine ? { startDate: mine.startDate || ev.startDate, endDate: mine.endDate || ev.endDate } : ev;
+            var ds2 = getEventDateStatus(view);
+            var loc = (mine && mine.location) || ev.location;
             return '<div class="contract-kol-event-item">' +
                 '<span class="'+ds2.cls+'" style="font-size:11px;padding:2px 8px;">' + ds2.label + '</span>' +
                 '<span style="flex:1;font-weight:600;margin-left:8px;">' + ev.name + '</span>' +
-                (ev.location ? '<span style="font-size:12px;color:var(--text-secondary);">📍 ' + ev.location + '</span>' : '') +
+                (mine && mine.category ? '<span style="font-size:12px;color:var(--text-secondary);">' + mine.category + '</span>' : '') +
+                (loc ? '<span style="font-size:12px;color:var(--text-secondary);">📍 ' + loc + '</span>' : '') +
+                (mine && mine.status ? '<span class="event-status '+eventStatusClass(mine.status)+'">' + mine.status + '</span>' : '') +
                 (ds2.countdown ? '<span style="font-size:11px;color:var(--accent-yellow);">' + ds2.countdown + '</span>' : '') +
                 '</div>';
         }).join('');
@@ -2513,488 +3388,7 @@ function saveContract(kolNameEncoded) {
             document.getElementById('ctResult').innerHTML = '<div style="color:var(--accent-red);font-size:13px;">網路錯誤，請重試</div>';
         });
 }
-// =====================================================================
-// AI 數據助手
-// =====================================================================
-// Gemini API 呼叫由後端 Apps Script 處理，前端不含 API Key
-
-var aiHistory = [];
-var aiIsOpen = false;
-var aiIsLoading = false;
-var aiAutoSpeak = false;
-
-function toggleAiPanel() {
-    aiIsOpen = !aiIsOpen;
-    var panel = document.getElementById('aiPanel');
-    var fab = document.getElementById('aiFab');
-    if (aiIsOpen) {
-        panel.classList.add('open');
-        fab.classList.add('open');
-        fab.textContent = '\u2715';
-        document.getElementById('aiInput').focus();
-    } else {
-        panel.classList.remove('open');
-        fab.classList.remove('open');
-        fab.textContent = '\uD83E\uDD16';
-    }
-}
-
-function clearAiChat() {
-    aiHistory = [];
-    var msgs = document.getElementById('aiMessages');
-    msgs.innerHTML = '<div class="ai-msg assistant">\u5c0d\u8a71\u5df2\u6e05\u7a7a\uff0c\u6709\u4ec0\u9ebc\u60f3\u554f\u7684\u55ce\uff1f\uD83D\uDE0A</div>';
-    document.getElementById('aiSuggestions').style.display = 'flex';
-}
-
-function sendAiSuggestion(btn) {
-    var text = btn.textContent;
-    document.getElementById('aiSuggestions').style.display = 'none';
-    sendAiMessageWithText(text);
-}
-
-function aiInputKeydown(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendAiMessage();
-    }
-}
-
-function aiInputResize(el) {
-    el.style.height = 'auto';
-    el.style.height = Math.min(el.scrollHeight, 80) + 'px';
-}
-
-function sendAiMessage() {
-    var input = document.getElementById('aiInput');
-    var text = input.value.trim();
-    if (!text || aiIsLoading) return;
-    input.value = '';
-    input.style.height = 'auto';
-    document.getElementById('aiSuggestions').style.display = 'none';
-    sendAiMessageWithText(text);
-}
-
-function buildDashboardContext() {
-    var today = new Date().toISOString().split('T')[0];
-    var ctx = '\u4eca\u5929\u65e5\u671f\uff1a' + today + '\n';
-    ctx += '\u76ee\u524d\u67e5\u770b\u6708\u4efd\uff1a' + currentPeriod + '\n';
-    ctx += '\u6240\u6709\u53ef\u7528\u6708\u4efd\uff1a' + PERIODS.join('\u3001') + '\n\n';
-
-    ctx += '=== KOL \u92b7\u552e\u8cc7\u6599 ===\n';
-    PERIODS.forEach(function(period) {
-        var data = getMonthData(period);
-        ctx += '\n\u300a' + period + '\u300b\n';
-        data.forEach(function(r) {
-            var igStatus = r.igPosted === true ? '\u6709\u767c\u6587' : (r.igPosted === false ? '\u672a\u767c\u6587' : '\u7121IG\u8cc7\u6599');
-            ctx += r.name + '\uff5c' + r.classification +
-                '\uff5c\u8a02\u55ae:' + r.orders +
-                '\uff5c\u92b7\u552e:NT$' + Math.round(r.amount) +
-                '\uff5cROAS:' + r.roas.toFixed(2) +
-                '\uff5c\u5e95\u85aa:NT$' + Math.round(r.sponsorship) +
-                '\uff5cCredit:NT$' + Math.round(r.credit) +
-                '\uff5c' + igStatus + '\n';
-        });
-    });
-
-    if (CONTRACTS.length > 0) {
-        ctx += '\n=== KOL \u5408\u7d04\u8cc7\u6599 ===\n';
-        CONTRACTS.forEach(function(c) {
-            ctx += c.name + '\uff5c\u985e\u578b:' + c.type + '\uff5c\u958b\u59cb:' + c.startDate + '\uff5c\u5230\u671f:' + c.endDate;
-            if (c.note) ctx += '\uff5c\u5099\u8a3b:' + c.note;
-            ctx += '\n';
-        });
-    }
-
-    if (EVENTS.length > 0) {
-        ctx += '\n=== \u5e74\u5ea6\u8cfd\u4e8b ===\n';
-        EVENTS.forEach(function(ev) {
-            ctx += ev.name + '\uff5c\u65e5\u671f:' + ev.date + '\uff5c\u5730\u9ede:' + ev.location +
-                '\uff5c\u53c3\u8cfdKOL:' + (ev.kols.join('\u3001') || '\u672a\u5b9a');
-            if (ev.note) ctx += '\uff5c\u5099\u8a3b:' + ev.note;
-            ctx += '\n';
-        });
-    }
-
-    return ctx;
-}
-
-function sendAiMessageWithText(text) {
-    if (aiIsLoading) return;
-    aiIsLoading = true;
-
-    appendAiMsg('user', text);
-    var loadingId = appendAiLoading();
-    aiHistory.push({ role: 'user', parts: [{ text: text }] });
-
-    // 呼叫 Apps Script 後端（text/plain 避免 CORS preflight）
-    var context = buildDashboardContext();
-    fetch(API_URL + '?action=askAI&pw=notag', {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({ messages: aiHistory, context: context })
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-        removeAiLoading(loadingId);
-        aiIsLoading = false;
-        var reply = '';
-        if (data.reply) {
-            reply = data.reply;
-        } else if (data.error) {
-            reply = '⚠️ 發生錯誤：' + data.error;
-        } else {
-            reply = '⚠️ 無法取得回應，請稍後再試';
-        }
-        aiHistory.push({ role: 'model', parts: [{ text: reply }] });
-        appendAiMsg('assistant', reply);
-    })
-    .catch(function() {
-        removeAiLoading(loadingId);
-        aiIsLoading = false;
-        appendAiMsg('assistant', '⚠️ 網路錯誤，請重試');
-        aiHistory.pop();
-    });
-}
-
-function appendAiMsg(role, text) {
-    var msgs = document.getElementById('aiMessages');
-    var wrapper = document.createElement('div');
-    wrapper.style.display = 'flex';
-    wrapper.style.flexDirection = 'column';
-    wrapper.style.alignItems = role === 'user' ? 'flex-end' : 'flex-start';
-
-    var div = document.createElement('div');
-    div.className = 'ai-msg ' + role;
-    div.textContent = text;
-    wrapper.appendChild(div);
-
-    // 助手訊息加朗讀按鈕
-    if (role === 'assistant') {
-        var actions = document.createElement('div');
-        actions.className = 'ai-msg-actions';
-        // 朗讀按鈕
-        var speakBtn = document.createElement('button');
-        speakBtn.className = 'ai-speak-btn';
-        speakBtn.textContent = '🔊 朗讀';
-        speakBtn.onclick = function() { speakText(text, speakBtn, pauseBtn, stopBtn); };
-        actions.appendChild(speakBtn);
-
-        // 暫停按鈕
-        var pauseBtn = document.createElement('button');
-        pauseBtn.className = 'ai-speak-btn';
-        pauseBtn.textContent = '⏸ 暫停';
-        pauseBtn.style.display = 'none';
-        pauseBtn.onclick = function() { pauseOrResumeSpeaking(pauseBtn); };
-        actions.appendChild(pauseBtn);
-
-        // 停止按鈕
-        var stopBtn = document.createElement('button');
-        stopBtn.className = 'ai-speak-btn';
-        stopBtn.textContent = '⏹ 停止';
-        stopBtn.style.display = 'none';
-        stopBtn.style.color = 'var(--accent-red)';
-        stopBtn.style.borderColor = 'var(--accent-red)';
-        stopBtn.onclick = function() { stopSpeaking(); };
-        actions.appendChild(stopBtn);
-        wrapper.appendChild(actions);
-
-        // 自動朗讀
-        if (aiAutoSpeak) {
-            setTimeout(function() { speakText(text, speakBtn, pauseBtn, stopBtn); }, 200);
-        }
-    }
-
-    msgs.appendChild(wrapper);
-    msgs.scrollTop = msgs.scrollHeight;
-    return div;
-}
-
-function appendAiLoading() {
-    var msgs = document.getElementById('aiMessages');
-    var div = document.createElement('div');
-    var id = 'aiLoading_' + Date.now();
-    div.id = id;
-    div.className = 'ai-msg thinking';
-    div.innerHTML = '<div class="ai-typing"><span></span><span></span><span></span></div>';
-    msgs.appendChild(div);
-    msgs.scrollTop = msgs.scrollHeight;
-    document.getElementById('aiSendBtn').disabled = true;
-    return id;
-}
-
-function removeAiLoading(id) {
-    var el = document.getElementById(id);
-    if (el) el.remove();
-    document.getElementById('aiSendBtn').disabled = false;
-}
-// =====================================================================
-// 語音輸入
-// =====================================================================
-var aiRecognition = null;
-var aiIsRecording = false;
-
-function toggleVoiceInput() {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-        appendAiMsg('assistant', '⚠️ 你的瀏覽器不支援語音輸入，請使用 Chrome 或 Edge。');
-        if (!document.getElementById('aiPanel').classList.contains('open')) toggleAiPanel();
-        return;
-    }
-
-    if (aiIsRecording) {
-        stopVoiceInput();
-    } else {
-        startVoiceInput();
-    }
-}
-
-function startVoiceInput() {
-    var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    aiRecognition = new SpeechRecognition();
-    aiRecognition.lang = 'zh-TW';
-    aiRecognition.continuous = true;      // 持續聆聽，不因停頓而中斷
-    aiRecognition.interimResults = true;  // 即時顯示辨識中的文字
-
-    var silenceTimer = null;
-    var finalTranscript = '';
-
-    function resetSilenceTimer() {
-        if (silenceTimer) clearTimeout(silenceTimer);
-        silenceTimer = setTimeout(function() {
-            // 3秒沒有新的語音輸入，停止聆聽並送出
-            if (aiIsRecording) {
-                aiRecognition.stop();
-            }
-        }, 3000);
-    }
-
-    aiRecognition.onstart = function() {
-        aiIsRecording = true;
-        finalTranscript = '';
-        var btn = document.getElementById('aiMicBtn');
-        btn.classList.add('recording');
-        btn.textContent = '⏹';
-        btn.title = '點擊停止';
-        document.getElementById('aiInput').placeholder = '聆聽中（停頓3秒自動送出）...';
-        if (!document.getElementById('aiPanel').classList.contains('open')) toggleAiPanel();
-        resetSilenceTimer();
-    };
-
-    aiRecognition.onresult = function(e) {
-        var interim = '';
-        for (var i = e.resultIndex; i < e.results.length; i++) {
-            if (e.results[i].isFinal) {
-                finalTranscript += e.results[i][0].transcript;
-            } else {
-                interim += e.results[i][0].transcript;
-            }
-        }
-        // 顯示已確認+正在辨識的文字
-        document.getElementById('aiInput').value = finalTranscript + interim;
-        aiInputResize(document.getElementById('aiInput'));
-        // 有新語音輸入，重置計時器
-        resetSilenceTimer();
-    };
-
-    aiRecognition.onend = function() {
-        if (silenceTimer) clearTimeout(silenceTimer);
-        aiIsRecording = false;
-        var btn = document.getElementById('aiMicBtn');
-        btn.classList.remove('recording');
-        btn.textContent = '🎤';
-        btn.title = '語音輸入';
-        document.getElementById('aiInput').placeholder = '輸入問題，或點🎤說話...';
-
-        var text = document.getElementById('aiInput').value.trim();
-        if (text) {
-            setTimeout(function() { sendAiMessage(); }, 300);
-        }
-    };
-
-    aiRecognition.onerror = function(e) {
-        if (silenceTimer) clearTimeout(silenceTimer);
-        aiIsRecording = false;
-        var btn = document.getElementById('aiMicBtn');
-        btn.classList.remove('recording');
-        btn.textContent = '🎤';
-        document.getElementById('aiInput').placeholder = '輸入問題，或點🎤說話...';
-        if (e.error === 'not-allowed') {
-            appendAiMsg('assistant', '⚠️ 請允許瀏覽器使用麥克風權限，再試一次。');
-        } else if (e.error !== 'no-speech') {
-            appendAiMsg('assistant', '⚠️ 語音辨識失敗（' + e.error + '），請重試。');
-        }
-    };
-
-    aiRecognition.start();
-}
-
-function stopVoiceInput() {
-    if (aiRecognition) {
-        aiRecognition.stop();
-    }
-}
-// =====================================================================
-// 語音合成（TTS）
-// =====================================================================
-var aiAutoSpeak = false;
-var aiCurrentUtterance = null;
-var aiCurrentSpeakBtn = null;
-var aiIsSpeaking = false;
-var aiIsPaused = false;
-
-function toggleAutoSpeak() {
-    aiAutoSpeak = !aiAutoSpeak;
-    var btn = document.getElementById('aiAutoSpeakBtn');
-    if (aiAutoSpeak) {
-        btn.classList.add('on');
-        btn.textContent = '🔊 自動 ON';
-        window.speechSynthesis && window.speechSynthesis.getVoices();
-    } else {
-        btn.classList.remove('on');
-        btn.textContent = '🔊 自動';
-        stopSpeaking();
-    }
-}
-
-function speakText(text, playBtn, pauseBtn, stopBtn) {
-    if (!window.speechSynthesis) {
-        appendAiMsg('assistant', '⚠️ 你的瀏覽器不支援語音朗讀，請使用 Chrome 或 Edge。');
-        return;
-    }
-
-    // 停止其他正在播放的
-    if (aiIsSpeaking) {
-        stopSpeaking();
-    }
-
-    // 清理文字（移除 emoji 和特殊符號避免奇怪發音）
-    var cleanText = text.replace(/[^一-鿿　-〿＀-￯a-zA-Z0-9\s，。！？、：；「」『』（）\-\.]/g, ' ').trim();
-
-    var utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.lang = 'zh-TW';
-    utterance.rate = 1.05;
-    utterance.pitch = 1.0;
-    utterance.volume = 1.0;
-
-    // 嘗試找中文語音
-    var voices = window.speechSynthesis.getVoices();
-    var zhVoice = voices.find(function(v) {
-        return v.lang === 'zh-TW' || v.lang === 'zh-HK' || v.lang.startsWith('zh');
-    });
-    if (zhVoice) utterance.voice = zhVoice;
-
-    utterance.onstart = function() {
-        aiIsSpeaking = true;
-        aiIsPaused = false;
-        if (playBtn) { playBtn.style.display = 'none'; }
-        if (pauseBtn) { pauseBtn.style.display = ''; pauseBtn.textContent = '⏸ 暫停'; }
-        if (stopBtn) { stopBtn.style.display = ''; }
-        aiCurrentSpeakBtn = playBtn;
-    };
-    utterance.onend = function() {
-        aiIsSpeaking = false;
-        aiIsPaused = false;
-        if (playBtn) { playBtn.style.display = ''; }
-        if (pauseBtn) { pauseBtn.style.display = 'none'; }
-        if (stopBtn) { stopBtn.style.display = 'none'; }
-        aiCurrentUtterance = null;
-        aiCurrentSpeakBtn = null;
-    };
-    utterance.onerror = function() {
-        aiIsSpeaking = false;
-        aiIsPaused = false;
-        if (playBtn) { playBtn.style.display = ''; }
-        if (pauseBtn) { pauseBtn.style.display = 'none'; }
-        if (stopBtn) { stopBtn.style.display = 'none'; }
-        aiCurrentUtterance = null;
-        aiCurrentSpeakBtn = null;
-    };
-
-    aiCurrentUtterance = utterance;
-    window.speechSynthesis.speak(utterance);
-}
-
-function pauseOrResumeSpeaking(pauseBtn) {
-    if (!window.speechSynthesis) return;
-    if (aiIsPaused) {
-        window.speechSynthesis.resume();
-        aiIsPaused = false;
-        if (pauseBtn) pauseBtn.textContent = '⏸ 暫停';
-    } else {
-        window.speechSynthesis.pause();
-        aiIsPaused = true;
-        if (pauseBtn) pauseBtn.textContent = '▶ 繼續';
-    }
-}
-
-function stopSpeaking() {
-    aiIsSpeaking = false;
-    aiIsPaused = false;
-    if (window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-    }
-    // 重置所有朗讀按鈕組
-    document.querySelectorAll('.ai-msg-actions').forEach(function(actions) {
-        var btns = actions.querySelectorAll('.ai-speak-btn');
-        if (btns.length >= 3) {
-            btns[0].style.display = '';  // 朗讀
-            btns[1].style.display = 'none';  // 暫停
-            btns[2].style.display = 'none';  // 停止
-            btns[1].textContent = '⏸ 暫停';
-        }
-    });
-    aiCurrentUtterance = null;
-    aiCurrentSpeakBtn = null;
-}
-
-// 預載語音列表（部分瀏覽器需要）
-if (window.speechSynthesis) {
-    window.speechSynthesis.onvoiceschanged = function() {
-        window.speechSynthesis.getVoices();
-    };
-}
-
-
-
-
 </script>
-
-<!-- ── AI 助手 ─────────────────────────────────────── -->
-<button class="ai-fab" id="aiFab" onclick="toggleAiPanel()" title="AI Assistant">🤖</button>
-
-<div class="ai-panel" id="aiPanel">
-    <div class="ai-panel-header">
-        <div style="flex:1;">
-            <div class="ai-panel-title">✨ AI Assistant <small style='font-size:10px;color:var(--text-muted);'>AI數據助手</small></div>
-            <div class="ai-panel-sub">Ask me anything about KOL data</div>
-        </div>
-        <div class="ai-panel-header-btns">
-            <button class="ai-tts-toggle" id="aiAutoSpeakBtn" onclick="toggleAutoSpeak()" title="自動朗讀模式">🔊 自動</button>
-            <button class="ai-clear-btn" onclick="clearAiChat()">清空</button>
-        </div>
-    </div>
-    <div class="ai-messages" id="aiMessages">
-        <div class="ai-msg assistant">你好！我是你的 KOL 數據助手 👋
-
-你可以問我像是：
-• 4月業績最好的前3名是誰？
-• 合約在8月底前到期的有哪些人？
-• 哪些 Ambassador 本月沒有發文？
-
-有什麼想知道的嗎？</div>
-    </div>
-    <div class="ai-suggestions" id="aiSuggestions">
-        <button class="ai-suggestion" onclick="sendAiSuggestion(this)">本月業績前3名</button>
-        <button class="ai-suggestion" onclick="sendAiSuggestion(this)">合約快到期的人</button>
-        <button class="ai-suggestion" onclick="sendAiSuggestion(this)">本月未發文的KOL</button>
-        <button class="ai-suggestion" onclick="sendAiSuggestion(this)">近期賽事</button>
-    </div>
-    <div class="ai-input-row">
-        <button class="ai-mic-btn" id="aiMicBtn" onclick="toggleVoiceInput()" title="語音輸入">🎤</button>
-        <textarea class="ai-input" id="aiInput" placeholder="輸入問題，或點🎤說話..." rows="1"
-            onkeydown="aiInputKeydown(event)" oninput="aiInputResize(this)"></textarea>
-        <button class="ai-send-btn" id="aiSendBtn" onclick="sendAiMessage()">➤</button>
-    </div>
-</div>
 
 <script>
 if ('serviceWorker' in navigator) {
