@@ -150,6 +150,7 @@
 }
 .bell-tag-contract { background: var(--accent-yellow-dim); color: var(--accent-yellow); }
 .bell-tag-event { background: var(--accent-blue-dim); color: var(--accent-blue); }
+.bell-tag-note { background: var(--accent-purple-dim); color: var(--accent-purple); }
 .bell-empty { padding: 20px 18px; color: var(--text-muted); font-size: 13px; text-align: center; }
 
 /* ── 賽事複選 KOL ──────────────────────────────────── */
@@ -305,6 +306,100 @@
 .ct-days { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
 .ct-note { color: var(--text-secondary); font-size: 12px; white-space: normal; max-width: 260px; }
 .ct-empty { color: var(--text-muted); text-align: center; padding: 40px 0; font-size: 13px; }
+
+/* ── 記事表單與列表 ───────────────────────────────── */
+.nf-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; margin-top: 14px; }
+@media(max-width:768px){ .nf-grid { grid-template-columns: 1fr; } }
+.nf-field { display: flex; flex-direction: column; }
+.nf-label { display: flex; flex-direction: column; font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px; }
+.nf-label small { font-size: 10px; font-weight: 400; color: var(--text-muted); }
+.nf-input {
+    width: 100%; padding: 9px 12px; border-radius: 8px; outline: none;
+    background: var(--bg-primary); border: 1px solid var(--border); color: var(--text-primary);
+    font-family: 'Outfit', sans-serif; font-size: 13px;
+}
+.nf-input:focus { border-color: var(--accent-green); }
+.nf-textarea { resize: vertical; min-height: 74px; line-height: 1.6; }
+
+.note-item {
+    background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 14px 16px; margin-bottom: 10px; transition: border-color 0.15s;
+}
+.note-item:hover { border-color: var(--text-muted); }
+.note-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.note-date { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; color: var(--accent-blue); }
+.note-cat {
+    font-size: 10px; font-weight: 700; padding: 2px 9px; border-radius: 20px;
+    border: 1px solid transparent; white-space: nowrap;
+}
+.note-cat.c-shoot    { background: var(--accent-purple-dim); color: var(--accent-purple); border-color: rgba(168,85,247,0.3); }
+.note-cat.c-contract { background: var(--accent-yellow-dim); color: var(--accent-yellow); border-color: rgba(255,197,66,0.3); }
+.note-cat.c-issue    { background: var(--accent-red-dim);    color: var(--accent-red);    border-color: rgba(255,77,106,0.3); }
+.note-cat.c-general  { background: var(--accent-blue-dim);   color: var(--accent-blue);   border-color: rgba(77,156,255,0.3); }
+.note-kols { display: flex; gap: 5px; flex-wrap: wrap; }
+.note-kol { font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 20px;
+            background: var(--accent-green-dim); color: var(--accent-green); border: 1px solid rgba(0,232,143,0.3); }
+.note-follow { font-size: 11px; font-weight: 600; color: var(--accent-yellow); white-space: nowrap; }
+.note-actions { margin-left: auto; display: flex; gap: 6px; }
+.note-body { margin-top: 9px; font-size: 13px; line-height: 1.7; color: var(--text-primary); white-space: pre-wrap; }
+.note-meta { margin-top: 8px; font-size: 10px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+.note-empty { color: var(--text-muted); text-align: center; padding: 36px 0; font-size: 13px; }
+
+/* ── 月曆 ─────────────────────────────────────────── */
+.cal-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+.cal-nav { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.cal-title { font-size: 17px; font-weight: 700; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; min-width: 108px; text-align: center; }
+.cal-legend { display: flex; gap: 12px; flex-wrap: wrap; }
+.cal-key { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-secondary); }
+.cal-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.cal-dot.ev { background: var(--accent-green); }
+.cal-dot.ct { background: var(--accent-yellow); }
+.cal-dot.nt { background: var(--accent-purple); }
+.cal-dot.fu { background: var(--accent-blue); }
+
+.cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0,1fr)); gap: 4px; }
+.cal-dow {
+    text-align: center; font-size: 11px; font-weight: 700; color: var(--text-muted);
+    padding: 6px 0; letter-spacing: 0.04em;
+}
+.cal-cell {
+    min-height: 96px; border: 1px solid var(--border); border-radius: 10px; padding: 6px;
+    background: var(--bg-primary); cursor: pointer; transition: all 0.15s; overflow: hidden;
+}
+.cal-cell:hover { border-color: var(--text-secondary); }
+.cal-cell.other { opacity: 0.35; }
+.cal-cell.today { border-color: var(--accent-green); box-shadow: 0 0 0 1px var(--accent-green) inset; }
+.cal-cell.sel { border-color: var(--accent-blue); box-shadow: 0 0 0 2px var(--accent-blue) inset; }
+.cal-daynum { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; color: var(--text-secondary); }
+.cal-cell.today .cal-daynum { color: var(--accent-green); }
+.cal-chip {
+    display: block; font-size: 10px; line-height: 1.35; margin-top: 3px; padding: 2px 5px;
+    border-radius: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.cal-chip.ev { background: var(--accent-green-dim);  color: var(--accent-green); }
+.cal-chip.ct { background: var(--accent-yellow-dim); color: var(--accent-yellow); }
+.cal-chip.nt { background: var(--accent-purple-dim); color: var(--accent-purple); }
+.cal-chip.fu { background: var(--accent-blue-dim);   color: var(--accent-blue); }
+.cal-more { font-size: 10px; color: var(--text-muted); margin-top: 3px; }
+@media(max-width:768px){
+    .cal-cell { min-height: 62px; }
+    .cal-chip { font-size: 9px; }
+}
+
+.cal-day-row {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 12px;
+    border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px;
+    background: var(--bg-primary); cursor: pointer; transition: border-color 0.15s;
+}
+.cal-day-row:hover { border-color: var(--accent-blue); }
+.cal-tag { font-size: 10px; font-weight: 700; padding: 2px 9px; border-radius: 20px; white-space: nowrap; }
+.cal-tag.ev { background: var(--accent-green-dim);  color: var(--accent-green); }
+.cal-tag.ct { background: var(--accent-yellow-dim); color: var(--accent-yellow); }
+.cal-tag.nt { background: var(--accent-purple-dim); color: var(--accent-purple); }
+.cal-tag.fu { background: var(--accent-blue-dim);   color: var(--accent-blue); }
+.cal-row-title { font-weight: 600; color: var(--text-primary); font-size: 13px; flex: 1; min-width: 0; }
+.cal-row-sub { font-size: 11px; color: var(--text-secondary); }
+.cal-jump { font-size: 10px; color: var(--text-muted); white-space: nowrap; }
 
 /* ── 合約區塊 ─────────────────────────────────────── */
 .contract-info-card { background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
@@ -796,6 +891,11 @@ table td { font-size: 13px; color: #d0d0e0; padding: 10px 12px; }
             <div class="nav-group-title">🏆 Events 賽事</div>
             <button class="nav-item" data-view="events" data-group="all"><span class="nav-ico">🏆</span><span class="nav-label">Event Schedule<small>賽事行程</small></span></button>
         </div>
+        <div class="nav-group">
+            <div class="nav-group-title">📝 Notes 記事</div>
+            <button class="nav-item" data-view="notes" data-group="all"><span class="nav-ico">📝</span><span class="nav-label">KOL Notes<small>重要記事</small></span></button>
+            <button class="nav-item" data-view="calendar" data-group="all"><span class="nav-ico">📅</span><span class="nav-label">Calendar<small>月曆</small></span></button>
+        </div>
     </nav>
     <div class="sidebar-foot">
         <button class="mini-btn" onclick="collapseAllCards(true)">⊟ Collapse all 全部收合</button>
@@ -1052,6 +1152,104 @@ table td { font-size: 13px; color: #d0d0e0; padding: 10px 12px; }
     </div>
 </div>
 
+<!-- ── 記事 Section ──────────────────────────────── -->
+<div id="notesSection" style="display:none;">
+    <div class="group-head">
+        <h2>📝 KOL Notes <small>重要記事</small></h2>
+        <span>Anything worth remembering per KOL, saved back to the Sheet 每位 KOL 的重要記錄，會寫回 Google Sheet</span>
+    </div>
+
+    <div class="card full-width" data-card="noteCompose">
+        <div class="card-title">✍️ New note <small style="font-size:11px;color:var(--text-muted);">新增記事</small></div>
+        <div class="card-subtitle">Pick KOLs, a date, a category, then write it down 選 KOL、日期、分類，寫下內容</div>
+
+        <div class="nf-grid">
+            <div class="nf-field">
+                <label class="nf-label">Date<small>日期</small></label>
+                <input type="date" id="noteDate" class="nf-input">
+            </div>
+            <div class="nf-field">
+                <label class="nf-label">Category<small>分類</small></label>
+                <select id="noteCategory" class="nf-input"></select>
+            </div>
+            <div class="nf-field">
+                <label class="nf-label">Follow-up<small>追蹤日（選填）</small></label>
+                <input type="date" id="noteFollowUp" class="nf-input">
+            </div>
+        </div>
+
+        <div class="nf-field" style="margin-top:14px;">
+            <label class="nf-label">KOL<small>可多選</small></label>
+            <div class="cf-chips" id="noteKolChips"></div>
+        </div>
+
+        <div class="nf-field" style="margin-top:14px;">
+            <label class="nf-label">Content<small>內容</small></label>
+            <textarea id="noteContent" class="nf-input nf-textarea" rows="3"
+                placeholder="e.g. Discussed the gym video shoot plan 例如：討論健身影片的拍攝計畫"></textarea>
+        </div>
+
+        <div class="cf-actions">
+            <button class="action-btn upload-btn" id="noteSaveBtn" onclick="submitNote()">💾 Save note 儲存記事</button>
+            <button class="mini-btn" onclick="resetNoteForm()">↺ Clear 清空</button>
+            <span id="noteFormMsg" class="cf-count"></span>
+        </div>
+    </div>
+
+    <div class="card full-width" data-card="noteList">
+        <div class="card-title">📒 All notes <small style="font-size:11px;color:var(--text-muted);">記事列表</small></div>
+        <div class="card-subtitle">Newest first 由新到舊</div>
+
+        <div class="cf-row">
+            <span class="cf-label">KOL<small>可多選</small></span>
+            <div class="cf-chips" id="noteFilterKol"></div>
+        </div>
+        <div class="cf-row">
+            <span class="cf-label">Category<small>分類</small></span>
+            <div class="cf-chips" id="noteFilterCat"></div>
+        </div>
+        <div class="cf-actions">
+            <input type="text" class="event-search" id="noteSearch" placeholder="Search content 搜尋內容..." oninput="renderNotes()">
+            <button class="mini-btn" onclick="resetNoteFilters()">↺ Reset 重設</button>
+            <span class="cf-count" id="noteCount"></span>
+        </div>
+
+        <div id="noteListBody" style="margin-top:16px;"></div>
+    </div>
+</div>
+
+<!-- ── 月曆 Section ──────────────────────────────── -->
+<div id="calendarSection" style="display:none;">
+    <div class="group-head">
+        <h2>📅 Calendar <small>月曆</small></h2>
+        <span>Events, contract expiries and notes on one grid 賽事、合約到期與記事一次看</span>
+    </div>
+
+    <div class="card full-width" data-card="calendarCard">
+        <div class="cal-toolbar">
+            <div class="cal-nav">
+                <button class="mini-btn" onclick="calShift(-1)">‹ Prev 上月</button>
+                <span class="cal-title" id="calTitle"></span>
+                <button class="mini-btn" onclick="calShift(1)">Next 下月 ›</button>
+                <button class="mini-btn" onclick="calToday()">Today 今天</button>
+            </div>
+            <div class="cal-legend">
+                <span class="cal-key"><i class="cal-dot ev"></i>Events 賽事</span>
+                <span class="cal-key"><i class="cal-dot ct"></i>Contract ends 合約到期</span>
+                <span class="cal-key"><i class="cal-dot nt"></i>Notes 記事</span>
+                <span class="cal-key"><i class="cal-dot fu"></i>Follow-ups 追蹤</span>
+            </div>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+    </div>
+
+    <div class="card full-width" data-card="calendarDay">
+        <div class="card-title">🔎 Day detail <small style="font-size:11px;color:var(--text-muted);">當日細節</small></div>
+        <div class="card-subtitle">Click a date above, then click any item to jump to it 點上方日期，再點項目可跳到對應畫面</div>
+        <div id="calDayDetail" style="margin-top:12px;"></div>
+    </div>
+</div>
+
 </main>
 </div><!-- end layout -->
 
@@ -1238,6 +1436,7 @@ function loadDashboard() {
             selectedPeriods = currentPeriod ? [currentPeriod] : [];
             CONTRACTS = ceData.contracts || [];
             EVENTS = ceData.events || [];
+            NOTES = ceData.notes || [];
 
             buildPeriodLabels();
 
@@ -1396,6 +1595,8 @@ function switchNav(view, group, btn) {
     document.getElementById('individualSection').style.display = view === 'individual' ? 'block' : 'none';
     document.getElementById('contractsSection').style.display  = view === 'contracts'  ? 'block' : 'none';
     document.getElementById('eventsSection').style.display     = view === 'events'     ? 'block' : 'none';
+    document.getElementById('notesSection').style.display     = view === 'notes'      ? 'block' : 'none';
+    document.getElementById('calendarSection').style.display  = view === 'calendar'   ? 'block' : 'none';
 
     // 總覽內再依分類顯示對應的區塊
     document.querySelectorAll('#overviewSection .group-block').forEach(function(block) {
@@ -1406,6 +1607,8 @@ function switchNav(view, group, btn) {
     else if (view === 'individual') { destroyAllCharts(); renderIndividual(); }
     else if (view === 'contracts') { renderContracts(); initCollapsibles(); }
     else if (view === 'events') { renderEventsTab(); }
+    else if (view === 'notes') { initNoteForm(); renderNotes(); initCollapsibles(); }
+    else if (view === 'calendar') { renderCalendar(); initCollapsibles(); }
 
     closeSidebar();
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2411,6 +2614,22 @@ function initEventHandlers() {
         var row = e.target.closest('.ct-row');
         if (row) focusKolFromContract(decodeURIComponent(row.dataset.kol));
     });
+
+    // 記事頁：表單的 KOL 選擇 + 列表篩選
+    document.getElementById('notesSection').addEventListener('click', function(e) {
+        var pick = e.target.closest('[data-notekol]');
+        if (pick) { toggleNoteFormKol(decodeURIComponent(pick.dataset.notekol)); return; }
+        var f = e.target.closest('[data-nkind]');
+        if (f) toggleNoteFilter(f.dataset.nkind, decodeURIComponent(f.dataset.nval));
+    });
+
+    // 月曆：點日期選取、點項目跳轉
+    document.getElementById('calendarSection').addEventListener('click', function(e) {
+        var cell = e.target.closest('.cal-cell');
+        if (cell) { calSelected = cell.dataset.iso; renderCalendar(); return; }
+        var row = e.target.closest('.cal-day-row');
+        if (row) calJump(row.dataset.kind, decodeURIComponent(row.dataset.ref));
+    });
     document.querySelectorAll('#sortGroup .sort-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
             var clickedSort = this.dataset.sort;
@@ -2704,6 +2923,22 @@ function renderBellAlerts() {
         }
     });
 
+    // 記事的追蹤日：今天起 30 天內
+    NOTES.forEach(function(n) {
+        if (!n.followUp) return;
+        var fu = new Date(n.followUp); fu.setHours(0,0,0,0);
+        if (isNaN(fu.getTime()) || fu < today || fu > in30) return;
+        var diff3 = daysDiff(n.followUp);
+        allAlerts.push({
+            type: 'note',
+            id: 'note:' + n.id,
+            name: (n.kols || []).join(', ') + ' — ' + noteCatMeta(n.category).en,
+            sub: n.followUp + '（' + diff3 + ' days left 剩 ' + diff3 + ' 天）· ' + String(n.content).slice(0, 40),
+            urgent: diff3 <= 7,
+            done: isBellDone('note', n.id)
+        });
+    });
+
     // badge 只計算未處理的
     var pendingCount = allAlerts.filter(function(a){ return !a.done; }).length;
     var badge = document.getElementById('bellBadge');
@@ -2742,6 +2977,8 @@ function renderBellAlerts() {
         }
         html += renderBellGroup(contractAlerts, '📋 Contracts expiring 合約到期', 'bell-tag-contract', '⚠️ Urgent 緊急', '📅 Soon 即將');
         html += renderBellGroup(eventAlerts,    '🏆 Upcoming events 即將賽事',  'bell-tag-event',    '🔥 This week 本週', '📅 This month 本月');
+        html += renderBellGroup(allAlerts.filter(function(a){ return a.type==='note'; }),
+                                '📝 Note follow-ups 記事追蹤', 'bell-tag-note', '⏰ This week 本週', '📅 This month 本月');
         if (allAlerts.some(function(a){ return a.done; })) {
             html += '<div style="padding:8px 18px 12px;border-top:1px solid var(--border);margin-top:4px;">' +
                 '<button onclick="clearAllBellDone()" style="font-size:11px;color:var(--text-muted);background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer;">↺ Reset all 重設已完成</button>' +
@@ -2816,6 +3053,387 @@ function getEventDateStatus(ev) {
         countdown = '倒數 ' + diff2 + ' 天';
     }
     return { label: label, cls: cls, countdown: countdown };
+}
+
+// =====================================================================
+// 記事（KOL Notes）
+// =====================================================================
+var NOTES = [];
+var NOTE_CATEGORIES = [
+    { key: '拍攝計畫', en: 'Shoot plan',   cls: 'c-shoot' },
+    { key: '合約洽談', en: 'Contract',     cls: 'c-contract' },
+    { key: '問題回報', en: 'Issue',        cls: 'c-issue' },
+    { key: '一般記錄', en: 'General',      cls: 'c-general' }
+];
+var noteFilters = { kols: [], cats: [] };
+var editingNoteId = null;
+
+function noteCatMeta(key) {
+    for (var i = 0; i < NOTE_CATEGORIES.length; i++) {
+        if (NOTE_CATEGORIES[i].key === key) return NOTE_CATEGORIES[i];
+    }
+    return { key: key || '', en: key || '—', cls: 'c-general' };
+}
+
+function todayIso() {
+    var d = new Date();
+    return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+}
+
+// 主資料裡的 KOL 名單（記事的可選對象）
+function allKolNames() {
+    var seen = {}, out = [];
+    RAW_DATA.forEach(function(r) { if (r.name && !seen[r.name]) { seen[r.name] = 1; out.push(r.name); } });
+    CONTRACTS.forEach(function(c) { if (c.name && !seen[c.name]) { seen[c.name] = 1; out.push(c.name); } });
+    return out.sort(cmpName);
+}
+
+function initNoteForm() {
+    var sel = document.getElementById('noteCategory');
+    if (sel && !sel.options.length) {
+        sel.innerHTML = NOTE_CATEGORIES.map(function(c) {
+            return '<option value="' + c.key + '">' + c.en + '　' + c.key + '</option>';
+        }).join('');
+    }
+    var d = document.getElementById('noteDate');
+    if (d && !d.value) d.value = todayIso();
+    renderNoteKolPicker();
+}
+
+var noteFormKols = [];
+function renderNoteKolPicker() {
+    var wrap = document.getElementById('noteKolChips');
+    if (!wrap) return;
+    wrap.innerHTML = allKolNames().map(function(n) {
+        return '<button type="button" class="cf-chip' + (noteFormKols.indexOf(n) !== -1 ? ' on' : '') +
+            '" data-notekol="' + encodeURIComponent(n) + '">' + n + '</button>';
+    }).join('');
+}
+
+function toggleNoteFormKol(name) {
+    var i = noteFormKols.indexOf(name);
+    if (i === -1) noteFormKols.push(name); else noteFormKols.splice(i, 1);
+    renderNoteKolPicker();
+}
+
+function resetNoteForm() {
+    editingNoteId = null;
+    noteFormKols = [];
+    document.getElementById('noteDate').value = todayIso();
+    document.getElementById('noteFollowUp').value = '';
+    document.getElementById('noteContent').value = '';
+    document.getElementById('noteCategory').selectedIndex = 0;
+    document.getElementById('noteFormMsg').textContent = '';
+    document.getElementById('noteSaveBtn').textContent = '💾 Save note 儲存記事';
+    renderNoteKolPicker();
+}
+
+function noteFormMsg(text, color) {
+    var el = document.getElementById('noteFormMsg');
+    if (!el) return;
+    el.textContent = text;
+    el.style.color = color || 'var(--text-muted)';
+}
+
+function submitNote() {
+    var content = document.getElementById('noteContent').value.trim();
+    if (!content) { noteFormMsg('Content is required 請填寫內容', 'var(--accent-red)'); return; }
+    if (!noteFormKols.length) { noteFormMsg('Pick at least one KOL 請至少選一位 KOL', 'var(--accent-red)'); return; }
+
+    var obj = {
+        id: editingNoteId || '',
+        date: document.getElementById('noteDate').value || todayIso(),
+        kols: noteFormKols.slice(),
+        category: document.getElementById('noteCategory').value,
+        content: content,
+        followUp: document.getElementById('noteFollowUp').value || ''
+    };
+
+    var btn = document.getElementById('noteSaveBtn');
+    btn.disabled = true;
+    noteFormMsg('Saving… 儲存中…');
+
+    apiPost('saveNote', JSON.stringify(obj)).then(function(r) {
+        btn.disabled = false;
+        if (!r || !r.success) {
+            noteFormMsg('Save failed 儲存失敗：' + ((r && r.message) || 'unknown'), 'var(--accent-red)');
+            return;
+        }
+        obj.id = r.id;
+        var idx = -1;
+        for (var i = 0; i < NOTES.length; i++) { if (NOTES[i].id === obj.id) { idx = i; break; } }
+        if (idx !== -1) NOTES[idx] = obj; else NOTES.push(obj);
+        resetNoteForm();
+        noteFormMsg('Saved ✓ 已儲存', 'var(--accent-green)');
+        renderNotes(); renderCalendar(); renderBellAlerts();
+        if (currentView === 'individual') renderIndividual();
+    }).catch(function() {
+        btn.disabled = false;
+        noteFormMsg('Network error 網路錯誤，請重試', 'var(--accent-red)');
+    });
+}
+
+function editNote(idEnc) {
+    var id = decodeURIComponent(idEnc);
+    var n = null;
+    for (var i = 0; i < NOTES.length; i++) { if (NOTES[i].id === id) { n = NOTES[i]; break; } }
+    if (!n) return;
+    editingNoteId = id;
+    noteFormKols = (n.kols || []).slice();
+    document.getElementById('noteDate').value = n.date || todayIso();
+    document.getElementById('noteFollowUp').value = n.followUp || '';
+    document.getElementById('noteContent').value = n.content || '';
+    var sel = document.getElementById('noteCategory');
+    for (var j = 0; j < sel.options.length; j++) {
+        if (sel.options[j].value === n.category) { sel.selectedIndex = j; break; }
+    }
+    document.getElementById('noteSaveBtn').textContent = '💾 Update note 更新記事';
+    noteFormMsg('Editing 編輯中：' + (n.date || '') , 'var(--accent-yellow)');
+    renderNoteKolPicker();
+    document.querySelector('[data-card="noteCompose"]').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function deleteNote(idEnc) {
+    var id = decodeURIComponent(idEnc);
+    if (!confirm('Delete this note? 確定刪除這筆記事？')) return;
+    apiPost('deleteNote', JSON.stringify({ id: id })).then(function(r) {
+        if (!r || !r.success) { alert('Delete failed 刪除失敗：' + ((r && r.message) || '')); return; }
+        NOTES = NOTES.filter(function(n) { return n.id !== id; });
+        if (editingNoteId === id) resetNoteForm();
+        renderNotes(); renderCalendar(); renderBellAlerts();
+        if (currentView === 'individual') renderIndividual();
+    }).catch(function() { alert('Network error 網路錯誤，請重試'); });
+}
+
+function toggleNoteFilter(kind, value) {
+    var arr = noteFilters[kind];
+    var i = arr.indexOf(value);
+    if (i === -1) arr.push(value); else arr.splice(i, 1);
+    renderNotes();
+}
+
+function resetNoteFilters() {
+    noteFilters = { kols: [], cats: [] };
+    var s = document.getElementById('noteSearch');
+    if (s) s.value = '';
+    renderNotes();
+}
+
+function notesFor(kolName) {
+    return NOTES.filter(function(n) { return (n.kols || []).indexOf(kolName) !== -1; })
+                .sort(function(a, b) { return (b.date || '') < (a.date || '') ? -1 : 1; });
+}
+
+function renderNotes() {
+    var body = document.getElementById('noteListBody');
+    if (!body) return;
+
+    // 篩選器
+    var kolCount = {}, kolList = [];
+    NOTES.forEach(function(n) {
+        (n.kols || []).forEach(function(k) {
+            if (kolCount[k] === undefined) { kolCount[k] = 0; kolList.push(k); }
+            kolCount[k]++;
+        });
+    });
+    kolList.sort(cmpName);
+    document.getElementById('noteFilterKol').innerHTML = kolList.length
+        ? kolList.map(function(k) {
+            return '<button class="cf-chip' + (noteFilters.kols.indexOf(k) !== -1 ? ' on' : '') +
+                '" data-nkind="kols" data-nval="' + encodeURIComponent(k) + '">' + k +
+                '<span class="cf-n">' + kolCount[k] + '</span></button>';
+          }).join('')
+        : '<span class="cf-count">—</span>';
+
+    document.getElementById('noteFilterCat').innerHTML = NOTE_CATEGORIES.map(function(c) {
+        var n = NOTES.filter(function(x) { return x.category === c.key; }).length;
+        if (!n) return '';
+        return '<button class="cf-chip' + (noteFilters.cats.indexOf(c.key) !== -1 ? ' on' : '') +
+            '" data-nkind="cats" data-nval="' + encodeURIComponent(c.key) + '">' + c.en + ' ' + c.key +
+            '<span class="cf-n">' + n + '</span></button>';
+    }).join('') || '<span class="cf-count">—</span>';
+
+    var q = ((document.getElementById('noteSearch') || {}).value || '').toLowerCase().trim();
+    var rows = NOTES.filter(function(n) {
+        if (noteFilters.kols.length && !(n.kols || []).some(function(k) { return noteFilters.kols.indexOf(k) !== -1; })) return false;
+        if (noteFilters.cats.length && noteFilters.cats.indexOf(n.category) === -1) return false;
+        if (q && (n.content || '').toLowerCase().indexOf(q) === -1 &&
+                 (n.kols || []).join(',').toLowerCase().indexOf(q) === -1) return false;
+        return true;
+    }).sort(function(a, b) {
+        var ad = a.date || '', bd = b.date || '';
+        if (ad !== bd) return ad < bd ? 1 : -1;      // 新的在前
+        return (b.created || '') < (a.created || '') ? -1 : 1;
+    });
+
+    var cnt = document.getElementById('noteCount');
+    if (cnt) cnt.textContent = 'Showing 顯示 ' + rows.length + ' / ' + NOTES.length;
+
+    if (!rows.length) {
+        body.innerHTML = '<div class="note-empty">' +
+            (NOTES.length ? 'No notes match these filters 沒有符合條件的記事'
+                          : 'No notes yet — add one above 還沒有記事，用上面的表單新增') + '</div>';
+        return;
+    }
+
+    body.innerHTML = rows.map(function(n) {
+        var cat = noteCatMeta(n.category);
+        return '<div class="note-item">' +
+            '<div class="note-head">' +
+                '<span class="note-date">' + (n.date || '—') + '</span>' +
+                '<span class="note-cat ' + cat.cls + '">' + cat.en + ' ' + cat.key + '</span>' +
+                '<span class="note-kols">' + (n.kols || []).map(function(k) {
+                    return '<span class="note-kol">' + k + '</span>'; }).join('') + '</span>' +
+                (n.followUp ? '<span class="note-follow">⏰ Follow-up 追蹤 ' + n.followUp + '</span>' : '') +
+                '<span class="note-actions">' +
+                    '<button class="sort-btn" style="font-size:11px;" data-nid="' + encodeURIComponent(n.id) +
+                        '" onclick="editNote(this.dataset.nid)">✏️ Edit 編輯</button>' +
+                    '<button class="sort-btn" style="font-size:11px;color:var(--accent-red);" data-nid="' + encodeURIComponent(n.id) +
+                        '" onclick="deleteNote(this.dataset.nid)">🗑 Delete 刪除</button>' +
+                '</span>' +
+            '</div>' +
+            '<div class="note-body">' + escapeHtml(n.content || '') + '</div>' +
+            (n.created ? '<div class="note-meta">saved 建立 ' + n.created + '</div>' : '') +
+            '</div>';
+    }).join('');
+}
+
+function escapeHtml(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// =====================================================================
+// 月曆
+// =====================================================================
+var calYear = new Date().getFullYear();
+var calMonth = new Date().getMonth();      // 0-based
+var calSelected = todayIso();
+
+function calShift(delta) {
+    calMonth += delta;
+    while (calMonth < 0)  { calMonth += 12; calYear--; }
+    while (calMonth > 11) { calMonth -= 12; calYear++; }
+    renderCalendar();
+}
+
+function calToday() {
+    var d = new Date();
+    calYear = d.getFullYear(); calMonth = d.getMonth(); calSelected = todayIso();
+    renderCalendar();
+}
+
+// 把某一天的所有項目收集起來
+function calItemsOn(iso) {
+    var items = [];
+
+    allEvents().forEach(function(ev) {
+        var s = ev.startDate || '', e = ev.endDate || s;
+        if (!s) return;
+        if (iso >= s && iso <= (e || s)) {
+            items.push({
+                kind: 'ev', title: ev.name,
+                sub: (ev.kols || []).join(', ') + (ev.location ? ' · ' + ev.location : ''),
+                cancelled: eventFullyCancelled(ev), ref: ev.name
+            });
+        }
+    });
+
+    CONTRACTS.forEach(function(c) {
+        if (c.endDate === iso) {
+            items.push({ kind: 'ct', title: c.name + ' — contract ends 合約到期',
+                         sub: (c.type || '') + (c.note ? ' · ' + c.note : ''), ref: c.name });
+        }
+    });
+
+    NOTES.forEach(function(n) {
+        if (n.date === iso) {
+            var cat = noteCatMeta(n.category);
+            items.push({ kind: 'nt', title: (n.kols || []).join(', ') + ' — ' + cat.en,
+                         sub: n.content, ref: n.id });
+        }
+        if (n.followUp === iso) {
+            items.push({ kind: 'fu', title: (n.kols || []).join(', ') + ' — follow-up 追蹤',
+                         sub: n.content, ref: n.id });
+        }
+    });
+
+    return items;
+}
+
+function renderCalendar() {
+    var grid = document.getElementById('calGrid');
+    if (!grid) return;
+
+    document.getElementById('calTitle').textContent = calYear + '/' + pad2(calMonth + 1);
+
+    var dows = ['Sun 日','Mon 一','Tue 二','Wed 三','Thu 四','Fri 五','Sat 六'];
+    var html = dows.map(function(d) { return '<div class="cal-dow">' + d + '</div>'; }).join('');
+
+    var first = new Date(calYear, calMonth, 1);
+    var startIdx = first.getDay();
+    var start = new Date(calYear, calMonth, 1 - startIdx);
+    var today = todayIso();
+
+    for (var i = 0; i < 42; i++) {
+        var d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+        var iso = d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+        var other = (d.getMonth() !== calMonth);
+        var items = calItemsOn(iso);
+
+        var cls = 'cal-cell' + (other ? ' other' : '') +
+                  (iso === today ? ' today' : '') + (iso === calSelected ? ' sel' : '');
+        var chips = items.slice(0, 3).map(function(it) {
+            return '<span class="cal-chip ' + it.kind + '">' +
+                (it.cancelled ? '⛔ ' : '') + escapeHtml(it.title) + '</span>';
+        }).join('');
+        if (items.length > 3) chips += '<div class="cal-more">+' + (items.length - 3) + ' more 更多</div>';
+
+        html += '<div class="' + cls + '" data-iso="' + iso + '">' +
+                    '<div class="cal-daynum">' + d.getDate() + '</div>' + chips + '</div>';
+    }
+    grid.innerHTML = html;
+    renderCalDay();
+}
+
+function renderCalDay() {
+    var box = document.getElementById('calDayDetail');
+    if (!box) return;
+    var items = calItemsOn(calSelected);
+    var head = '<div style="font-family:JetBrains Mono,monospace;font-size:14px;font-weight:700;' +
+               'color:var(--accent-blue);margin-bottom:10px;">' + calSelected + '</div>';
+    if (!items.length) {
+        box.innerHTML = head + '<div class="note-empty">Nothing on this day 這天沒有安排</div>';
+        return;
+    }
+    var tagText = { ev: '🏆 Event 賽事', ct: '📋 Contract 合約', nt: '📝 Note 記事', fu: '⏰ Follow-up 追蹤' };
+    box.innerHTML = head + items.map(function(it) {
+        return '<div class="cal-day-row" data-kind="' + it.kind + '" data-ref="' + encodeURIComponent(it.ref) + '">' +
+            '<span class="cal-tag ' + it.kind + '">' + tagText[it.kind] + '</span>' +
+            '<span class="cal-row-title">' + (it.cancelled ? '⛔ ' : '') + escapeHtml(it.title) + '</span>' +
+            (it.sub ? '<span class="cal-row-sub">' + escapeHtml(it.sub).slice(0, 90) + '</span>' : '') +
+            '<span class="cal-jump">jump →</span>' +
+            '</div>';
+    }).join('');
+}
+
+// 從月曆點進對應畫面
+function calJump(kind, ref) {
+    if (kind === 'ev') {
+        switchNav('events', 'all', document.querySelector('.nav-item[data-view="events"]'));
+        var s = document.getElementById('eventSearchInput');
+        if (s) { s.value = ref; renderEventsTab(); }
+    } else if (kind === 'ct') {
+        switchNav('contracts', 'all', document.querySelector('.nav-item[data-view="contracts"]'));
+        contractFilters = { months: [], types: [], statuses: [], kols: [ref] };
+        renderContracts();
+    } else {
+        switchNav('notes', 'all', document.querySelector('.nav-item[data-view="notes"]'));
+        var q = document.getElementById('noteSearch');
+        var n = null;
+        for (var i = 0; i < NOTES.length; i++) { if (NOTES[i].id === ref) { n = NOTES[i]; break; } }
+        if (n && q) { q.value = n.content.slice(0, 20); }
+        renderNotes();
+    }
 }
 
 // =====================================================================
@@ -3742,6 +4360,28 @@ function renderContractBlock(kolName) {
                 (note2 ? '<div class="event-row-note'+(cancelled2?' warn':'')+'">Note 備註：' + note2 + '</div>' : '') +
                 '</div>';
         }).join('');
+        html += '</div>';
+    }
+
+    // 該 KOL 的近期記事
+    var myNotes = notesFor(kolName).slice(0, 6);
+    if (myNotes.length) {
+        html += '<div class="contract-kol-events"><div style="font-size:13px;font-weight:700;color:var(--text-secondary);margin-bottom:10px;">' +
+                '📝 Recent notes 近期記事</div>';
+        html += myNotes.map(function(n) {
+            var cat = noteCatMeta(n.category);
+            return '<div class="contract-kol-event-item">' +
+                '<span class="note-date">' + (n.date || '—') + '</span>' +
+                '<span class="note-cat ' + cat.cls + '">' + cat.en + '</span>' +
+                '<span style="flex:1;font-size:13px;">' + escapeHtml(n.content).slice(0, 120) + '</span>' +
+                (n.followUp ? '<span class="note-follow">⏰ ' + n.followUp + '</span>' : '') +
+                '</div>';
+        }).join('');
+        var total = notesFor(kolName).length;
+        if (total > 6) {
+            html += '<div style="font-size:11px;color:var(--text-muted);margin-top:8px;">' +
+                    '+' + (total - 6) + ' more in Notes 更多請見記事頁</div>';
+        }
         html += '</div>';
     }
 
