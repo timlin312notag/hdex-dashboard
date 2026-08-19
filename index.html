@@ -1519,6 +1519,9 @@ function loadDashboard() {
         .then(function(results) {
             var result = results[0];
             var ceData = results[1];
+            // 後端找不到設定的分頁時會退用第一個分頁，並回報警告 —— 要讓人看得到
+            if (result.sheetWarning) showSheetWarning(result.sheetWarning);
+
             RAW_DATA = result.data;
             PERIODS = result.periods;
             clearAggCache();
@@ -1558,6 +1561,23 @@ function loadDashboard() {
 // =====================================================================
 // HELPERS
 // =====================================================================
+// 後端退用第一個分頁時顯示的警告條（正常情況不會出現）
+function showSheetWarning(msg) {
+    var id = 'sheetWarningBar';
+    var bar = document.getElementById(id);
+    if (!bar) {
+        bar = document.createElement('div');
+        bar.id = id;
+        bar.style.cssText =
+            'background:var(--accent-yellow-dim);border:1px solid var(--accent-yellow);' +
+            'color:var(--accent-yellow);border-radius:var(--radius);padding:12px 16px;' +
+            'margin-bottom:16px;font-size:13px;line-height:1.6;';
+        var dash = document.getElementById('dashboard');
+        dash.insertBefore(bar, dash.firstChild);
+    }
+    bar.innerHTML = '⚠️ <strong>Sheet name mismatch 分頁名稱不符</strong><br>' + msg;
+}
+
 function fmt(n) { return 'NT$ ' + Math.round(n).toLocaleString('en-US'); }
 function fmtNum(n) { return Math.round(n).toLocaleString('en-US'); }
 function fmtDec(n, d) { d = d || 2; return n.toFixed(d); }
@@ -2809,7 +2829,7 @@ function openSettings() {
     if (_settingsUrl) { window.open(_settingsUrl, '_blank'); return; }
     apiGet('getSettingsUrl')
         .then(function(data) { _settingsUrl = data.url; window.open(_settingsUrl, '_blank'); })
-        .catch(function() { window.open('https://docs.google.com/spreadsheets/d/1Mui2WGqrxfpm_KDUxkTYCNdvvM_xH4qMQsyHHy8wYCE', '_blank'); });
+        .catch(function() { window.open('https://docs.google.com/spreadsheets/d/1MZ3xVJLCMza8N4hufvsGfbeckThC_S99f5AtC8qAuBw', '_blank'); });
 }
 
 var _csvFileContent = null;
